@@ -1,0 +1,294 @@
+@model Rs_system.Models.ViewModels.RegistroCultoViewModel
+@{
+    ViewData["Title"] = "Editar Registro de Ofrendas";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Editar Registro de Ofrendas</h4>
+        <p class="text-muted mb-0">Modificar registro del @Model.Fecha.ToString("dd/MM/yyyy")</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Volver
+    </a>
+</div>
+
+<form asp-action="Edit" method="post" id="ofrendaForm">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <div class="row">
+        <!-- Left Column: Basic Info -->
+        <div class="col-lg-4">
+            <div class="card-custom">
+                <h6 class="mb-3"><i class="bi bi-calendar-event me-2"></i>Información del Culto</h6>
+                
+                <div class="mb-3">
+                    <label asp-for="Fecha" class="form-label"></label>
+                    <input asp-for="Fecha" class="form-control" type="date" />
+                    <span asp-validation-for="Fecha" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Observaciones" class="form-label"></label>
+                    <textarea asp-for="Observaciones" class="form-control" rows="3" placeholder="Notas adicionales..."></textarea>
+                    <span asp-validation-for="Observaciones" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="card-custom mt-3">
+                <h6 class="mb-3"><i class="bi bi-calculator me-2"></i>Resumen</h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Total Ofrendas:</span>
+                    <strong id="totalOfrendas">$ 0.00</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Total Descuentos:</span>
+                    <strong id="totalDescuentos" class="text-warning">$ 0.00</strong>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">Monto Neto:</span>
+                    <strong id="montoNeto" class="text-success fs-5">$ 0.00</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Offerings -->
+        <div class="col-lg-8">
+            <div class="card-custom">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0"><i class="bi bi-cash-stack me-2"></i>Ofrendas</h6>
+                    <button type="button" class="btn btn-sm btn-primary-custom" onclick="addOfrenda()">
+                        <i class="bi bi-plus-lg me-1"></i> Agregar Ofrenda
+                    </button>
+                </div>
+                
+                <div id="ofrendasContainer">
+                    <!-- Existing offerings will be loaded here -->
+                </div>
+                
+                <div id="emptyState" class="text-center text-muted py-4" style="display: none;">
+                    <i class="bi bi-plus-circle fs-1 d-block mb-2"></i>
+                    Haga clic en "Agregar Ofrenda" para comenzar
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 text-end">
+        <a asp-action="Index" class="btn btn-outline-secondary me-2">Cancelar</a>
+        <button type="submit" class="btn btn-primary-custom">
+            <i class="bi bi-check-lg me-1"></i> Guardar Cambios
+        </button>
+    </div>
+</form>
+
+<!-- Ofrenda Template -->
+<template id="ofrendaTemplate">
+    <div class="ofrenda-item card mb-3" data-index="0">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+            <span class="fw-semibold">Ofrenda #<span class="ofrenda-number">1</span></span>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeOfrenda(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Concepto *</label>
+                    <input type="text" name="Ofrendas[0].Concepto" class="form-control ofrenda-concepto" placeholder="Ej: Ofrenda general" required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Monto *</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" step="0.01" min="0.01" name="Ofrendas[0].Monto" class="form-control ofrenda-monto" placeholder="0.00" required onchange="calculateTotals()" />
+                    </div>
+                </div>
+            </div>
+            
+            <div class="descuentos-section">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-muted"><i class="bi bi-dash-circle me-1"></i>Descuentos</small>
+                    <button type="button" class="btn btn-sm btn-outline-warning" onclick="addDescuento(this)">
+                        <i class="bi bi-plus"></i> Agregar Descuento
+                    </button>
+                </div>
+                <div class="descuentos-container">
+                    <!-- Descuentos will be added here -->
+                </div>
+            </div>
+            
+            <div class="mt-3 pt-2 border-top d-flex justify-content-end">
+                <span class="text-muted me-2">Neto:</span>
+                <strong class="ofrenda-neto text-success">$ 0.00</strong>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Descuento Template -->
+<template id="descuentoTemplate">
+    <div class="descuento-item row g-2 mb-2">
+        <div class="col-md-5">
+            <input type="text" name="Ofrendas[0].Descuentos[0].Concepto" class="form-control form-control-sm descuento-concepto" placeholder="Concepto descuento" required />
+        </div>
+        <div class="col-md-5">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text">$</span>
+                <input type="number" step="0.01" min="0.01" name="Ofrendas[0].Descuentos[0].Monto" class="form-control descuento-monto" placeholder="0.00" required onchange="calculateTotals()" />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="removeDescuento(this)">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+</template>
+
+@section Scripts {
+    <script>
+        let ofrendaIndex = 0;
+        
+        // Existing data from model
+        const existingData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Ofrendas));
+
+        function addOfrenda(concepto = '', monto = 0, descuentos = []) {
+            const container = document.getElementById('ofrendasContainer');
+            const template = document.getElementById('ofrendaTemplate');
+            const clone = template.content.cloneNode(true);
+            
+            // Update indices
+            const ofrendaItem = clone.querySelector('.ofrenda-item');
+            ofrendaItem.dataset.index = ofrendaIndex;
+            ofrendaItem.querySelector('.ofrenda-number').textContent = ofrendaIndex + 1;
+            
+            // Update input names and values
+            clone.querySelectorAll('[name]').forEach(input => {
+                input.name = input.name.replace('[0]', `[${ofrendaIndex}]`);
+            });
+            
+            // Set values
+            clone.querySelector('.ofrenda-concepto').value = concepto;
+            clone.querySelector('.ofrenda-monto').value = monto || '';
+            
+            container.appendChild(clone);
+            
+            // Add existing descuentos
+            const addedItem = container.lastElementChild;
+            descuentos.forEach(d => {
+                addDescuentoToItem(addedItem, d.concepto, d.monto);
+            });
+            
+            document.getElementById('emptyState').style.display = 'none';
+            ofrendaIndex++;
+            calculateTotals();
+        }
+
+        function removeOfrenda(btn) {
+            btn.closest('.ofrenda-item').remove();
+            updateOfrendaIndices();
+            calculateTotals();
+            
+            if (document.querySelectorAll('.ofrenda-item').length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+            }
+        }
+
+        function addDescuento(btn) {
+            addDescuentoToItem(btn.closest('.ofrenda-item'));
+        }
+        
+        function addDescuentoToItem(ofrendaItem, concepto = '', monto = 0) {
+            const ofrendaIdx = ofrendaItem.dataset.index;
+            const container = ofrendaItem.querySelector('.descuentos-container');
+            const descuentoIdx = container.querySelectorAll('.descuento-item').length;
+            
+            const template = document.getElementById('descuentoTemplate');
+            const clone = template.content.cloneNode(true);
+            
+            // Update input names
+            clone.querySelectorAll('[name]').forEach(input => {
+                input.name = input.name.replace('Ofrendas[0]', `Ofrendas[${ofrendaIdx}]`);
+                input.name = input.name.replace('Descuentos[0]', `Descuentos[${descuentoIdx}]`);
+            });
+            
+            // Set values
+            clone.querySelector('.descuento-concepto').value = concepto;
+            clone.querySelector('.descuento-monto').value = monto || '';
+            
+            container.appendChild(clone);
+            calculateTotals();
+        }
+
+        function removeDescuento(btn) {
+            btn.closest('.descuento-item').remove();
+            updateDescuentoIndices();
+            calculateTotals();
+        }
+
+        function updateOfrendaIndices() {
+            document.querySelectorAll('.ofrenda-item').forEach((item, idx) => {
+                item.dataset.index = idx;
+                item.querySelector('.ofrenda-number').textContent = idx + 1;
+                
+                item.querySelectorAll('[name^="Ofrendas["]').forEach(input => {
+                    input.name = input.name.replace(/Ofrendas\[\d+\]/, `Ofrendas[${idx}]`);
+                });
+            });
+            ofrendaIndex = document.querySelectorAll('.ofrenda-item').length;
+        }
+
+        function updateDescuentoIndices() {
+            document.querySelectorAll('.ofrenda-item').forEach((ofrendaItem) => {
+                ofrendaItem.querySelectorAll('.descuento-item').forEach((descItem, descIdx) => {
+                    descItem.querySelectorAll('[name*="Descuentos["]').forEach(input => {
+                        input.name = input.name.replace(/Descuentos\[\d+\]/, `Descuentos[${descIdx}]`);
+                    });
+                });
+            });
+        }
+
+        function calculateTotals() {
+            let totalOfrendas = 0;
+            let totalDescuentos = 0;
+
+            document.querySelectorAll('.ofrenda-item').forEach(item => {
+                const monto = parseFloat(item.querySelector('.ofrenda-monto').value) || 0;
+                let descuentosSum = 0;
+                
+                item.querySelectorAll('.descuento-monto').forEach(descInput => {
+                    descuentosSum += parseFloat(descInput.value) || 0;
+                });
+                
+                const neto = monto - descuentosSum;
+                item.querySelector('.ofrenda-neto').textContent = `$ ${neto.toFixed(2)}`;
+                
+                totalOfrendas += monto;
+                totalDescuentos += descuentosSum;
+            });
+
+            document.getElementById('totalOfrendas').textContent = `$ ${totalOfrendas.toFixed(2)}`;
+            document.getElementById('totalDescuentos').textContent = `$ ${totalDescuentos.toFixed(2)}`;
+            document.getElementById('montoNeto').textContent = `$ ${(totalOfrendas - totalDescuentos).toFixed(2)}`;
+        }
+
+        // Load existing data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (existingData && existingData.length > 0) {
+                existingData.forEach(ofrenda => {
+                    addOfrenda(
+                        ofrenda.concepto,
+                        ofrenda.monto,
+                        ofrenda.descuentos.map(d => ({ concepto: d.concepto, monto: d.monto }))
+                    );
+                });
+            } else {
+                addOfrenda();
+            }
+        });
+    </script>
+}

@@ -1,0 +1,218 @@
+/* FarmMan Login Styles */
+:root {
+  --primary-green: #4caf50;
+  --primary-green-hover: #388e3c;
+  --secondary-green: #81c784;
+  --light-green: #e8f5e9;
+  --border-color: #dee2e6;
+  --text-secondary: #6c757d;
+  --text-primary: #212529;
+  --white: #ffffff;
+  --gray-light: #f8f9fa;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.farmman-login-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.farmman-login-card {
+  background: var(--white);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  max-width: 1000px;
+  width: 100%;
+  min-height: 600px;
+}
+
+.farmman-split-screen {
+  display: flex;
+  min-height: 600px;
+}
+
+.farmman-left-column {
+  flex: 1;
+  background: url("/Assets/login-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  min-height: 600px;
+}
+
+.farmman-right-column {
+  flex: 1;
+  padding: 60px 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--white);
+}
+
+.farmman-logo-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.farmman-logo-icon {
+  color: var(--primary-green);
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.farmman-logo-text {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.farmman-welcome-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.farmman-welcome-subtitle {
+  color: var(--text-secondary);
+  margin-bottom: 30px;
+  font-size: 0.95rem;
+}
+
+.farmman-form-group {
+  margin-bottom: 20px;
+}
+
+.farmman-form-control {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: var(--white);
+}
+
+.farmman-form-control:focus {
+  outline: none;
+  border-color: var(--primary-green);
+}
+
+.farmman-forgot-password {
+  text-align: right;
+  margin-bottom: 25px;
+}
+
+.farmman-forgot-password a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.farmman-forgot-password a:hover {
+  text-decoration: underline;
+}
+
+.farmman-login-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--primary-green);
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 25px;
+}
+
+.farmman-login-btn:hover {
+  background: var(--primary-green-hover);
+}
+
+.farmman-divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  color: var(--text-secondary);
+}
+
+.farmman-divider::before,
+.farmman-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+}
+
+.farmman-divider span {
+  padding: 0 15px;
+  font-size: 0.85rem;
+}
+
+.farmman-social-login {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.farmman-social-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.farmman-social-btn:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+}
+
+.farmman-footer {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.farmman-footer a {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 5px;
+}
+
+.farmman-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .farmman-split-screen {
+    flex-direction: column;
+  }
+
+  .farmman-left-column {
+    height: 200px;
+    min-height: auto;
+  }
+
+  .farmman-right-column {
+    padding: 40px 30px;
+  }
+}

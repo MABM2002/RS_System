@@ -1,0 +1,114 @@
+@model Rs_system.Models.ViewModels.UsuarioViewModel
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Editar Usuario</h2>
+        <p class="text-muted small mb-0">Actualizando perfil de: <strong>@Model.NombreUsuario</strong></p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card-custom">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <h5 class="mb-4 text-primary border-bottom pb-2">Información Personal</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="Nombres" class="form-label fw-semibold"></label>
+                        <input asp-for="Nombres" class="form-control" />
+                        <span asp-validation-for="Nombres" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Apellidos" class="form-label fw-semibold"></label>
+                        <input asp-for="Apellidos" class="form-control" />
+                        <span asp-validation-for="Apellidos" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Telefono" class="form-label fw-semibold"></label>
+                        <input asp-for="Telefono" class="form-control" />
+                        <span asp-validation-for="Telefono" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <h6 class="border-bottom pb-2 mb-3"><i class="bi bi-person-badge me-2"></i>Asignación de Roles</h6>
+                        <div class="row g-3">
+                            @foreach (var role in ViewBag.Roles as List<Rs_system.Models.RolSistema>)
+                            {
+                                <div class="col-md-4">
+                                    <div class="form-check card p-2 border-light shadow-sm">
+                                        <input class="form-check-input ms-0 me-2" type="checkbox" name="SelectedRoles" value="@role.Id" id="role_@role.Id"
+                                               @(Model.SelectedRoles.Contains(role.Id) ? "checked" : "")>
+                                        <label class="form-check-label" for="role_@role.Id">
+                                            <strong>@role.Nombre</strong><br />
+                                            <small class="text-muted">@role.Descripcion</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="mb-4 text-primary border-bottom pb-2">Configuración de Cuenta</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="NombreUsuario" class="form-label fw-semibold"></label>
+                        <input asp-for="NombreUsuario" class="form-control" />
+                        <span asp-validation-for="NombreUsuario" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Activo" class="form-label fw-semibold"></label>
+                        <select asp-for="Activo" class="form-select">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                        <span asp-validation-for="Activo" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="alert alert-info small">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Deje los campos de contraseña en blanco si no desea cambiarla.
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="Contrasena" class="form-label fw-semibold">Nueva Contraseña</label>
+                        <input asp-for="Contrasena" class="form-control" placeholder="Opcional" />
+                        <span asp-validation-for="Contrasena" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmarContrasena" class="form-label fw-semibold"></label>
+                        <input asp-for="ConfirmarContrasena" class="form-control" placeholder="Opcional" />
+                        <span asp-validation-for="ConfirmarContrasena" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="submit" class="btn btn-primary-custom px-5">
+                        <i class="bi bi-check2-circle me-2"></i>Actualizar Usuario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

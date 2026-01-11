@@ -1,0 +1,19 @@
+@model Rs_system.Models.ViewModels.MenuViewModel
+
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var currentUrl = $"/{currentController}/{currentAction}";
+    ViewData["CurrentUrl"] = currentUrl;
+}
+
+<nav class="nav flex-column">
+    <a class="nav-link-custom @(currentController == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">
+        <i class="bi bi-house-door"></i> Inicio
+    </a>
+
+    @foreach (var item in Model.Items)
+    {
+        <partial name="Components/Menu/_MenuItem" model="item" view-data="ViewData" />
+    }
+</nav>

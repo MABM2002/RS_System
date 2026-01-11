@@ -1,0 +1,96 @@
+@model IEnumerable<Rs_system.Models.Permiso>
+
+@{
+    ViewData["Title"] = "Gestión de Menú y Permisos";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1">Gestión de Menú y Permisos</h4>
+            <p class="text-muted mb-0">Administración de opciones del sistema</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary-custom">
+            <i class="bi bi-plus-lg me-1"></i> Nueva Opción
+        </a>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card-custom">
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                        <tr>
+                            <th>Módulo</th>
+                            <th>Orden</th>
+                            <th>Nombre</th>
+                            <th>Ruta (URL)</th>
+                            <th>Icono</th>
+                            <th class="text-center">Es Menú</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-info text-dark">
+                                        <i class="bi @item.Modulo?.Icono me-1"></i>
+                                        @(item.Modulo?.Nombre ?? "Sin Módulo")
+                                    </span>
+                                </td>
+                                <td><span class="badge bg-secondary">@item.Orden</span></td>
+                                <td class="fw-bold">@item.Nombre</td>
+                                <td class="font-monospace small">@item.Url</td>
+                                <td><i class="bi @item.Icono me-2"></i>@item.Icono</td>
+                                <td class="text-center">
+                                    @if (item.EsMenu)
+                                    {
+                                        <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted"><i class="bi bi-x-circle"></i></span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" title="Eliminar" 
+                                                onclick="confirmDelete(@item.Id, '@item.Nombre')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+        </div>
+    </div>
+</div>
+
+<form id="deleteForm" asp-action="Delete" method="post" style="display:none;">
+    <input type="hidden" name="id" id="deleteId" />
+</form>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, name) {
+            if (confirm(`¿Está seguro de que desea eliminar "${name}"?`)) {
+                document.getElementById('deleteId').value = id;
+                document.getElementById('deleteForm').submit();
+            }
+        }
+    </script>
+}

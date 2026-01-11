@@ -1,0 +1,138 @@
+@model Rs_system.Models.ViewModels.RegisterViewModel
+@inject Rs_system.Services.IConfiguracionService ConfigService
+@{
+    ViewData["Title"] = "Crear Cuenta";
+    Layout = null;
+    var nameShort = await ConfigService.GetValorOrDefaultAsync("NAME_FOUNDATION_SHORT", "Rs_system");
+    var logoUrl = await ConfigService.GetValorOrDefaultAsync("LOGO_FOUNDATION", "/assets/home.png");
+    var nameFoundation = await ConfigService.GetValorOrDefaultAsync("NAME_FOUNDATION", "Rs_system");
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"] - @nameShort</title>
+    <link href="~/css/css2.css?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true"/>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-background">
+            <div class="auth-gradient"></div>
+            <div class="auth-pattern"></div>
+        </div>
+        
+        <div class="auth-card auth-card-register animate-fade-in">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <img src="@logoUrl" alt="Logo" class="img-fluid mb-3" style="max-height: 80px; width: auto; object-fit: contain;" />
+                </div>
+                <h1 class="auth-title">Crear Cuenta</h1>
+                <p class="auth-subtitle">Únete a @nameShort - @nameFoundation</p>
+            </div>
+            
+            <form asp-action="Register" method="post" class="auth-form">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input asp-for="Nombres" class="form-control" id="nombres" placeholder="Nombres" autofocus/>
+                            <label for="nombres">Nombres</label>
+                            <span asp-validation-for="Nombres" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input asp-for="Apellidos" class="form-control" id="apellidos" placeholder="Apellidos"/>
+                            <label for="apellidos">Apellidos</label>
+                            <span asp-validation-for="Apellidos" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <input asp-for="NombreUsuario" class="form-control" id="username" placeholder="Nombre de Usuario" autocomplete="username"/>
+                    <label for="username">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        Nombre de Usuario
+                    </label>
+                    <span asp-validation-for="NombreUsuario" class="text-danger small"></span>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <input asp-for="Email" class="form-control" id="email" placeholder="Correo Electrónico" type="email" autocomplete="email"/>
+                    <label for="email">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                        Correo Electrónico
+                    </label>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input asp-for="Contrasena" class="form-control" id="password" placeholder="Contraseña" autocomplete="new-password"/>
+                            <label for="password">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                                Contraseña
+                            </label>
+                            <span asp-validation-for="Contrasena" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input asp-for="ConfirmarContrasena" class="form-control" id="confirmPassword" placeholder="Confirmar Contraseña" autocomplete="new-password"/>
+                            <label for="confirmPassword">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                </svg>
+                                Confirmar
+                            </label>
+                            <span asp-validation-for="ConfirmarContrasena" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-auth">
+                    <span>Crear Cuenta</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <line x1="20" y1="8" x2="20" y2="14"/>
+                        <line x1="23" y1="11" x2="17" y2="11"/>
+                    </svg>
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>¿Ya tienes una cuenta?</p>
+                <a asp-action="Login" class="auth-link">Iniciar Sesión</a>
+            </div>
+            
+            <div class="auth-branding">
+                <span>Sistema de Gestión</span>
+                <span class="separator">•</span>
+                <span>@nameFoundation</span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

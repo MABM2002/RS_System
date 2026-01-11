@@ -1,0 +1,236 @@
+@model Rs_system.Models.ViewModels.AsistenciaCultoViewModel
+@{
+    ViewData["Title"] = "Editar Registro de Asistencia";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Editar Registro</h2>
+        <p class="text-muted small mb-0">Actualice la información de asistencia del culto.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card-custom">
+            <form asp-action="Edit" method="post" id="asistenciaForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                
+                <h5 class="mb-4 text-primary border-bottom pb-2">
+                    <i class="bi bi-calendar-event me-2"></i>Información del Culto
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="FechaHoraInicio" class="form-label fw-semibold"></label>
+                        <input asp-for="FechaHoraInicio" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="FechaHoraInicio" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="TipoCulto" class="form-label fw-semibold"></label>
+                        <select asp-for="TipoCulto" asp-items="@(new SelectList(ViewBag.TiposCulto))" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                        </select>
+                        <span asp-validation-for="TipoCulto" class="text-danger small"></span>
+                    </div>
+                </div>
+                
+                <h5 class="mb-4 text-primary border-bottom pb-2">
+                    <i class="bi bi-people me-2"></i>Tipo de Conteo
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <div class="btn-group w-100" role="group" aria-label="Tipo de conteo">
+                                @foreach (var tipo in ViewBag.TiposConteo as List<Rs_system.Models.Enums.TipoConteo>)
+                                {
+                                    <input type="radio" class="btn-check" name="TipoConteo" id="tipo@((int)tipo)" value="@((int)tipo)" 
+                                           @(Model.TipoConteo == tipo ? "checked" : "")>
+                                    <label class="btn btn-outline-success" for="tipo@((int)tipo)">
+                                        @tipo.ToString()
+                                    </label>
+                                }
+                            </div>
+                            <span asp-validation-for="TipoConteo" class="text-danger small d-block mt-2"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Campos para Conteo Detallado -->
+                <div id="camposDetallado" class="campos-tipo mb-4">
+                    <h6 class="mb-3 text-success">
+                        <i class="bi bi-list-check me-2"></i>Conteo Detallado por Grupo
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="HermanasMisioneras" class="form-label fw-semibold"></label>
+                            <input asp-for="HermanasMisioneras" type="number" min="0" class="form-control campo-detallado" />
+                            <span asp-validation-for="HermanasMisioneras" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="HermanosFraternidad" class="form-label fw-semibold"></label>
+                            <input asp-for="HermanosFraternidad" type="number" min="0" class="form-control campo-detallado" />
+                            <span asp-validation-for="HermanosFraternidad" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="EmbajadoresCristo" class="form-label fw-semibold"></label>
+                            <input asp-for="EmbajadoresCristo" type="number" min="0" class="form-control campo-detallado" />
+                            <span asp-validation-for="EmbajadoresCristo" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Ninos" class="form-label fw-semibold"></label>
+                            <input asp-for="Ninos" type="number" min="0" class="form-control campo-detallado campo-ninos" />
+                            <span asp-validation-for="Ninos" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Visitas" class="form-label fw-semibold"></label>
+                            <input asp-for="Visitas" type="number" min="0" class="form-control campo-detallado" />
+                            <span asp-validation-for="Visitas" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Amigos" class="form-label fw-semibold"></label>
+                            <input asp-for="Amigos" type="number" min="0" class="form-control campo-detallado" />
+                            <span asp-validation-for="Amigos" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Campos para Conteo General -->
+                <div id="camposGeneral" class="campos-tipo mb-4">
+                    <h6 class="mb-3 text-warning">
+                        <i class="bi bi-people-fill me-2"></i>Conteo General
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="AdultosGeneral" class="form-label fw-semibold"></label>
+                            <input asp-for="AdultosGeneral" type="number" min="0" class="form-control campo-general" />
+                            <span asp-validation-for="AdultosGeneral" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Ninos" class="form-label fw-semibold"></label>
+                            <input asp-for="Ninos" type="number" min="0" class="form-control campo-general campo-ninos" />
+                            <span asp-validation-for="Ninos" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Campos para Conteo Total -->
+                <div id="camposTotal" class="campos-tipo mb-4">
+                    <h6 class="mb-3 text-info">
+                        <i class="bi bi-calculator me-2"></i>Conteo Total Directo
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="TotalManual" class="form-label fw-semibold"></label>
+                            <input asp-for="TotalManual" type="number" min="0" class="form-control campo-total" />
+                            <span asp-validation-for="TotalManual" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Total Calculado -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="bi bi-calculator-fill me-2"></i>Total Calculado</h6>
+                                <div class="display-4 text-primary text-center" id="totalCalculado">@Model.Total</div>
+                                <div class="text-center small text-muted mt-2">Asistentes totales</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Observaciones -->
+                <h5 class="mb-4 text-primary border-bottom pb-2">
+                    <i class="bi bi-chat-text me-2"></i>Observaciones
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <label asp-for="Observaciones" class="form-label"></label>
+                        <textarea asp-for="Observaciones" class="form-control" rows="3" 
+                                  placeholder="Observaciones adicionales sobre el culto..."></textarea>
+                        <span asp-validation-for="Observaciones" class="text-danger small"></span>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="submit" class="btn btn-primary-custom px-5">
+                        <i class="bi bi-save me-2"></i>Actualizar Registro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Ocultar todos los campos al inicio
+            $('.campos-tipo').hide();
+            
+            // Función para mostrar campos según tipo de conteo
+            function mostrarCamposPorTipo() {
+                const tipoConteo = $('input[name="TipoConteo"]:checked').val();
+                
+                // Ocultar todos los campos
+                $('.campos-tipo').hide();
+                $('.campos-tipo input').prop('disabled', true);
+                
+                // Mostrar campos correspondientes y habilitarlos
+                if (tipoConteo === '1') { // Detallado
+                    $('#camposDetallado').show();
+                    $('.campo-detallado').prop('disabled', false);
+                } else if (tipoConteo === '2') { // General
+                    $('#camposGeneral').show();
+                    $('.campo-general').prop('disabled', false);
+                } else if (tipoConteo === '3') { // Total
+                    $('#camposTotal').show();
+                    $('.campo-total').prop('disabled', false);
+                }
+                
+                // Calcular total
+                calcularTotal();
+            }
+            
+            // Función para calcular el total
+            function calcularTotal() {
+                const tipoConteo = $('input[name="TipoConteo"]:checked').val();
+                let total = 0;
+                
+                if (tipoConteo === '1') { // Detallado
+                    total = parseInt($('#HermanasMisioneras').val() || 0) +
+                            parseInt($('#HermanosFraternidad').val() || 0) +
+                            parseInt($('#EmbajadoresCristo').val() || 0) +
+                            parseInt($('#Ninos').val() || 0) +
+                            parseInt($('#Visitas').val() || 0) +
+                            parseInt($('#Amigos').val() || 0);
+                } else if (tipoConteo === '2') { // General
+                    total = parseInt($('#AdultosGeneral').val() || 0) +
+                            parseInt($('#Ninos').val() || 0);
+                } else if (tipoConteo === '3') { // Total
+                    total = parseInt($('#TotalManual').val() || 0);
+                }
+                
+                $('#totalCalculado').text(total);
+            }
+            
+            // Eventos
+            $('input[name="TipoConteo"]').change(mostrarCamposPorTipo);
+            $('.campos-tipo input').on('input', calcularTotal);
+            
+            // Mostrar campos iniciales
+            mostrarCamposPorTipo();
+            
+            // Calcular total inicial
+            calcularTotal();
+        });
+    </script>
+}

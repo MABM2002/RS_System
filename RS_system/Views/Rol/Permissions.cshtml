@@ -1,0 +1,62 @@
+@model IEnumerable<Rs_system.Models.Permiso>
+
+@{
+    var rol = ViewBag.Rol as Rs_system.Models.RolSistema;
+    var assignedCodes = ViewBag.AssignedControllerCodes as List<string>;
+    ViewData["Title"] = "Gestionar Acceso a Menú: " + rol?.Nombre;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Gestionar Acceso a Menú</h4>
+        <p class="text-muted mb-0">Configurar permisos para: <strong>@rol?.Nombre</strong> (@rol?.Codigo)</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Volver
+    </a>
+</div>
+
+<div class="card-custom">
+    <p class="text-muted mb-4">Seleccione las opciones del menú que estarán disponibles para este rol.</p>
+
+    <form asp-action="UpdatePermissions" method="post">
+                <input type="hidden" name="rolId" value="@rol?.Id" />
+                
+                @{
+                    var groupedControllers = Model.GroupBy(c => c.Modulo);
+                }
+
+                <div class="row">
+                    @foreach (var group in groupedControllers)
+                    {
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-light shadow-sm">
+                                <div class="card-header bg-light py-2">
+                                    <h6 class="mb-0 fw-bold text-primary">@group.Key</h6>
+                                </div>
+                                <div class="card-body">
+                                    @foreach (var controller in group)
+                                    {
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="selectedControllers" 
+                                                   value="@controller.Codigo" id="ctrl_@controller.Codigo"
+                                                   @(assignedCodes != null && assignedCodes.Contains(controller.Codigo) ? "checked" : "")>
+                                            <label class="form-check-label" for="ctrl_@controller.Codigo">
+                                                <span class="fw-semibold">@controller.Nombre</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+        <div class="mt-4 text-end border-top pt-3">
+            <a asp-action="Index" class="btn btn-outline-secondary me-2">Cancelar</a>
+            <button type="submit" class="btn btn-primary-custom px-5">
+                <i class="bi bi-check-all me-2"></i> Guardar Configuración
+            </button>
+        </div>
+    </form>
+</div>

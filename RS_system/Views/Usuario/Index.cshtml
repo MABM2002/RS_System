@@ -1,0 +1,97 @@
+@model IEnumerable<Rs_system.Models.Usuario>
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Usuarios del Sistema</h2>
+        <p class="text-muted small mb-0">Administre las cuentas de acceso y perfiles del personal administrativo.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary-custom">
+        <i class="bi bi-person-plus-fill me-2"></i>Nuevo Usuario
+    </a>
+</div>
+
+<div class="card-custom">
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Nombre Completo</th>
+                    <th>Email</th>
+                    <th>Último Acceso</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.NombreUsuario</td>
+                        <td>@item.Persona.Nombres @item.Persona.Apellidos</td>
+                        <td>@item.Email</td>
+                        <td class="small text-muted">
+                            @(item.UltimoLogin?.ToString("dd/MM/yyyy HH:mm") ?? "Nunca")
+                        </td>
+                        <td>
+                            <span class="badge @(item.Activo ? "bg-success" : "bg-danger")">
+                                @(item.Activo ? "Activo" : "Inactivo")
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                @if (item.Activo && item.NombreUsuario != User.Identity?.Name)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Desactivar" 
+                                            onclick="confirmarDesactivacion(@item.Id, '@item.NombreUsuario')">
+                                        <i class="bi bi-person-x"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div class="modal fade" id="modalDesactivar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Desactivación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                ¿Está seguro que desea revocar el acceso al usuario <strong id="nombreUsuario"></strong>?
+                <p class="text-muted small mt-2">El usuario ya no podrá iniciar sesión en el sistema.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formDesactivar" asp-action="Desactivar" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="usuarioIdDesactivar" />
+                    <button type="submit" class="btn btn-danger">Desactivar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmarDesactivacion(id, nombre) {
+            document.getElementById('nombreUsuario').innerText = nombre;
+            document.getElementById('usuarioIdDesactivar').value = id;
+            new bootstrap.Modal(document.getElementById('modalDesactivar')).show();
+        }
+    </script>
+}

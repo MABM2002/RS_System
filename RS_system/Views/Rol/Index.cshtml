@@ -1,0 +1,91 @@
+@model IEnumerable<Rs_system.Models.RolSistema>
+
+@{
+    ViewData["Title"] = "Gestión de Roles";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1">Gestión de Roles</h4>
+            <p class="text-muted mb-0">Administración de roles y permisos del sistema</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary-custom">
+            <i class="bi bi-plus-lg me-1"></i> Nuevo Rol
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card-custom">
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th class="text-center">Permisos</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="font-monospace">@item.Codigo</td>
+                                <td class="fw-bold">@item.Nombre</td>
+                                <td class="text-muted small">@item.Descripcion</td>
+                                <td class="text-center">
+                                    <span class="badge bg-secondary">@item.RolesPermisos.Count asignados</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Permissions" asp-route-id="@item.Id" class="btn btn-outline-info" title="Gestionar Permisos">
+                                            <i class="bi bi-shield-check"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" title="Eliminar" 
+                                                onclick="confirmDelete(@item.Id, '@item.Nombre')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+    </div>
+    </div>
+
+<form id="deleteForm" asp-action="Delete" method="post" style="display:none;">
+    <input type="hidden" name="id" id="deleteId" />
+</form>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, name) {
+            if (confirm(`¿Está seguro de que desea eliminar el rol "${name}"?`)) {
+                document.getElementById('deleteId').value = id;
+                document.getElementById('deleteForm').submit();
+            }
+        }
+    </script>
+}

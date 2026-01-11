@@ -1,0 +1,112 @@
+@model Rs_system.Models.AsistenciaCulto
+@{
+    ViewData["Title"] = "Eliminar Registro";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1 text-danger">Eliminar Registro</h2>
+        <p class="text-muted small mb-0">Confirme la eliminación del registro de asistencia.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card-custom border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                    <strong>¡Advertencia!</strong> Esta acción eliminará permanentemente el registro de asistencia. Esta acción no se puede deshacer.
+                </div>
+                
+                <h5 class="mt-4">Detalles del Registro a Eliminar:</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Fecha y Hora:</dt>
+                    <dd class="col-sm-8">@Model.FechaHoraInicio.ToString("dd/MM/yyyy HH:mm")</dd>
+                    
+                    <dt class="col-sm-4">Tipo de Culto:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-primary">@Model.TipoCulto</span>
+                    </dd>
+                    
+                    <dt class="col-sm-4">Tipo de Conteo:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge @(Model.TipoConteo == Rs_system.Models.Enums.TipoConteo.Detallado ? "bg-success" : 
+                                             Model.TipoConteo == Rs_system.Models.Enums.TipoConteo.General ? "bg-warning" : "bg-info")">
+                            @Model.TipoConteo
+                        </span>
+                    </dd>
+                    
+                    <dt class="col-sm-4">Total de Asistentes:</dt>
+                    <dd class="col-sm-8 fw-bold text-primary">@Model.Total</dd>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Observaciones))
+                    {
+                        <dt class="col-sm-4">Observaciones:</dt>
+                        <dd class="col-sm-8">@Model.Observaciones</dd>
+                    }
+                    
+                    <dt class="col-sm-4">Fecha de creación:</dt>
+                    <dd class="col-sm-8">@Model.CreadoEn.ToString("dd/MM/yyyy HH:mm")</dd>
+                </dl>
+                
+                @if (Model.TipoConteo == Rs_system.Models.Enums.TipoConteo.Detallado)
+                {
+                    <div class="card bg-light mt-3">
+                        <div class="card-body">
+                            <h6 class="card-title">Desglose de Asistencia:</h6>
+                            <div class="row small">
+                                <div class="col-md-6">
+                                    <div>Hermanas: @Model.HermanasMisioneras</div>
+                                    <div>Hermanos: @Model.HermanosFraternidad</div>
+                                    <div>Embajadores: @Model.EmbajadoresCristo</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div>Niños: @Model.Ninos</div>
+                                    <div>Visitas: @Model.Visitas</div>
+                                    <div>Amigos: @Model.Amigos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (Model.TipoConteo == Rs_system.Models.Enums.TipoConteo.General)
+                {
+                    <div class="card bg-light mt-3">
+                        <div class="card-body">
+                            <h6 class="card-title">Conteo General:</h6>
+                            <div class="row small">
+                                <div class="col-md-6">
+                                    <div>Adultos: @Model.AdultosGeneral</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div>Niños: @Model.Ninos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-footer">
+                <form asp-action="Delete" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash-fill me-2"></i>Eliminar Permanentemente
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

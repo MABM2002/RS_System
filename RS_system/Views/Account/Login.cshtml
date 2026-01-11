@@ -1,0 +1,79 @@
+@model Rs_system.Models.ViewModels.LoginViewModel
+@inject Rs_system.Services.IConfiguracionService ConfigService
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+    Layout = null;    
+    var nameShort = await ConfigService.GetValorOrDefaultAsync("NAME__CHURCH_SHORT", "FarmMan");
+    var name = await ConfigService.GetValorOrDefaultAsync("NAME_CHURCH", "FarmMan");
+    var logoUrl = await ConfigService.GetValorOrDefaultAsync("LOGO_FOUNDATION", "/assets/home.png");
+    
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"] - @nameShort</title>
+    <link rel="stylesheet" href="~/css/inter.css" asp-append-version="true" />
+    <link href="~/css/css2.css?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/farmman-login.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/all.min.css" />
+</head>
+<body>
+    <div class="farmman-login-container">
+        <div class="farmman-login-card">
+            <div class="farmman-split-screen">
+                <!-- Left Column: Image -->
+                <div class="farmman-left-column"></div>
+                
+                <!-- Right Column: Login Form -->
+                <div class="farmman-right-column">
+                    <div class="farmman-logo-header">
+                        <div class="farmman-logo-icon">
+                            <i class="fa-solid fa-church"></i>
+                        </div>
+                        <div class="farmman-logo-text">@name</div>
+                    </div>
+                    
+                    <h1 class="farmman-welcome-title">Hola,<br>Bienvenido</h1>
+                    <p class="farmman-welcome-subtitle">Inicia sesión en @nameShort</p>
+                    
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    
+                    <form asp-action="Login" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+                        
+                        <div class="farmman-form-group">
+                            <input asp-for="NombreUsuario" class="farmman-form-control" placeholder="Usuario" autofocus autocomplete="username"/>
+                            <span asp-validation-for="NombreUsuario" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="farmman-form-group">
+                            <input asp-for="Contrasena" class="farmman-form-control" placeholder="Contraseña" autocomplete="current-password"/>
+                            <span asp-validation-for="Contrasena" class="text-danger small"></span>
+                        </div>
+                        
+                        <button type="submit" class="farmman-login-btn">
+                            Iniciar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

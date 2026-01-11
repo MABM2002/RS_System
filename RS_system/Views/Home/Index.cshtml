@@ -1,0 +1,43 @@
+@inject Rs_system.Services.IConfiguracionService ConfigService
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Dashboard";
+    var nameIglesia = await ConfigService.GetValorOrDefaultAsync("NAME_FOUNDATION", "Rs_system");
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+        <div class="col-md-8">
+            <div class="card-custom">
+                <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                    <i class="bi bi-house-door-fill text-primary fs-3 me-3"></i>
+                    <h2 class="mb-0 text-primary">@nameIglesia</h2>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">Sistema de Gestión</h3>
+                    <p class="card-text">
+                        Bienvenido al sistema de gestión integral de @nameIglesia. Esta plataforma está diseñada para facilitar la administración de recursos, miembros, eventos y actividades de la iglesia.
+                    </p>
+                    <p class="card-text">
+                        Desde este panel principal podrás acceder a todas las funcionalidades del sistema, incluyendo:
+                    </p>
+                    <ul>
+                        <li>Gestión de miembros y asistentes</li>
+                        <li>Control de eventos y actividades</li>
+                        <li>Administración de recursos y materiales</li>
+                        <li>Reportes y estadísticas</li>
+                        <li>Configuración del sistema</li>
+                    </ul>
+                    <p class="card-text">
+                        Utiliza el menú de navegación para acceder a las diferentes secciones del sistema.
+                    </p>
+                </div>
+                <div class="text-muted small mt-4 pt-3 border-top">
+                    Sistema desarrollado para optimizar la gestión eclesiástica
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>

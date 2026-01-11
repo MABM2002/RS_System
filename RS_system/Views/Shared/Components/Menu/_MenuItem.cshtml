@@ -1,0 +1,46 @@
+@using Rs_system.Models.ViewModels
+@model MenuItem
+
+@{
+    var currentUrl = ViewData["CurrentUrl"] as string ?? "";
+    var collapseId = "menu-" + Guid.NewGuid().ToString("N");
+    
+    // Helper function to check active state recursively
+    bool IsItemOrChildActive(MenuItem item, string url)
+    {
+        if (!item.IsGroup && !string.IsNullOrEmpty(item.Url))
+        {
+            return url.StartsWith(item.Url, StringComparison.OrdinalIgnoreCase);
+        }
+        return item.Children.Any(c => IsItemOrChildActive(c, url));
+    }
+
+    bool isExpanded = Model.IsGroup && IsItemOrChildActive(Model, currentUrl);
+}
+
+@if (Model.IsGroup)
+{
+    <div class="nav-section-title mt-3" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="@isExpanded.ToString().ToLower()" style="cursor:pointer">
+        @if (!string.IsNullOrEmpty(Model.Icon))
+        {
+            <i class="bi @Model.Icon me-1"></i>
+        }
+        @Model.Title
+        <i class="bi bi-chevron-down float-end small"></i>
+    </div>
+    <div class="collapse @(isExpanded ? "show" : "")" id="@collapseId">
+        <div class="ms-3 border-start ps-2">
+            @foreach (var child in Model.Children)
+            {
+                <partial name="Components/Menu/_MenuItem" model="child" view-data="ViewData" />
+            }
+        </div>
+    </div>
+}
+else
+{
+    var isActive = !string.IsNullOrEmpty(Model.Url) && currentUrl.StartsWith(Model.Url, StringComparison.OrdinalIgnoreCase);
+    <a class="nav-link-custom @(isActive ? "active" : "")" href="@Model.Url">
+        <i class="bi @Model.Icon"></i> @Model.Title
+    </a>
+}

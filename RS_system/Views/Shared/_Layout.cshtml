@@ -1,0 +1,93 @@
+﻿@inject Rs_system.Services.IConfiguracionService ConfigService
+@{
+    var logoUrl = await ConfigService.GetValorOrDefaultAsync("LOGO_FOUNDATION", "/assets/home.png");
+    var nameShort = await ConfigService.GetValorOrDefaultAsync("NAME_FOUNDATION_SHORT", "Rs_system");
+    var nameFoundation = await ConfigService.GetValorOrDefaultAsync("NAME_FOUNDATION", "Rs_system");
+    var descriptionShort = await ConfigService.GetValorOrDefaultAsync("DESCRIPTION_SHORT", "Fundacion sin fines de lucro");
+    var version = await ConfigService.GetValorOrDefaultAsync("VERSION_SYSTEM", "1.0.0");
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"] - @nameShort</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/all.min.css">
+    <link rel="stylesheet" href="~/css/toastr.min.css">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/inter.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    <!--<link rel="stylesheet" href="~/Rs_system.styles.css" asp-append-version="true"/>-->
+    <link rel="manifest" href="~/manifest.json">
+    <meta name="theme-color" content="#1e293b">
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <div class="app-wrapper">
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a class="sidebar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
+                    <img src="@logoUrl" alt="Logo" class="me-2" style="height: 32px; width: auto; object-fit: contain;" />
+                    <span>@nameShort</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav p-3">
+                @await Component.InvokeAsync("Menu")
+            </nav>
+            <div class="sidebar-footer p-3 border-top border-secondary">
+                <small class="text-muted">v @version &copy; 2026</small>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left d-flex align-items-center">
+                    <button id="sidebarToggle" class="btn btn-link text-dark p-0 me-3">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+                    <h5 class="mb-0 fw-semibold">@ViewData["Title"]</h5>
+                </div>
+                <div class="header-right">
+                    <partial name="_LoginPartial"/>
+                </div>
+            </header>
+
+            <div class="page-container">
+                @RenderBody()
+            </div>
+
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small">@nameFoundation &copy; 2026 - @descriptionShort.</span>
+                        <div class="small text-muted">
+                            <i class="bi bi-shield-check me-1"></i> Sistema Seguro
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/toastr.min.js"></script>
+    <script src="~/js/sweetalert.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registrado', reg))
+                    .catch(err => console.log('Error registrando Service Worker', err));
+            });
+        }
+    </script>
+</body>
+</html>
