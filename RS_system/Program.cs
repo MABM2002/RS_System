@@ -30,6 +30,11 @@ builder.Services.AddScoped<IReporteService, ReporteService>();
 builder.Services.AddScoped<IConfiguracionService, ConfiguracionService>();
 builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IMiembroService, MiembroService>();
+builder.Services.AddScoped<ICategoriaService, CategoriaService>();
+builder.Services.AddScoped<IEstadoArticuloService, EstadoArticuloService>();
+builder.Services.AddScoped<IUbicacionService, UbicacionService>();
+builder.Services.AddScoped<IArticuloService, ArticuloService>();
+builder.Services.AddScoped<IMovimientoService, MovimientoService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddSingleton<IQueryCacheService, QueryCacheService>();
 builder.Services.AddMemoryCache(options =>

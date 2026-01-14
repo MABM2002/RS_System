@@ -31,6 +31,14 @@ public class ApplicationDbContext : DbContext
     // Church Members module
     public DbSet<GrupoTrabajo> GruposTrabajo { get; set; }
     public DbSet<Miembro> Miembros { get; set; }
+    
+    // Inventory module
+    public DbSet<Categoria> Categorias { get; set; }
+    public DbSet<EstadoArticulo> EstadosArticulos { get; set; }
+    public DbSet<Ubicacion> Ubicaciones { get; set; }
+    public DbSet<Existencia> Existencias { get; set; }
+    public DbSet<Articulo> Articulos { get; set; }
+    public DbSet<MovimientoInventario> MovimientosInventario { get; set; }
 
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
