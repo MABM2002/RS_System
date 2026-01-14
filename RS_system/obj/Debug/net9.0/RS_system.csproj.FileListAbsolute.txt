@@ -260,7 +260,6 @@
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/zdzqtnkble-87fc7y1x7t.gz
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/lkdeyc53tx-jfsiqqwiad.gz
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/jymdxbokw3-fnygdjjojd.gz
-/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/iz5enhq87a-svh9ti7drw.gz
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/tlmqwhkg3d-ifse5yxmqk.gz
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/b6c3bvqukf-ifse5yxmqk.gz
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets.build.json
@@ -274,4 +273,4 @@
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/RS_system.genruntimeconfig.cache
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/ref/RS_system.dll
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/rld9et4i1y-hb39ws7tz0.gz
-/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/7075gedban-7xh0rp53jd.gz
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/7075gedban-bup8j0n9jm.gz

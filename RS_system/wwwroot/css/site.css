@@ -2,7 +2,7 @@
   --sidebar-width: 260px;
   --sidebar-bg: #1e3a2f;
   --sidebar-hover: #284c3e;
-  --sidebar-active: #4CAF50;
+  --sidebar-active: #4caf50;
   --sidebar-text: #f1f5f9;
   --sidebar-text-muted: #a8c5b8;
 
@@ -11,8 +11,8 @@
 
   --content-bg: #f0f7f4;
 
-  --primary-color: #4CAF50;
-  --primary-hover: #388E3C;
+  --primary-color: #4caf50;
+  --primary-hover: #388e3c;
 
   --text-main: #1a2e26;
   --text-muted: #5c756d;
@@ -257,5 +257,77 @@ h6 {
 
   .main-content.expanded {
     margin-left: 0;
+  }
+}
+
+/* Responsive Scaling */
+@media (max-width: 992px) {
+  :root {
+    --sidebar-width: 220px;
+    --header-height: 50px;
+  }
+
+  body {
+    font-size: 0.95rem;
+  }
+
+  .page-container {
+    padding: 1.5rem;
+  }
+
+  .card-custom {
+    padding: 1.25rem;
+  }
+
+  .nav-link-custom {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+  }
+  h3 {
+    font-size: 1.25rem;
+  }
+  h4 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --header-height: 50px; /* Keep compact header */
+  }
+
+  body {
+    font-size: 0.9rem;
+  }
+
+  .page-container {
+    padding: 1rem;
+  }
+
+  .card-custom {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .sidebar-brand {
+    font-size: 1.1rem;
+  }
+
+  .btn-primary-custom {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .table-custom th,
+  .table-custom td {
+    padding: 0.5rem;
+    font-size: 0.8rem;
   }
 }

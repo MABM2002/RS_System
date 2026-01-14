@@ -1,0 +1,196 @@
+@model IEnumerable<Rs_system.Models.ViewModels.MiembroViewModel>
+@{
+    ViewData["Title"] = "Miembros de la Iglesia";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Miembros en Propiedad</h4>
+        <p class="text-muted mb-0">Gestión de miembros de la congregación</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary-custom">
+        <i class="bi bi-plus-lg me-1"></i> Nuevo Miembro
+    </a>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Total Miembros</h6>
+            <h3 class="text-primary mb-0">@Model.Count()</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Bautizados en el Espíritu Santo</h6>
+            <h3 class="text-success mb-0">@Model.Count(m => m.BautizadoEspirituSanto)</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Grupos de Trabajo</h6>
+            <h3 class="text-info mb-0">@Model.Where(m => m.GrupoTrabajoId.HasValue).GroupBy(m => m.GrupoTrabajoId).Count()</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Members Table -->
+<div class="card-custom">
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Foto</th>
+                    <th>Nombre Completo</th>
+                    <th>Fecha de Nacimiento</th>
+                    <th>Grupo de Trabajo</th>
+                    <th class="text-center">Bautizado E.S.</th>
+                    <th>Teléfono</th>
+                    <th>Fecha Ingreso</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="bi bi-people fs-1 d-block mb-2"></i>
+                            No hay miembros registrados
+                        </td>
+                    </tr>
+                }
+                @foreach (var miembro in Model)
+                {
+                    <tr>
+                        <td class="text-center">
+                            @if (!string.IsNullOrEmpty(miembro.FotoUrl))
+                            {
+                                <img src="/@miembro.FotoUrl" alt="@miembro.NombreCompleto" class="img-thumbnail" style="width: 40px; height: 40px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <i class="bi bi-person-circle text-muted" style="font-size: 2rem;"></i>
+                            }
+                        </td>
+                        <td>
+                            <strong>@miembro.NombreCompleto</strong>
+                        </td>
+                        <td>
+                            @if (miembro.FechaNacimiento.HasValue)
+                            {
+                                <span>@miembro.FechaNacimiento.Value.ToString("dd/MM/yyyy")</span>
+                                <br>
+                                <small class="text-muted">
+                                    @{
+                                        var edad = DateTime.Today.Year - miembro.FechaNacimiento.Value.Year;
+                                        if (miembro.FechaNacimiento.Value.ToDateTime(TimeOnly.MinValue) > DateTime.Today.AddYears(-edad))
+                                            edad--;
+                                    }
+                                    @edad años
+                                </small>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(miembro.GrupoTrabajoNombre))
+                            {
+                                <span class="badge bg-primary">@miembro.GrupoTrabajoNombre</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Sin grupo</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (miembro.BautizadoEspirituSanto)
+                            {
+                                <i class="bi bi-check-circle-fill text-success" title="Sí"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-x-circle text-muted" title="No"></i>
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(miembro.Telefono))
+                            {
+                                <span>@miembro.Telefono</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            @if (miembro.FechaIngresoCongregacion.HasValue)
+                            {
+                                <span>@miembro.FechaIngresoCongregacion.Value.ToString("dd/MM/yyyy")</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <a asp-action="Details" asp-route-id="@miembro.Id" class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a asp-action="Edit" asp-route-id="@miembro.Id" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete(@miembro.Id)" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Delete Form -->
+<form id="deleteForm" asp-action="Delete" method="post" style="display: none;">
+    <input type="hidden" name="id" id="deleteId" />
+</form>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: '¿Eliminar miembro?',
+                text: 'Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteId').value = id;
+                    document.getElementById('deleteForm').submit();
+                }
+            });
+        }
+
+        // Show success/error messages
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+            toastr.success('@TempData["SuccessMessage"]');
+            </text>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+            toastr.error('@TempData["ErrorMessage"]');
+            </text>
+        }
+    </script>
+}

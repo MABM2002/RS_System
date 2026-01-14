@@ -1,0 +1,199 @@
+@model Rs_system.Models.ViewModels.MiembroViewModel
+@{
+    ViewData["Title"] = "Detalles del Miembro";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Detalles del Miembro</h4>
+        <p class="text-muted mb-0">Información completa del miembro</p>
+    </div>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i> Editar
+        </a>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="card-custom">
+    <div class="row">
+        <div class="col-md-4 mb-3 text-center">
+            <h6 class="text-muted mb-2">Foto del Miembro</h6>
+            @if (!string.IsNullOrEmpty(Model.FotoUrl))
+            {
+                <img src="/@Model.FotoUrl" alt="Foto de @Model.NombreCompleto" class="img-fluid rounded" style="max-height: 200px; object-fit: cover;" />
+                <div class="mt-2">
+                    <a href="/@Model.FotoUrl" target="_blank" class="btn btn-sm btn-outline-info">
+                        <i class="bi bi-eye me-1"></i> Ver foto completa
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column align-items-center">
+                    <i class="bi bi-person-circle text-muted" style="font-size: 6rem;"></i>
+                    <span class="text-muted small">No hay foto registrada</span>
+                </div>
+            }
+        </div>
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <h6 class="text-muted mb-2">Nombres</h6>
+                    <p class="mb-0">@Model.Nombres</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <h6 class="text-muted mb-2">Apellidos</h6>
+                    <p class="mb-0">@Model.Apellidos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-3" />
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <h6 class="text-muted mb-2">Fecha de Nacimiento</h6>
+            <p class="mb-0">
+                @if (Model.FechaNacimiento.HasValue)
+                {
+                    <span>@Model.FechaNacimiento.Value.ToString("dd/MM/yyyy")</span>
+                    <span class="text-muted">
+                        (@{
+                            var edad = DateTime.Today.Year - Model.FechaNacimiento.Value.Year;
+                            if (Model.FechaNacimiento.Value.ToDateTime(TimeOnly.MinValue) > DateTime.Today.AddYears(-edad))
+                                edad--;
+                        }
+                        @edad años)
+                    </span>
+                }
+                else
+                {
+                    <span class="text-muted">No especificado</span>
+                }
+            </p>
+        </div>
+        <div class="col-md-6 mb-3">
+            <h6 class="text-muted mb-2">Fecha de Ingreso a la Congregación</h6>
+            <p class="mb-0">
+                @if (Model.FechaIngresoCongregacion.HasValue)
+                {
+                    <span>@Model.FechaIngresoCongregacion.Value.ToString("dd/MM/yyyy")</span>
+                }
+                else
+                {
+                    <span class="text-muted">No especificado</span>
+                }
+            </p>
+        </div>
+    </div>
+
+    <hr class="my-3" />
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <h6 class="text-muted mb-2">Teléfono</h6>
+            <p class="mb-0">
+                @if (!string.IsNullOrEmpty(Model.Telefono))
+                {
+                    <i class="bi bi-telephone me-1"></i>
+                    <span>@Model.Telefono</span>
+                }
+                else
+                {
+                    <span class="text-muted">No especificado</span>
+                }
+            </p>
+        </div>
+        <div class="col-md-6 mb-3">
+            <h6 class="text-muted mb-2">Teléfono de Emergencia</h6>
+            <p class="mb-0">
+                @if (!string.IsNullOrEmpty(Model.TelefonoEmergencia))
+                {
+                    <i class="bi bi-telephone-fill me-1 text-danger"></i>
+                    <span>@Model.TelefonoEmergencia</span>
+                }
+                else
+                {
+                    <span class="text-muted">No especificado</span>
+                }
+            </p>
+        </div>
+    </div>
+
+    <hr class="my-3" />
+
+    <div class="mb-3">
+        <h6 class="text-muted mb-2">Dirección</h6>
+        <p class="mb-0">
+            @if (!string.IsNullOrEmpty(Model.Direccion))
+            {
+                <i class="bi bi-geo-alt me-1"></i>
+                <span>@Model.Direccion</span>
+            }
+            else
+            {
+                <span class="text-muted">No especificado</span>
+            }
+        </p>
+    </div>
+
+    <hr class="my-3" />
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <h6 class="text-muted mb-2">Grupo de Trabajo</h6>
+            <p class="mb-0">
+                @if (!string.IsNullOrEmpty(Model.GrupoTrabajoNombre))
+                {
+                    <span class="badge bg-primary">@Model.GrupoTrabajoNombre</span>
+                }
+                else
+                {
+                    <span class="text-muted">Sin grupo asignado</span>
+                }
+            </p>
+        </div>
+        <div class="col-md-6 mb-3">
+            <h6 class="text-muted mb-2">Bautizado en el Espíritu Santo</h6>
+            <p class="mb-0">
+                @if (Model.BautizadoEspirituSanto)
+                {
+                    <span class="badge bg-success">
+                        <i class="bi bi-check-circle me-1"></i> Sí
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">
+                        <i class="bi bi-x-circle me-1"></i> No
+                    </span>
+                }
+            </p>
+        </div>
+    </div>
+
+    <hr class="my-3" />
+
+    <div class="mb-3">
+        <h6 class="text-muted mb-2">Estado</h6>
+        <p class="mb-0">
+            @if (Model.Activo)
+            {
+                <span class="badge bg-success">
+                    <i class="bi bi-check-circle me-1"></i> Activo
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-warning">
+                    <i class="bi bi-pause-circle me-1"></i> Inactivo
+                </span>
+            }
+        </p>
+    </div>
+</div>

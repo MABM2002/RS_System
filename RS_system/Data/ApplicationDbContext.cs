@@ -22,10 +22,16 @@ public class ApplicationDbContext : DbContext
     
     public DbSet<AsistenciaCulto> AsistenciasCulto { get; set; }
     
+    
     // Offerings module
     public DbSet<RegistroCulto> RegistrosCulto { get; set; }
     public DbSet<Ofrenda> Ofrendas { get; set; }
     public DbSet<DescuentoOfrenda> DescuentosOfrenda { get; set; }
+    
+    // Church Members module
+    public DbSet<GrupoTrabajo> GruposTrabajo { get; set; }
+    public DbSet<Miembro> Miembros { get; set; }
+
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -69,6 +75,20 @@ public class ApplicationDbContext : DbContext
             .HasOne(u => u.Persona)
             .WithMany()
             .HasForeignKey(u => u.PersonaId);
+        
+        // Church Members module relationships
+        modelBuilder.Entity<Miembro>()
+            .HasOne(m => m.GrupoTrabajo)
+            .WithMany(g => g.Miembros)
+            .HasForeignKey(m => m.GrupoTrabajoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Miembro>()
+            .HasOne(m => m.Persona)
+            .WithMany()
+            .HasForeignKey(m => m.PersonaId)
+            .OnDelete(DeleteBehavior.Restrict);
+
 
         // Global configuration: Convert all dates to UTC when saving
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
