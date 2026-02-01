@@ -1,0 +1,298 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Nuevo Movimiento";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Registrar Movimiento</h4>
+        <p class="text-muted mb-0">Traslados, bajas o cambios de estado</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Cancelar
+    </a>
+</div>
+
+<div class="row">
+    <!-- Step 1: Select Article -->
+    <div class="col-md-4 mb-4">
+        <div class="card-custom h-100">
+            <div class="card-header bg-transparent py-3">
+                <h5 class="card-title mb-0">1. Seleccionar Artículo</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" asp-action="Create">
+                    <div class="mb-3">
+                        <label class="form-label">Buscar Artículo</label>
+                        <select name="articuloId" class="form-select" asp-items="ViewBag.Articulos" onchange="this.form.submit()">
+                            <option value="">-- Seleccione un artículo --</option>
+                        </select>
+                        <div class="form-text">Seleccione para cargar datos actuales.</div>
+                    </div>
+                </form>
+
+                @if (ViewBag.ArticuloId != null)
+                {
+                    <div class="alert alert-light border mt-3">
+                        <h6 class="fw-bold mb-2">Estado Actual</h6>
+                        <div class="mb-1"><span class="text-muted">Ubicación:</span> <strong>@ViewBag.UbicacionActual</strong></div>
+                        <div class="mb-1"><span class="text-muted">Estado:</span> <strong>@ViewBag.EstadoActual</strong></div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Select Action -->
+    <div class="col-md-8">
+        @if (ViewBag.ArticuloId != null)
+        {
+            <div class="card-custom">
+                <div class="card-header bg-transparent py-3">
+                    <ul class="nav nav-pills card-header-pills" id="pills-tab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pills-entrada-tab" data-bs-toggle="pill" data-bs-target="#pills-entrada" type="button" role="tab">
+                                <i class="bi bi-plus-circle me-1"></i> Entrada
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pills-traslado-tab" data-bs-toggle="pill" data-bs-target="#pills-traslado" type="button" role="tab">
+                                <i class="bi bi-arrow-left-right me-1"></i> Traslado
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pills-estado-tab" data-bs-toggle="pill" data-bs-target="#pills-estado" type="button" role="tab">
+                                <i class="bi bi-cone-striped me-1"></i> Cambio de Estado
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pills-prestamo-tab" data-bs-toggle="pill" data-bs-target="#pills-prestamo" type="button" role="tab">
+                                <i class="bi bi-box-arrow-right me-1"></i> Préstamo
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-danger" id="pills-baja-tab" data-bs-toggle="pill" data-bs-target="#pills-baja" type="button" role="tab">
+                                <i class="bi bi-trash me-1"></i> Dar de Baja
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body pt-4">
+                    <div class="tab-content" id="pills-tabContent">
+                        
+                        <!-- ENTRADA FORM -->
+                        <div class="tab-pane fade show active" id="pills-entrada" role="tabpanel">
+                            <form asp-action="RegistrarEntrada" method="post">
+                                <input type="hidden" name="articuloId" value="@ViewBag.ArticuloId" />
+                                <h5 class="mb-3">Registrar Entrada de Inventario (Compra/Reingreso)</h5>
+                                
+                                <div class="alert alert-success py-2">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Esta acción aumentará el stock actual del artículo.
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Cantidad a Ingresar</label>
+                                    @if (ViewBag.TipoControl == "LOTE")
+                                    {
+                                        <input type="number" name="cantidad" class="form-control" min="1" value="1" required />
+                                    }
+                                    else
+                                    {
+                                        <input type="number" name="cantidad" class="form-control" value="1" readonly />
+                                        <div class="form-text">Para artículos unitarios, la cantidad es siempre 1.</div>
+                                    }
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Observación / Referencia</label>
+                                    <textarea name="observacion" class="form-control" rows="2" placeholder="Ej: Compra según factura #123, Donación recibida..."></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-plus-lg me-1"></i> Confirmar Entrada
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- TRASLADO FORM -->
+                        <div class="tab-pane fade" id="pills-traslado" role="tabpanel">
+                            <form asp-action="RegistrarTraslado" method="post">
+                                <input type="hidden" name="articuloId" value="@ViewBag.ArticuloId" />
+                                <h5 class="mb-3">Registrar Traslado de Ubicación</h5>
+                                
+                                @if (ViewBag.TipoControl == "LOTE")
+                                {
+                                    <div class="alert alert-info py-2">
+                                        <div class="d-flex justify-content-between">
+                                            <span><strong>Control por Lote:</strong> Especifique la cantidad a mover.</span>
+                                            <span class="badge bg-light text-dark border">Global: @ViewBag.CantidadGlobal</span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-primary fw-bold">Cantidad a Mover</label>
+                                        <input type="number" name="cantidad" class="form-control" min="1" max="@ViewBag.CantidadGlobal" value="1" required />
+                                    </div>
+                                }
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Nueva Ubicación</label>
+                                    <select name="nuevaUbicacionId" class="form-select" asp-items="ViewBag.Ubicaciones" required>
+                                        <option value="">-- Seleccionar Destino --</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Observación</label>
+                                    <textarea name="observacion" class="form-control" rows="2" placeholder="Motivo del traslado..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary-custom">
+                                    <i class="bi bi-save me-1"></i> Confirmar Traslado
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- CAMBIO ESTADO FORM -->
+                        <div class="tab-pane fade" id="pills-estado" role="tabpanel">
+                            <form asp-action="RegistrarCambioEstado" method="post">
+                                <input type="hidden" name="articuloId" value="@ViewBag.ArticuloId" />
+                                <h5 class="mb-3">Registrar Cambio de Condición</h5>
+                                
+                                <div class="alert alert-light border">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    @if(ViewBag.TipoControl == "LOTE") {
+                                        <span>El cambio de estado aplicará a <strong>todo el lote</strong> (@ViewBag.CantidadGlobal unidades).</span>
+                                    } else {
+                                        <span>El cambio de estado aplica a la unidad única.</span>
+                                    }
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Nuevo Estado</label>
+                                    <select name="nuevoEstadoId" class="form-select" asp-items="ViewBag.Estados" required>
+                                        <option value="">-- Seleccionar Nuevo Estado --</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Observación</label>
+                                    <textarea name="observacion" class="form-control" rows="2" placeholder="Detalles del daño o reparación..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-warning text-white">
+                                    <i class="bi bi-save me-1"></i> Confirmar Cambio
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- PRESTAMO FORM -->
+                        <div class="tab-pane fade" id="pills-prestamo" role="tabpanel">
+                            <form asp-action="RegistrarPrestamo" method="post">
+                                <input type="hidden" name="articuloId" value="@ViewBag.ArticuloId" />
+                                <h5 class="mb-3">Registrar Préstamo a Persona</h5>
+                                
+                                @if (ViewBag.TipoControl == "LOTE")
+                                {
+                                    <div class="alert alert-info py-2">
+                                        <div class="d-flex justify-content-between">
+                                            <span><strong>Control por Lote:</strong> Especifique la cantidad a prestar.</span>
+                                            <span class="badge bg-light text-dark border">Disponible: @ViewBag.CantidadGlobal</span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-primary fw-bold">Cantidad a Prestar</label>
+                                        <input type="number" name="cantidad" class="form-control" min="1" max="@ViewBag.CantidadGlobal" value="1" required />
+                                    </div>
+                                }
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Nombre de la Persona <span class="text-danger">*</span></label>
+                                            <input type="text" name="personaNombre" class="form-control" placeholder="Nombre completo" required />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Identificación</label>
+                                            <input type="text" name="personaIdentificacion" class="form-control" placeholder="Cédula, DNI, etc." />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Fecha Devolución Estimada</label>
+                                    <input type="date" name="fechaDevolucionEstimada" class="form-control" />
+                                    <div class="form-text">Fecha aproximada de devolución del artículo.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Observación</label>
+                                    <textarea name="observacion" class="form-control" rows="2" placeholder="Detalles del préstamo..."></textarea>
+                                </div>
+                                
+                                <div class="alert alert-light border">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    <span>Se generarán códigos individuales para cada artículo prestado (ej: sp-b20-001, sp-b20-002, ...)</span>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-info text-white">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Confirmar Préstamo
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- BAJA FORM -->
+                        <div class="tab-pane fade" id="pills-baja" role="tabpanel">
+                            <form asp-action="RegistrarBaja" method="post" onsubmit="return confirm('¿Está seguro de realizar esta baja?');">
+                                <input type="hidden" name="articuloId" value="@ViewBag.ArticuloId" />
+                                <h5 class="mb-3 text-danger">Registrar Baja de Activo</h5>
+                                
+                                @if (ViewBag.TipoControl == "LOTE")
+                                {
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Cantidad a dar de Baja</label>
+                                        <input type="number" name="cantidad" class="form-control" min="1" max="@ViewBag.CantidadGlobal" value="1" required />
+                                        <div class="form-text">Esto restará del stock global.</div>
+                                    </div>
+                                }
+                                else 
+                                {
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        <strong>Atención:</strong> Esta acción marcará el artículo como inactivo.
+                                    </div>
+                                }
+
+                                <div class="mb-3">
+                                    <label class="form-label">Motivo de Baja <span class="text-danger">*</span></label>
+                                    <textarea name="motivo" class="form-control" rows="3" placeholder="Ej: Robo, Pérdida total, Venta, Donación..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash me-1"></i> Confirmar Baja
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="card-custom h-100 d-flex align-items-center justify-content-center bg-light border-0">
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-arrow-left-circle fs-1 mb-3 d-block"></i>
+                    <h5>Seleccione un artículo para comenzar</h5>
+                    <p>Use el panel de la izquierda para buscar el activo.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>toastr.error('@TempData["ErrorMessage"]');</text>
+        }
+    </script>
+}

@@ -1,0 +1,64 @@
+@model Rs_system.Models.Ubicacion
+@{
+    ViewData["Title"] = "Editar Ubicación";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Editar Ubicación</h4>
+        <p class="text-muted mb-0">Modificar información del lugar</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Volver
+    </a>
+</div>
+
+<div class="card-custom" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            
+            <div class="mb-3">
+                <label asp-for="Nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+                <input asp-for="Nombre" class="form-control" placeholder="Ej: Bodega Central, Auditorio" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Descripcion" class="form-label">Descripción</label>
+                <textarea asp-for="Descripcion" class="form-control" rows="2" placeholder="Detalles sobre la ubicación (opcional)"></textarea>
+                <span asp-validation-for="Descripcion" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="Responsable" class="form-label">Responsable</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input asp-for="Responsable" class="form-control" placeholder="Nombre de la persona encargada" />
+                </div>
+                <div class="form-text">Persona a cargo de esta ubicación (opcional).</div>
+                <span asp-validation-for="Responsable" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check form-switch">
+                    <input asp-for="Activo" class="form-check-input" type="checkbox" role="switch" />
+                    <label asp-for="Activo" class="form-check-label">Ubicación Activa</label>
+                </div>
+                <div class="form-text">Si está inactiva, no se podrá asignar a nuevos artículos.</div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary-custom">
+                    <i class="bi bi-save me-1"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

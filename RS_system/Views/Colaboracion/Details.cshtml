@@ -1,0 +1,130 @@
+@model Rs_system.Models.Colaboracion
+@{
+    ViewData["Title"] = "Detalle de Colaboración";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Detalle de Colaboración #@Model.Id</h4>
+        <p class="text-muted mb-0">Información completa de la colaboración</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Volver
+    </a>
+</div>
+
+<div class="row">
+    <!-- Información Principal -->
+    <div class="col-md-6 mb-4">
+        <div class="card-custom">
+            <h6 class="text-primary border-bottom pb-2 mb-3">Información de Registro</h6>
+            
+            <div class="mb-3">
+                <label class="text-muted small">Miembro</label>
+                <div><strong>@Model.Miembro.Persona.Nombres @Model.Miembro.Persona.Apellidos</strong></div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="text-muted small">Fecha de Registro</label>
+                <div>@Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="text-muted small">Registrado por</label>
+                <div>@(Model.RegistradoPor ?? "Sistema")</div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="text-muted small">Monto Total</label>
+                <div><h4 class="text-success mb-0">$@Model.MontoTotal.ToString("N2")</h4></div>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.Observaciones))
+            {
+                <div class="mb-3">
+                    <label class="text-muted small">Observaciones</label>
+                    <div class="alert alert-info mb-0">@Model.Observaciones</div>
+                </div>
+            }
+        </div>
+    </div>
+    
+    <!-- Desglose Detallado -->
+    <div class="col-md-6 mb-4">
+        <div class="card-custom">
+            <h6 class="text-primary border-bottom pb-2 mb-3">Desglose por Tipo</h6>
+            
+            @{
+                var porTipo = Model.Detalles.GroupBy(d => d.TipoColaboracion.Nombre);
+            }
+            
+            @foreach (var grupo in porTipo)
+            {
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">@grupo.Key</h6>
+                        <span class="badge bg-primary">@grupo.Count() meses</span>
+                    </div>
+                    <div class="text-muted small">
+                        Total: <strong class="text-success">$@grupo.Sum(d => d.Monto).ToString("N2")</strong>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de Detalles Mensuales -->
+<div class="card-custom">
+    <h6 class="text-primary border-bottom pb-2 mb-3">Meses Cubiertos</h6>
+    
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Mes</th>
+                    <th>Año</th>
+                    <th>Tipo</th>
+                    <th class="text-end">Monto</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var detalle in Model.Detalles.OrderBy(d => d.Anio).ThenBy(d => d.Mes))
+                {
+                    <tr>
+                        <td>
+                            @{
+                                var fecha = new DateTime(detalle.Anio, detalle.Mes, 1);
+                            }
+                            @fecha.ToString("MMMM", new System.Globalization.CultureInfo("es-ES"))
+                        </td>
+                        <td>@detalle.Anio</td>
+                        <td>
+                            <span class="badge bg-primary">@detalle.TipoColaboracion.Nombre</span>
+                        </td>
+                        <td class="text-end">
+                            <strong>$@detalle.Monto.ToString("N2")</strong>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="table-active">
+                    <td colspan="3" class="text-end"><strong>TOTAL:</strong></td>
+                    <td class="text-end">
+                        <h5 class="mb-0 text-success">$@Model.Detalles.Sum(d => d.Monto).ToString("N2")</h5>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between mt-4">
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Volver al Listado
+    </a>
+    <a asp-action="EstadoCuenta" asp-route-id="@Model.MiembroId" class="btn btn-primary-custom">
+        <i class="bi bi-file-text me-1"></i> Ver Estado de Cuenta del Miembro
+    </a>
+</div>

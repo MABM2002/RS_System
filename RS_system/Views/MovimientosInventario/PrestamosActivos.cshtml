@@ -1,0 +1,156 @@
+@model IEnumerable<Rs_system.Models.Prestamo>
+@{
+    ViewData["Title"] = "Préstamos Activos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Préstamos Activos</h4>
+        <p class="text-muted mb-0">Artículos actualmente prestados</p>
+    </div>
+    <div>
+        <a asp-action="Create" class="btn btn-outline-primary me-2">
+            <i class="bi bi-plus-circle me-1"></i> Nuevo Préstamo
+        </a>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Historial
+        </a>
+    </div>
+</div>
+
+<div class="card-custom">
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-box-arrow-in-right fs-1 text-muted mb-3 d-block"></i>
+                <h5 class="text-muted">No hay préstamos activos</h5>
+                <p class="text-muted">Todos los artículos han sido devueltos.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Artículo</th>
+                            <th>Persona</th>
+                            <th>Cantidad</th>
+                            <th>Fecha Préstamo</th>
+                            <th>Devolución Estimada</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var prestamo in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">@prestamo.Articulo?.Codigo</div>
+                                    <div class="text-muted small">@prestamo.Articulo?.Nombre</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@prestamo.PersonaNombre</div>
+                                    @if (!string.IsNullOrEmpty(prestamo.PersonaIdentificacion))
+                                    {
+                                        <div class="text-muted small">@prestamo.PersonaIdentificacion</div>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">@prestamo.Cantidad</span>
+                                </td>
+                                <td>@prestamo.FechaPrestamo.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @if (prestamo.FechaDevolucionEstimada.HasValue)
+                                    {
+                                        var diasRestantes = (prestamo.FechaDevolucionEstimada.Value - DateTime.Today).Days;
+                                        var claseCss = diasRestantes < 0 ? "text-danger" : diasRestantes <= 3 ? "text-warning" : "text-success";
+                                        <span class="@claseCss">@prestamo.FechaDevolucionEstimada.Value.ToString("dd/MM/yyyy")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No definida</span>
+                                    }
+                                </td>
+                                <td>
+                                    @switch (prestamo.Estado)
+                                    {
+                                        case "ACTIVO":
+                                            <span class="badge bg-info">Activo</span>
+                                            break;
+                                        case "ATRASADO":
+                                            <span class="badge bg-danger">Atrasado</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@prestamo.Estado</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-info" onclick="verDetalles(@prestamo.Id)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <form asp-action="RegistrarDevolucion" method="post" style="display: inline;">
+                                            <input type="hidden" name="prestamoId" value="@prestamo.Id" />
+                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('¿Confirmar devolución de este préstamo?');">
+                                                <i class="bi bi-check-circle"></i> Devolver
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal Detalles -->
+<div class="modal fade" id="detallesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalles del Préstamo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detallesContent">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function verDetalles(prestamoId) {
+            // Aquí podrías implementar una llamada AJAX para cargar los detalles
+            // Por ahora mostramos un mensaje simple
+            $('#detallesContent').html('<div class="text-center py-3"><i class="bi bi-hourglass-split"></i> Cargando detalles...</div>');
+            $('#detallesModal').modal('show');
+            
+            // Simulación de carga
+            setTimeout(() => {
+                $('#detallesContent').html(`
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Los códigos individuales de los artículos prestados se mostrarán aquí.
+                    </div>
+                `);
+            }, 500);
+        }
+        
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>toastr.success('@TempData["SuccessMessage"]');</text>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>toastr.error('@TempData["ErrorMessage"]');</text>
+        }
+    </script>
+}

@@ -1,0 +1,164 @@
+@model Rs_system.Models.ReporteMensualGeneral
+@{
+    ViewData["Title"] = $"Consolidado - {Model.NombreMes} {Model.Anio}";
+    var ingresosPorCat = ViewBag.ConsolidadoIngresos as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
+    var egresosPorCat = ViewBag.ConsolidadoEgresos as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
+    
+    var totalIngresosMes = ingresosPorCat.Values.Sum();
+    var totalEgresosMes = egresosPorCat.Values.Sum();
+    var saldoFinal = Model.SaldoInicial + totalIngresosMes - totalEgresosMes;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Consolidado: @Model.NombreMes @Model.Anio</h1>
+        <div>
+            <a asp-action="RegistroMensual" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">
+                <i class="fas fa-edit"></i> Ver Detalle Registros
+            </a>
+            <a asp-action="Index" class="btn btn-secondary btn-sm ml-2">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <button onclick="window.print()" class="btn btn-info btn-sm ml-2">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Resumen Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Saldo Inicial</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.SaldoInicial.ToString("C")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Ingresos</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@totalIngresosMes.ToString("C")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Total Egresos</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@totalEgresosMes.ToString("C")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Saldo Final</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@saldoFinal.ToString("C")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Ingresos Chart/Table -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">Desglose de Ingresos</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Categoría</th>
+                                    <th class="text-right">Monto</th>
+                                    <th class="text-right">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in ingresosPorCat.OrderByDescending(x => x.Value))
+                                {
+                                    var porcentaje = totalIngresosMes > 0 ? (item.Value / totalIngresosMes) * 100 : 0;
+                                    <tr>
+                                        <td>@item.Key</td>
+                                        <td class="text-right">@item.Value.ToString("C")</td>
+                                        <td class="text-right">@porcentaje.ToString("F1")%</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="font-weight-bold">
+                                    <td>Total</td>
+                                    <td class="text-right">@totalIngresosMes.ToString("C")</td>
+                                    <td class="text-right">100%</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Egresos Chart/Table -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Desglose de Egresos</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Categoría</th>
+                                    <th class="text-right">Monto</th>
+                                    <th class="text-right">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in egresosPorCat.OrderByDescending(x => x.Value))
+                                {
+                                    var porcentaje = totalEgresosMes > 0 ? (item.Value / totalEgresosMes) * 100 : 0;
+                                    <tr>
+                                        <td>@item.Key</td>
+                                        <td class="text-right">@item.Value.ToString("C")</td>
+                                        <td class="text-right">@porcentaje.ToString("F1")%</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="font-weight-bold">
+                                    <td>Total</td>
+                                    <td class="text-right">@totalEgresosMes.ToString("C")</td>
+                                    <td class="text-right">100%</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

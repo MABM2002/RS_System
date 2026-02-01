@@ -1,0 +1,147 @@
+@model IEnumerable<Rs_system.Models.Colaboracion>
+@{
+    ViewData["Title"] = "Colaboraciones";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Colaboraciones Económicas</h4>
+        <p class="text-muted mb-0">Registro de colaboraciones mensuales de los miembros</p>
+    </div>
+    <div>
+        <a asp-action="Reportes" class="btn btn-outline-primary me-2">
+            <i class="bi bi-file-earmark-bar-graph me-1"></i> Reportes
+        </a>
+        <a asp-action="Create" class="btn btn-primary-custom">
+            <i class="bi bi-plus-lg me-1"></i> Nueva Colaboración
+        </a>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Total Recaudado Hoy</h6>
+            <h3 class="text-primary mb-0">
+                $@Model.Where(c => c.FechaRegistro.Date == DateTime.Today).Sum(c => c.MontoTotal).ToString("N2")
+            </h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Colaboraciones Hoy</h6>
+            <h3 class="text-success mb-0">
+                @Model.Count(c => c.FechaRegistro.Date == DateTime.Today)
+            </h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Total Registros</h6>
+            <h3 class="text-info mb-0">@Model.Count()</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Collaborations Table -->
+<div class="card-custom">
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Miembro</th>
+                    <th>Tipos</th>
+                    <th>Período</th>
+                    <th>Monto</th>
+                    <th>Registrado por</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="bi bi-cash-coin fs-1 d-block mb-2"></i>
+                            No hay colaboraciones registradas
+                        </td>
+                    </tr>
+                }
+                @foreach (var colaboracion in Model)
+                {
+                    <tr>
+                        <td>
+                            <strong>@colaboracion.FechaRegistro.ToString("dd/MM/yyyy")</strong><br>
+                            <small class="text-muted">@colaboracion.FechaRegistro.ToString("HH:mm")</small>
+                        </td>
+                        <td>
+                            <strong>@colaboracion.Miembro.Persona.Nombres @colaboracion.Miembro.Persona.Apellidos</strong>
+                        </td>
+                        <td>
+                            @{
+                                var tipos = colaboracion.Detalles.Select(d => d.TipoColaboracion.Nombre).Distinct();
+                            }
+                            @foreach (var tipo in tipos)
+                            {
+                                <span class="badge bg-primary me-1">@tipo</span>
+                            }
+                        </td>
+                        <td>
+                            @{
+                                var ordenados = colaboracion.Detalles.OrderBy(d => d.Anio).ThenBy(d => d.Mes).ToList();
+                                var primero = ordenados.First();
+                                var ultimo = ordenados.Last();
+                                
+                                if (primero.Anio == ultimo.Anio && primero.Mes == ultimo.Mes)
+                                {
+                                    var fecha = new DateTime(primero.Anio, primero.Mes, 1);
+                                    <text>@fecha.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES"))</text>
+                                }
+                                else
+                                {
+                                    var fechaInicio = new DateTime(primero.Anio, primero.Mes, 1);
+                                    var fechaFin = new DateTime(ultimo.Anio, ultimo.Mes, 1);
+                                    <text>@fechaInicio.ToString("MMM yyyy", new System.Globalization.CultureInfo("es-ES")) - @fechaFin.ToString("MMM yyyy", new System.Globalization.CultureInfo("es-ES"))</text>
+                                }
+                            }
+                        </td>
+                        <td>
+                            <strong class="text-success">$@colaboracion.MontoTotal.ToString("N2")</strong>
+                        </td>
+                        <td>
+                            <small>@(colaboracion.RegistradoPor ?? "Sistema")</small>
+                        </td>
+                        <td class="text-center">
+                            <a asp-action="Details" asp-route-id="@colaboracion.Id" class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a asp-action="EstadoCuenta" asp-route-id="@colaboracion.MiembroId" class="btn btn-sm btn-outline-info" title="Estado de cuenta">
+                                <i class="bi bi-file-text"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Show success/error messages
+        @if (TempData["Success"] != null)
+        {
+            <text>
+            toastr.success('@TempData["Success"]');
+            </text>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <text>
+            toastr.error('@TempData["Error"]');
+            </text>
+        }
+    </script>
+}

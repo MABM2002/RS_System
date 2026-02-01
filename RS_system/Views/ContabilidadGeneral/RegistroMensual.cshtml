@@ -1,0 +1,479 @@
+@model Rs_system.Models.ReporteMensualGeneral
+@{
+    ViewData["Title"] = $"Registro - {Model.NombreMes} {Model.Anio}";
+    var categoriasIngreso = ViewBag.CategoriasIngreso as List<Rs_system.Models.CategoriaIngreso>;
+    var categoriasEgreso = ViewBag.CategoriasEgreso as List<Rs_system.Models.CategoriaEgreso>;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h3 text-gray-800">Registro Mensual: @Model.NombreMes @Model.Anio</h1>
+            <h5 class="text-secondary">
+                Saldo Actual: <span class="font-weight-bold @(ViewBag.SaldoActual >= 0 ? "text-success" : "text-danger")">@ViewBag.SaldoActual?.ToString("C")</span>
+            </h5>
+        </div>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            @if (!Model.Cerrado)
+            {
+                <button id="btnGuardar" class="btn btn-primary btn-sm ml-2">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+                <form asp-action="CerrarMes" asp-route-id="@Model.Id" method="post" class="d-inline ml-2" onsubmit="return confirm('¿Está seguro de cerrar este mes? No podrá realizar más cambios.');">
+                    <button type="submit" class="btn btn-warning btn-sm">
+                        <i class="fas fa-lock"></i> Cerrar Mes
+                    </button>
+                </form>
+            }
+            else
+            {
+                <span class="badge badge-secondary ml-2 p-2">Mes Cerrado</span>
+            }
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm mb-0" id="tablaRegistros">
+                    <thead class="thead-light">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th style="width: 120px;">Fecha</th>
+                            <th style="width: 120px;">Tipo</th>
+                            <th style="width: 200px;">Categoría</th>
+                            <th>Descripción</th>
+                        <th style="width: 120px;">Comprobante</th>
+                            <th style="width: 50px;"></th>
+                            <th style="width: 150px;">Monto</th>
+                            @if (!Model.Cerrado)
+                            {
+                                <th style="width: 50px;"></th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyRegistros">
+                        <!-- Rows rendered by JS -->
+                    </tbody>
+                    @if (!Model.Cerrado)
+                    {
+                        <tfoot>
+                            <tr>
+                                <td colspan="9" class="text-center p-2">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="agregarFila()">
+                                        <i class="fas fa-plus"></i> Agregar Fila
+                                    </button>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Adjuntos -->
+<div class="modal fade" id="modalAdjuntos" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adjuntos del Movimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="adjuntoMovimientoId" />
+                
+                @if (!Model.Cerrado)
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Subir Archivos (Imágenes o PDF)</label>
+                        <!-- Usar 'form' envolvente para resetear fácil -->
+                        <form id="formSubirAdjuntos">
+                             <div class="input-group">
+                                <input type="file" class="form-control" id="inputArchivos" multiple accept="image/*,.pdf">
+                                <button class="btn btn-primary" type="button" onclick="subirArchivos()">
+                                    <i class="fas fa-upload"></i> Subir
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                }
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Fecha</th>
+                                <th style="width: 150px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyAdjuntos">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const esCerrado = @Model.Cerrado.ToString().ToLower();
+        const reporteId = @Model.Id;
+        
+        // Data from server
+        let rawRegistros = @Html.Raw(Json.Serialize(Model.Movimientos.Select(m => new {
+            m.Id,
+            m.Tipo, // 1 = Ingreso, 2 = Egreso
+            m.CategoriaIngresoId,
+            m.CategoriaEgresoId,
+            m.Monto,
+            Fecha = m.Fecha.ToString("yyyy-MM-dd"),
+            m.Descripcion,
+            m.NumeroComprobante
+        })));
+
+        // Normalizar datos a mi estructura interna para evitar problemas de mayúsculas/minúsculas
+        let registros = rawRegistros.map(r => ({
+            id: r.Id || r.id || 0,
+            tipo: (r.Tipo !== undefined ? r.Tipo : r.tipo),
+            categoriaIngresoId: r.CategoriaIngresoId || r.categoriaIngresoId,
+            categoriaEgresoId: r.CategoriaEgresoId || r.categoriaEgresoId,
+            monto: r.Monto !== undefined ? r.Monto : r.monto,
+            fecha: r.Fecha || r.fecha,
+            descripcion: r.Descripcion || r.descripcion,
+            numeroComprobante: r.NumeroComprobante || r.numeroComprobante
+        }));
+
+        // Categories helper
+        const rawCatsIngreso = @Html.Raw(Json.Serialize(categoriasIngreso.Select(c => new { c.Id, c.Nombre })));
+        const rawCatsEgreso = @Html.Raw(Json.Serialize(categoriasEgreso.Select(c => new { c.Id, c.Nombre })));
+        
+        const catsIngreso = rawCatsIngreso.map(c => ({ id: c.Id || c.id, nombre: c.Nombre || c.nombre }));
+        const catsEgreso = rawCatsEgreso.map(c => ({ id: c.Id || c.id, nombre: c.Nombre || c.nombre }));
+
+        function renderTable() {
+            const tbody = document.getElementById('tbodyRegistros');
+            tbody.innerHTML = '';
+            
+            registros.forEach((reg, index) => {
+                const tr = document.createElement('tr');
+                tr.dataset.index = index;
+                
+                // Logic for Attachment Button
+                const hasId = reg.id && reg.id > 0;
+                const btnAdjuntoClass = hasId ? "btn-info" : "btn-secondary";
+                const btnAdjuntoTitle = hasId ? "Gestionar Adjuntos" : "Guarde primero para adjuntar";
+                // IMPORTANTE: onclick debe ser cadena vacía si no hay ID, pero el disabled lo controla.
+                const btnAdjuntoAction = hasId ? `abrirAdjuntos(${reg.id})` : "";
+                const btnAdjuntoIcon = '<i class="fas fa-paperclip"></i>';
+                const disabledAttr = hasId ? "" : "disabled";
+
+                if (esCerrado) {
+                    // Read-only view
+                    const tipoTexto = reg.tipo === 1 ? '<span class="text-success">Ingreso</span>' : '<span class="text-danger">Egreso</span>';
+                    const catNombre = reg.tipo === 0 
+                        ? (catsIngreso.find(c => c.id === reg.categoriaIngresoId)?.nombre || '-')
+                        : (catsEgreso.find(c => c.id === reg.categoriaEgresoId)?.nombre || '-');
+                        
+                    tr.innerHTML = `
+                        <td class="text-center">${index + 1}</td>
+                        <td>${reg.fecha}</td>
+                        <td>${tipoTexto}</td>
+                        <td>${catNombre}</td>
+                        <td>${reg.descripcion || ''}</td>
+                        <td>${reg.numeroComprobante || ''}</td>
+                        <td class="text-center">
+                             <button type="button" class="btn btn-sm ${btnAdjuntoClass}" onclick="${btnAdjuntoAction}" title="${btnAdjuntoTitle}" ${disabledAttr}>
+                                ${btnAdjuntoIcon}
+                            </button>
+                        </td>
+                        <td class="text-end">${parseFloat(reg.monto).toFixed(2)}</td>
+                        <td></td>
+                    `;
+                } else {
+                    // Editable view
+                    tr.innerHTML = `
+                        <td class="text-center align-middle">${index + 1}</td>
+                        <td><input type="date" class="form-control form-control-sm" value="${reg.fecha}" onchange="updateReg(${index}, 'fecha', this.value)"></td>
+                        <td>
+                            <select class="form-control form-control-sm" onchange="cambiarTipo(${index}, this.value)">
+                                <option value="1" ${reg.tipo === 1 ? 'selected' : ''}>Ingreso</option>
+                                <option value="2" ${reg.tipo === 2 ? 'selected' : ''}>Egreso</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control form-control-sm" onchange="updateReg(${index}, 'categoria', this.value)">
+                                <option value="">Seleccione...</option>
+                                ${renderCatsOptions(reg.tipo, reg.tipo === 1 ? reg.categoriaIngresoId : reg.categoriaEgresoId)}
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-control form-control-sm" value="${reg.descripcion || ''}" onchange="updateReg(${index}, 'descripcion', this.value)"></td>
+                        <td><input type="text" class="form-control form-control-sm" value="${reg.numeroComprobante || ''}" onchange="updateReg(${index}, 'numeroComprobante', this.value)"></td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm ${btnAdjuntoClass}" onclick="${btnAdjuntoAction}" title="${btnAdjuntoTitle}" ${disabledAttr}>
+                                ${btnAdjuntoIcon}
+                            </button>
+                        </td>
+                        <td><input type="number" step="0.01" class="form-control form-control-sm text-end" value="${reg.monto}" onchange="updateReg(${index}, 'monto', this.value)"></td>
+                        <td class="text-center align-middle">
+                            <button class="btn btn-danger btn-sm py-0" onclick="eliminarFila(${index})" title="Eliminar"><i class="fas fa-times"></i></button>
+                        </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderCatsOptions(tipo, selectedId) {
+            const list = tipo == 1 ? catsIngreso : catsEgreso; // loose equality for string/number match
+            return list.map(c => `<option value="${c.id}" ${c.id == selectedId ? 'selected' : ''}>${c.nombre}</option>`).join('');
+        }
+
+        function agregarFila() {
+            const today = new Date().toISOString().split('T')[0];
+            registros.push({
+                id: 0,
+                tipo: 1,
+                categoriaIngresoId: null,
+                categoriaEgresoId: null,
+                monto: 0,
+                fecha: today,
+                descripcion: '',
+                numeroComprobante: ''
+            });
+            renderTable();
+        }
+
+        function eliminarFila(index) {
+            registros.splice(index, 1);
+            renderTable();
+        }
+
+        function cambiarTipo(index, nuevoTipo) {
+            registros[index].tipo = parseInt(nuevoTipo);
+            registros[index].categoriaIngresoId = null;
+            registros[index].categoriaEgresoId = null;
+            renderTable();
+        }
+
+        function updateReg(index, field, value) {
+            const reg = registros[index];
+            if (field === 'categoria') {
+                const val = value ? parseInt(value) : null;
+                if (reg.tipo === 1) reg.categoriaIngresoId = val;
+                else reg.categoriaEgresoId = val;
+            } else if (field === 'monto') {
+                reg.monto = parseFloat(value) || 0;
+            } else {
+                reg[field] = value;
+            }
+        }
+
+        // IMPORTANT: Payload mapping for Server (Server expects PascalCase usually, but standard API accepts camelCase too)
+        document.getElementById('btnGuardar')?.addEventListener('click', async () => {
+             // Validations
+            for (let i = 0; i < registros.length; i++) {
+                const r = registros[i];
+                if (r.monto <= 0) {
+                    alert(`Fila ${i+1}: El monto debe ser mayor a 0.`);
+                    return;
+                }
+                if (r.tipo === 1 && !r.categoriaIngresoId) {
+                    alert(`Fila ${i+1}: Debe seleccionar una categoría de ingreso.`);
+                    return;
+                }
+                if (r.tipo === 2 && !r.categoriaEgresoId) {
+                    alert(`Fila ${i+1}: Debe seleccionar una categoría de egreso.`);
+                    return;
+                }
+            }
+            
+            const btn = document.getElementById('btnGuardar');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            btn.disabled = true;
+
+            // Map back to PascalCase structure just in case server strictly needs it matches DTO
+            const payloadMovimientos = registros.map(r => ({
+                Id: r.id,
+                Tipo: r.tipo,
+                CategoriaIngresoId: r.categoriaIngresoId,
+                CategoriaEgresoId: r.categoriaEgresoId,
+                Monto: r.monto,
+                Fecha: r.fecha,
+                Descripcion: r.descripcion,
+                NumeroComprobante: r.numeroComprobante
+            }));
+
+            try {
+                const response = await fetch('@Url.Action("GuardarBulk")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ReporteId: reporteId,
+                        Movimientos: payloadMovimientos 
+                    })
+                });
+                // ... rest of logic
+
+
+                const result = await response.json();
+                if (result.success) {
+                    // Show toast or alert
+                    alert('Guardado exitosamente');
+                    location.reload(); 
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Ocurrió un error al guardar.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // ================= ADJUNTOS LOGIC =================
+
+        let currentMovId = 0;
+        var myModalAdjuntos;
+
+        function abrirAdjuntos(id) {
+            currentMovId = id;
+            document.getElementById('adjuntoMovimientoId').value = id;
+            
+            // Clear previous entries
+            document.getElementById('tbodyAdjuntos').innerHTML = '<tr><td colspan="3" class="text-center">Cargando...</td></tr>';
+            
+            if (!myModalAdjuntos) {
+                var el = document.getElementById('modalAdjuntos');
+                myModalAdjuntos = new bootstrap.Modal(el);
+            }
+            myModalAdjuntos.show();
+            
+            cargarAdjuntos(id);
+        }
+
+        async function cargarAdjuntos(id) {
+            try {
+                const url = '@Url.Action("ObtenerAdjuntos")?movimientoId=' + id;
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                const tbody = document.getElementById('tbodyAdjuntos');
+                tbody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center">Sin adjuntos</td></tr>';
+                    return;
+                }
+                
+                data.forEach(adj => {
+                   const tr = document.createElement('tr');
+                   
+                   // Si es imagen, mostrar preview pequeño en popover o algo, pero por ahora link simple
+                   let link = `<a href="${adj.url}" target="_blank" class="text-decoration-none"><i class="fas fa-external-link-alt"></i> ${adj.nombre}</a>`;
+                   
+                   let deleteBtn = '';
+                   if (!esCerrado) {
+                       deleteBtn = `<button class="btn btn-danger btn-sm" onclick="eliminarAdjunto(${adj.id})"><i class="fas fa-trash"></i></button>`;
+                   }
+
+                   tr.innerHTML = `
+                        <td>${link}</td>
+                        <td>${adj.fecha}</td>
+                        <td class="text-center">
+                            <a href="${adj.url}" download class="btn btn-secondary btn-sm"><i class="fas fa-download"></i></a>
+                            ${deleteBtn}
+                        </td>
+                   `;
+                   tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+                document.getElementById('tbodyAdjuntos').innerHTML = '<tr><td colspan="3" class="text-danger">Error al cargar adjuntos</td></tr>';
+            }
+        }
+
+        async function subirArchivos() {
+            const input = document.getElementById('inputArchivos');
+            if (input.files.length === 0) {
+                alert("Seleccione al menos un archivo.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('movimientoId', currentMovId);
+            for (let i = 0; i < input.files.length; i++) {
+                formData.append('archivos', input.files[i]);
+            }
+
+            try {
+                const res = await fetch('@Url.Action("SubirAdjunto")', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await res.json();
+                if (result.success) {
+                    // Limpiar input y recargar
+                    input.value = '';
+                    cargarAdjuntos(currentMovId);
+                } else {
+                    alert("Error: " + result.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error al subir archivos.");
+            }
+        }
+
+        async function eliminarAdjunto(id) {
+            if (!confirm('¿Eliminar este adjunto?')) return;
+            try {
+                const res = await fetch('@Url.Action("EliminarAdjunto")?id=' + id, { method: 'POST' });
+                const result = await res.json();
+                if (result.success) {
+                    cargarAdjuntos(currentMovId);
+                } else {
+                    alert("No se pudo eliminar.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error al eliminar.");
+            }
+        }
+
+        // Initialize
+        if (registros.length === 0 && !esCerrado) {
+            agregarFila();
+        } else {
+            renderTable();
+        }
+    </script>
+}

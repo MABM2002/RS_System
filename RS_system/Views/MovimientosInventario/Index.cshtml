@@ -1,0 +1,128 @@
+@model IEnumerable<Rs_system.Models.MovimientoInventario>
+@{
+    ViewData["Title"] = "Historial de Movimientos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Historial de Movimientos</h4>
+        <p class="text-muted mb-0">Registro de traslados, bajas y cambios de estado</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary-custom">
+        <i class="bi bi-arrow-left-right me-1"></i> Nuevo Movimiento
+    </a>
+</div>
+
+<div class="card-custom">
+    <div class="table-responsive">
+        <table class="table-custom align-middle">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Artículo</th>
+                    <th>Tipo</th>
+                    <th>Detalles</th>
+                    <th>Usuario</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-5">
+                            <i class="bi bi-clock-history fs-1 d-block mb-2"></i>
+                            No hay movimientos registrados
+                        </td>
+                    </tr>
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="width: 150px;">
+                            <div class="fw-bold">@item.Fecha.ToLocalTime().ToString("dd/MM/yyyy")</div>
+                            <small class="text-muted">@item.Fecha.ToLocalTime().ToString("HH:mm")</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold">@item.Articulo?.Codigo</div>
+                            <small class="text-muted">@item.Articulo?.Nombre</small>
+                        </td>
+                        <td>
+                            @switch (item.TipoMovimiento)
+                            {
+                                case "ENTRADA":
+                                    <span class="badge bg-success">ENTRADA</span>
+                                    break;
+                                case "TRASLADO":
+                                    <span class="badge bg-info text-dark">TRASLADO</span>
+                                    break;
+                                case "BAJA":
+                                    <span class="badge bg-danger">BAJA</span>
+                                    break;
+                                case "PRESTAMO":
+                                    <span class="badge bg-primary">PRESTAMO</span>
+                                    break;
+                                case "DEVOLUCION":
+                                    <span class="badge bg-teal" style="background-color: #20c997; color: white;">DEVOLUCIÓN</span>
+                                    break;
+                                case "CAMBIO_ESTADO":
+                                    <span class="badge bg-warning text-dark">ESTADO</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary">@item.TipoMovimiento</span>
+                                    break;
+                            }
+                        </td>
+                        <td>
+                            @if (item.TipoMovimiento == "TRASLADO")
+                            {
+                                <div class="d-flex align-items-center">
+                                    <span class="text-muted me-2">@item.UbicacionOrigen?.Nombre</span>
+                                    <i class="bi bi-arrow-right text-primary me-2"></i>
+                                    <span class="fw-bold">@item.UbicacionDestino?.Nombre</span>
+                                </div>
+                            }
+                            else if (item.TipoMovimiento == "CAMBIO_ESTADO")
+                            {
+                                <div class="d-flex align-items-center">
+                                    <span class="text-muted me-2">@item.EstadoAnterior?.Nombre</span>
+                                    <i class="bi bi-arrow-right text-primary me-2"></i>
+                                    <span class="fw-bold">@item.EstadoNuevo?.Nombre</span>
+                                </div>
+                            }
+                            
+                            @if (item.Cantidad > 1 || item.Articulo?.TipoControl == "LOTE")
+                            {
+                                <div class="mt-1">
+                                    <span class="badge bg-light text-dark border">Cantidad: @item.Cantidad</span>
+                                </div>
+                            }
+                            
+                            @if (!string.IsNullOrEmpty(item.Observacion))
+                            {
+                                <div class="text-muted fst-italic mt-1 small">
+                                    <i class="bi bi-card-text me-1"></i> @item.Observacion
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            <small class="text-muted">@item.UsuarioId</small>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>toastr.success('@TempData["SuccessMessage"]');</text>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>toastr.error('@TempData["ErrorMessage"]');</text>
+        }
+    </script>
+}

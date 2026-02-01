@@ -1,0 +1,453 @@
+@model Rs_system.Models.ViewModels.RegistrarColaboracionViewModel
+@{
+    ViewData["Title"] = "Nueva Colaboración";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Nueva Colaboración</h4>
+        <p class="text-muted mb-0">Registrar colaboración económica mensual</p>
+    </div>
+    <div>
+        <a asp-controller="TipoColaboracion" asp-action="Index" class="btn btn-outline-primary me-2">
+            <i class="bi bi-gear me-1"></i> Gestionar Tipos
+        </a>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="card-custom">
+    <form asp-action="Create" method="post" id="colaboracionForm">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        
+        <!-- Selección de Miembro con Búsqueda -->
+        <div class="mb-4">
+            <h6 class="text-primary border-bottom pb-2">Información del Miembro</h6>
+            <div class="row">
+                <div class="col-md-12">
+                    <label for="buscarMiembro" class="form-label">Buscar Miembro</label>
+                    <input type="text" 
+                           id="buscarMiembro" 
+                           class="form-control" 
+                           placeholder="Escriba el nombre del miembro..."
+                           autocomplete="off" />
+                    <div id="resultadosBusqueda" class="list-group mt-2" style="display: none; position: absolute; z-index: 1000; max-height: 300px; overflow-y: auto; width: 90%;"></div>
+                    
+                    <input type="hidden" asp-for="MiembroId" id="miembroIdHidden" />
+                    
+                    <!-- Mostrar miembro seleccionado -->
+                    <div id="miembroSeleccionado" class="mt-3" style="display: none;">
+                        <div class="alert alert-success d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <i class="bi bi-person-check me-2"></i>
+                                <strong id="nombreMiembroSeleccionado"></strong>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="limpiarMiembro()">
+                                <i class="bi bi-x"></i> Cambiar
+                            </button>
+                        </div>
+                        
+                        <!-- Historial de Últimos Pagos -->
+                        <div id="infoUltimosPagos" style="display: none;">
+                            <div class="card border-info bg-light">
+                                <div class="card-header bg-transparent border-info py-1 px-3">
+                                    <small class="text-info fw-bold"><i class="bi bi-clock-history me-1"></i> Últimos meses pagados</small>
+                                </div>
+                                <div class="card-body py-2 px-3">
+                                    <div id="listaUltimosPagos" class="d-flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <span asp-validation-for="MiembroId" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Período de Colaboración -->
+        <div class="mb-4">
+            <h6 class="text-primary border-bottom pb-2">Período a Cubrir</h6>
+            <div class="row">
+                <div class="col-md-3">
+                    <label asp-for="MesInicial" class="form-label"></label>
+                    <select asp-for="MesInicial" class="form-select" id="mesInicial" onchange="calcularSugerido()">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                    <span asp-validation-for="MesInicial" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="AnioInicial" class="form-label"></label>
+                    <select asp-for="AnioInicial" class="form-select" id="anioInicial" onchange="calcularSugerido()">
+                        @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year - 5; i--)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                    <span asp-validation-for="AnioInicial" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="MesFinal" class="form-label"></label>
+                    <select asp-for="MesFinal" class="form-select" id="mesFinal" onchange="calcularSugerido()">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                    <span asp-validation-for="MesFinal" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="AnioFinal" class="form-label"></label>
+                    <select asp-for="AnioFinal" class="form-select" id="anioFinal" onchange="calcularSugerido()">
+                        @for (int i = DateTime.Now.Year + 1; i >= DateTime.Now.Year - 5; i--)
+                        {
+                            <option value="@i" selected="@(i == DateTime.Now.Year)">@i</option>
+                        }
+                    </select>
+                    <span asp-validation-for="AnioFinal" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tipos de Colaboración -->
+        <div class="mb-4">
+            <h6 class="text-primary border-bottom pb-2">Tipos de Colaboración</h6>
+            <div class="row">
+                @if (Model.TiposDisponibles != null && Model.TiposDisponibles.Any())
+                {
+                    @foreach (var tipo in Model.TiposDisponibles)
+                    {
+                        var esTransporteOLimpieza = tipo.Nombre.Equals("Transporte", StringComparison.OrdinalIgnoreCase) || 
+                                                     tipo.Nombre.Equals("Limpieza", StringComparison.OrdinalIgnoreCase);
+                        
+                        <div class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input tipo-checkbox" 
+                                       type="checkbox" 
+                                       name="TiposSeleccionados" 
+                                       value="@tipo.Id" 
+                                       id="tipo_@tipo.Id"
+                                       data-monto="@tipo.MontoSugerido"
+                                       @(esTransporteOLimpieza ? "checked" : "")
+                                       onchange="calcularSugerido()">
+                                <label class="form-check-label" for="tipo_@tipo.Id">
+                                    <strong>@tipo.Nombre</strong>
+                                    <span class="badge bg-success ms-2">$@tipo.MontoSugerido.ToString("N2")/mes</span>
+                                    @if (!string.IsNullOrEmpty(tipo.Descripcion))
+                                    {
+                                        <br><small class="text-muted">@tipo.Descripcion</small>
+                                    }
+                                </label>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="alert alert-warning">
+                            No hay tipos de colaboración activos. <a asp-controller="TipoColaboracion" asp-action="Index">Gestionar tipos</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <span asp-validation-for="TiposSeleccionados" class="text-danger"></span>
+        </div>
+
+        <!-- Tipo Prioritario -->
+        <div class="mb-4">
+            <h6 class="text-primary border-bottom pb-2">Priorización (Opcional)</h6>
+            <div class="row">
+                <div class="col-md-12">
+                    <label asp-for="TipoPrioritario" class="form-label"></label>
+                    <select asp-for="TipoPrioritario" class="form-select" id="tipoPrioritario">
+                        <option value="">Sin prioridad - Distribuir equitativamente</option>
+                        @if (Model.TiposDisponibles != null)
+                        {
+                            @foreach (var tipo in Model.TiposDisponibles)
+                            {
+                                <option value="@tipo.Id">@tipo.Nombre (se pagará primero $@tipo.MontoSugerido por mes)</option>
+                            }
+                        }
+                    </select>
+                    <small class="form-text text-muted">
+                        Si selecciona un tipo prioritario, el monto se asignará primero a ese tipo usando su monto sugerido, 
+                        y el resto se distribuirá equitativamente entre los demás tipos.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monto Total -->
+        <div class="mb-4">
+            <h6 class="text-primary border-bottom pb-2">Monto de la Colaboración</h6>
+            <div class="row">
+                <div class="col-md-6">
+                    <label asp-for="MontoTotal" class="form-label"></label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text">$</span>
+                        <input asp-for="MontoTotal" 
+                               type="number" 
+                               step="0.01" 
+                               class="form-control" 
+                               id="montoTotal"
+                               placeholder="0.00"
+                               required />
+                    </div>
+                    <span asp-validation-for="MontoTotal" class="text-danger"></span>
+                     <small class="form-text text-muted">Monto total que entrega el miembro</small>
+                 </div>
+                 <div class="col-md-6">
+                     <label class="form-label">Resumen</label>
+                     <div class="card bg-light">
+                         <div class="card-body">
+                             <div class="d-flex justify-content-between mb-2">
+                                 <span>Meses a cubrir:</span>
+                                 <strong id="totalMeses">0</strong>
+                             </div>
+                             <div class="d-flex justify-content-between mb-2">
+                                 <span>Tipos seleccionados:</span>
+                                 <strong id="totalTipos">0</strong>
+                             </div>
+                             <hr class="my-2">
+                             <div class="d-flex justify-content-between mb-2">
+                                 <span class="text-info">Monto sugerido:</span>
+                                 <strong class="text-info">$<span id="montoSugerido">0.00</span></strong>
+                             </div>
+                             <div id="alertaDiferencia" class="alert alert-warning py-1 px-2 mb-0 mt-2" style="display: none; font-size: 0.85rem;">
+                                 <i class="bi bi-exclamation-triangle me-1"></i>
+                                 <span id="mensajeDiferencia"></span>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+ 
+         <!-- Observaciones -->
+         <div class="mb-4">
+             <label asp-for="Observaciones" class="form-label"></label>
+             <textarea asp-for="Observaciones" class="form-control" rows="3" placeholder="Notas opcionales sobre esta colaboración"></textarea>
+             <span asp-validation-for="Observaciones" class="text-danger"></span>
+         </div>
+ 
+         <div class="d-flex justify-content-end gap-2">
+             <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+             <button type="submit" class="btn btn-primary-custom">
+                 <i class="bi bi-save me-1"></i> Registrar Colaboración
+             </button>
+         </div>
+     </form>
+ </div>
+ 
+ @section Scripts {
+     <script>
+         let timeoutBusqueda = null;
+         
+         // Búsqueda de miembros
+         document.getElementById('buscarMiembro').addEventListener('input', function(e) {
+             const termino = e.target.value;
+             const resultadosDiv = document.getElementById('resultadosBusqueda');
+             
+             clearTimeout(timeoutBusqueda);
+             
+             if (termino.length < 2) {
+                 resultadosDiv.style.display = 'none';
+                 return;
+             }
+             
+             timeoutBusqueda = setTimeout(async () => {
+                 try {
+                     const response = await fetch('@Url.Action("BuscarMiembros", "Colaboracion")?termino=' + encodeURIComponent(termino));
+                     const miembros = await response.json();
+                     
+                     if (miembros.length === 0) {
+                         resultadosDiv.innerHTML = '<div class="list-group-item text-muted">No se encontraron resultados</div>';
+                         resultadosDiv.style.display = 'block';
+                         return;
+                     }
+                     
+                     let html = '';
+                     miembros.forEach(miembro => {
+                         html += `
+                             <button type="button" class="list-group-item list-group-item-action" onclick="seleccionarMiembro(${miembro.id}, '${miembro.text}')">
+                                 <div class="d-flex justify-content-between align-items-center">
+                                     <div>
+                                         <i class="bi bi-person me-2"></i>
+                                         <strong>${miembro.text}</strong>
+                                     </div>
+                                     ${miembro.telefono ? '<small class="text-muted">' + miembro.telefono + '</small>' : ''}
+                                 </div>
+                             </button>
+                         `;
+                     });
+                     
+                     resultadosDiv.innerHTML = html;
+                     resultadosDiv.style.display = 'block';
+                 } catch (error) {
+                     console.error('Error al buscar miembros:', error);
+                 }
+             }, 300);
+         });
+         
+         // Cerrar resultados cuando se hace clic fuera
+         document.addEventListener('click', function(e) {
+             const buscarInput = document.getElementById('buscarMiembro');
+             const resultadosDiv = document.getElementById('resultadosBusqueda');
+             
+             if (!buscarInput.contains(e.target) && !resultadosDiv.contains(e.target)) {
+                 resultadosDiv.style.display = 'none';
+             }
+         });
+         
+         function seleccionarMiembro(id, nombre) {
+             document.getElementById('miembroIdHidden').value = id;
+             document.getElementById('nombreMiembroSeleccionado').textContent = nombre;
+             document.getElementById('miembroSeleccionado').style.display = 'block';
+             document.getElementById('buscarMiembro').value = '';
+             document.getElementById('buscarMiembro').style.display = 'none';
+             document.getElementById('resultadosBusqueda').style.display = 'none';
+             
+             // Cargar historial de pagos
+             cargarHistorialPagos(id);
+         }
+         
+         function limpiarMiembro() {
+             document.getElementById('miembroIdHidden').value = '';
+             document.getElementById('miembroSeleccionado').style.display = 'none';
+             document.getElementById('buscarMiembro').style.display = 'block';
+             document.getElementById('buscarMiembro').focus();
+             
+             // Ocultar historial
+             document.getElementById('infoUltimosPagos').style.display = 'none';
+             document.getElementById('listaUltimosPagos').innerHTML = '';
+         }
+         
+         async function cargarHistorialPagos(miembroId) {
+             const contenedor = document.getElementById('infoUltimosPagos');
+             const lista = document.getElementById('listaUltimosPagos');
+             
+             lista.innerHTML = '<div class="spinner-border spinner-border-sm text-info" role="status"></div> Cargando historial...';
+             contenedor.style.display = 'block';
+             
+             try {
+                 const response = await fetch('@Url.Action("ObtenerUltimosPagos", "Colaboracion")?miembroId=' + miembroId);
+                 const pagos = await response.json();
+                 
+                 if (pagos && pagos.length > 0) {
+                     let html = '';
+                     pagos.forEach(p => {
+                         const colorClass = p.ultimoMes > 0 ? 'bg-white text-info border border-info' : 'bg-secondary text-white';
+                         html += `
+                             <span class="badge ${colorClass} fw-normal p-2">
+                                 <strong>${p.nombreTipo}:</strong> ${p.ultimoPeriodoTexto}
+                             </span>
+                         `;
+                     });
+                     lista.innerHTML = html;
+                 } else {
+                     lista.innerHTML = '<span class="text-muted small">No hay historial de pagos registrado.</span>';
+                 }
+             } catch (error) {
+                 console.error('Error al cargar historial:', error);
+                 lista.innerHTML = '<span class="text-danger small"><i class="bi bi-exclamation-circle"></i> Error al cargar historial</span>';
+             }
+         }
+         
+         function calcularSugerido() {
+             try {
+                 // Obtener valores
+                 const mesInicial = parseInt(document.getElementById('mesInicial').value);
+                 const anioInicial = parseInt(document.getElementById('anioInicial').value);
+                 const mesFinal = parseInt(document.getElementById('mesFinal').value);
+                 const anioFinal = parseInt(document.getElementById('anioFinal').value);
+                 
+                 // Calcular total de meses
+                 const fechaInicial = new Date(anioInicial, mesInicial - 1, 1);
+                 const fechaFinal = new Date(anioFinal, mesFinal - 1, 1);
+                 
+                 let totalMeses = 0;
+                 if (fechaFinal >= fechaInicial) {
+                     totalMeses = ((anioFinal - anioInicial) * 12) + (mesFinal - mesInicial) + 1;
+                 }
+                 
+                 // Obtener tipos seleccionados y sus montos
+                 const tiposCheckboxes = document.querySelectorAll('.tipo-checkbox:checked');
+                 const totalTipos = tiposCheckboxes.length;
+                 
+                 // Calcular monto sugerido total
+                 let montoSugeridoTotal = 0;
+                 tiposCheckboxes.forEach(checkbox => {
+                     const montoPorMes = parseFloat(checkbox.getAttribute('data-monto')) || 0;
+                     montoSugeridoTotal += montoPorMes * totalMeses;
+                 });
+                 
+                 // Actualizar UI
+                 document.getElementById('totalMeses').textContent = totalMeses;
+                 document.getElementById('totalTipos').textContent = totalTipos;
+                 document.getElementById('montoSugerido').textContent = montoSugeridoTotal.toFixed(2);
+                 
+                 // Comparar con monto ingresado
+                 const montoIngresado = parseFloat(document.getElementById('montoTotal').value) || 0;
+                 const alertaDiv = document.getElementById('alertaDiferencia');
+                 const mensajeSpan = document.getElementById('mensajeDiferencia');
+                 
+                 if (montoIngresado > 0) {
+                     if (Math.abs(montoIngresado - montoSugeridoTotal) > 0.01) {
+                         const diferencia = montoIngresado - montoSugeridoTotal;
+                         if (diferencia > 0) {
+                             mensajeSpan.textContent = `Sobra: $${diferencia.toFixed(2)}`;
+                             alertaDiv.className = 'alert alert-info py-1 px-2 mb-0 mt-2';
+                         } else {
+                             mensajeSpan.textContent = `Falta: $${Math.abs(diferencia).toFixed(2)}`;
+                             alertaDiv.className = 'alert alert-warning py-1 px-2 mb-0 mt-2';
+                         }
+                         alertaDiv.style.display = 'block';
+                     } else {
+                         alertaDiv.style.display = 'none';
+                     }
+                 } else {
+                     alertaDiv.style.display = 'none';
+                 }
+             } catch (error) {
+                 console.error('Error al calcular sugerido:', error);
+             }
+         }
+         
+         // Calcular cuando cambia el monto total
+         document.getElementById('montoTotal')?.addEventListener('input', calcularSugerido);
+         
+         // Calcular al cargar la página
+         document.addEventListener('DOMContentLoaded', function() {
+             calcularSugerido();
+         });
+         
+        // Show error messages
+        @if (TempData["Error"] != null)
+        {
+            <text>
+            toastr.error('@TempData["Error"]');
+            </text>
+        }
+    </script>
+}

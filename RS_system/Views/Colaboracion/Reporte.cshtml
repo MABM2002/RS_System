@@ -1,0 +1,150 @@
+@model Rs_system.Models.ViewModels.ReporteColaboracionesViewModel
+@{
+    ViewData["Title"] = "Reporte de Colaboraciones";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Reporte de Colaboraciones</h4>
+        <p class="text-muted mb-0">
+            Del @Model.FechaInicio.ToString("dd/MM/yyyy") al @Model.FechaFin.ToString("dd/MM/yyyy")
+        </p>
+    </div>
+    <div>
+        <button onclick="window.print()" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-printer me-1"></i> Imprimir
+        </button>
+        <a asp-action="Reportes" class="btn btn-primary-custom">
+            <i class="bi bi-arrow-left me-1"></i> Nuevo Reporte
+        </a>
+    </div>
+</div>
+
+<!-- Resumen General -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Total Recaudado</h6>
+            <h2 class="text-success mb-0">$@Model.TotalRecaudado.ToString("N2")</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Total Movimientos</h6>
+            <h2 class="text-primary mb-0">@Model.Movimientos.Count</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Tipos de Colaboración</h6>
+            <h2 class="text-info mb-0">@Model.DesglosePorTipos.Count</h2>
+        </div>
+    </div>
+</div>
+
+<!-- Desglose por Tipo -->
+<div class="card-custom mb-4">
+    <h6 class="text-primary border-bottom pb-2 mb-3">Desglose por Tipo de Colaboración</h6>
+    
+    @if (Model.DesglosePorTipos.Any())
+    {
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Tipo de Colaboración</th>
+                        <th class="text-center">Cantidad de Meses</th>
+                        <th class="text-end">Total Recaudado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tipo in Model.DesglosePorTipos.OrderByDescending(t => t.TotalRecaudado))
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge bg-primary">@tipo.TipoNombre</span>
+                            </td>
+                            <td class="text-center">@tipo.CantidadMeses</td>
+                            <td class="text-end">
+                                <strong class="text-success">$@tipo.TotalRecaudado.ToString("N2")</strong>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="table-active">
+                        <td colspan="2" class="text-end"><strong>TOTAL:</strong></td>
+                        <td class="text-end">
+                            <h5 class="mb-0 text-success">$@Model.TotalRecaudado.ToString("N2")</h5>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            No hay datos para el período seleccionado.
+        </div>
+    }
+</div>
+
+<!-- Detalle de Movimientos -->
+<div class="card-custom">
+    <h6 class="text-primary border-bottom pb-2 mb-3">Detalle de Movimientos</h6>
+    
+    @if (Model.Movimientos.Any())
+    {
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Miembro</th>
+                        <th>Tipos</th>
+                        <th>Período Cubierto</th>
+                        <th class="text-end">Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var movimiento in Model.Movimientos.OrderByDescending(m => m.Fecha))
+                    {
+                        <tr>
+                            <td>@movimiento.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><strong>@movimiento.NombreMiembro</strong></td>
+                            <td>
+                                @foreach (var tipo in movimiento.TiposColaboracion.Split(", "))
+                                {
+                                    <span class="badge bg-primary me-1">@tipo</span>
+                                }
+                            </td>
+                            <td>@movimiento.PeriodoCubierto</td>
+                            <td class="text-end">
+                                <strong>$@movimiento.Monto.ToString("N2")</strong>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            No hay movimientos registrados en este período.
+        </div>
+    }
+</div>
+
+<style>
+    @@media print {
+        .btn, .no-print {
+            display: none !important;
+        }
+        .card-custom {
+            border: 1px solid #dee2e6;
+            page-break-inside: avoid;
+        }
+    }
+</style>

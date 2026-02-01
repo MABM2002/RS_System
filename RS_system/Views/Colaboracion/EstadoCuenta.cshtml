@@ -1,0 +1,133 @@
+@model Rs_system.Models.ViewModels.EstadoCuentaViewModel
+@{
+    ViewData["Title"] = "Estado de Cuenta";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Estado de Cuenta</h4>
+        <p class="text-muted mb-0">@Model.NombreMiembro</p>
+    </div>
+    <div>
+        <button onclick="window.print()" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-printer me-1"></i> Imprimir
+        </button>
+        <a asp-action="Index" class="btn btn-primary-custom">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+</div>
+
+<!-- Encabezado del Estado de Cuenta -->
+<div class="card-custom mb-4" style="border: 2px solid #198754;">
+    <div class="text-center py-4">
+        <h3 class="mb-3">ESTADO DE CUENTA DE COLABORACIONES</h3>
+        <h5 class="text-primary mb-2">@Model.NombreMiembro</h5>
+        <p class="text-muted mb-0">Fecha de consulta: @Model.FechaConsulta.ToString("dd/MM/yyyy HH:mm")</p>
+    </div>
+    <hr>
+    <div class="text-center py-3">
+        <h6 class="text-muted mb-2">Total Aportado</h6>
+        <h2 class="text-success mb-0">$@Model.TotalAportado.ToString("N2")</h2>
+    </div>
+</div>
+
+<!-- Historial por Tipo de Colaboración -->
+@if (Model.HistorialPorTipos.Any())
+{
+    @foreach (var historial in Model.HistorialPorTipos)
+    {
+        <div class="card-custom mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">
+                    <span class="badge bg-primary">@historial.TipoNombre</span>
+                </h5>
+                <h6 class="mb-0 text-success">
+                    Total: $@historial.TotalTipo.ToString("N2")
+                </h6>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Mes / Año</th>
+                            <th>Fecha de Pago</th>
+                            <th class="text-end">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var registro in historial.Registros.OrderByDescending(r => r.Anio).ThenByDescending(r => r.Mes))
+                        {
+                            <tr>
+                                <td><strong>@registro.MesTexto</strong></td>
+                                <td>@registro.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                                <td class="text-end">
+                                    <strong>$@registro.Monto.ToString("N2")</strong>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-active">
+                            <td colspan="2" class="text-end"><strong>Subtotal @historial.TipoNombre:</strong></td>
+                            <td class="text-end">
+                                <strong class="text-success">$@historial.TotalTipo.ToString("N2")</strong>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    }
+    
+    <!-- Total General -->
+    <div class="card-custom" style="border: 2px solid #198754;">
+        <div class="d-flex justify-content-between align-items-center py-3">
+            <h4 class="mb-0">TOTAL GENERAL</h4>
+            <h3 class="mb-0 text-success">$@Model.TotalAportado.ToString("N2")</h3>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card-custom">
+        <div class="alert alert-info mb-0">
+            <i class="bi bi-info-circle me-2"></i>
+            Este miembro aún no tiene colaboraciones registradas.
+        </div>
+    </div>
+}
+
+<!-- Pie de página para impresión -->
+<div class="mt-5 text-center text-muted" style="page-break-before: auto;">
+    <hr>
+    <p class="mb-1"><small>Este documento es un comprobante de colaboraciones realizadas</small></p>
+    <p class="mb-0"><small>Generado el @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small></p>
+</div>
+
+<style>
+    @@media print {
+        .btn, .no-print {
+            display: none !important;
+        }
+        .card-custom {
+            border: 1px solid #dee2e6;
+            page-break-inside: avoid;
+        }
+        body {
+            background: white;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        @if (TempData["Error"] != null)
+        {
+            <text>
+            toastr.error('@TempData["Error"]');
+            </text>
+        }
+    </script>
+}

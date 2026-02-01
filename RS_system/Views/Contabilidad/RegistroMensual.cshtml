@@ -1,0 +1,261 @@
+@model Rs_system.Models.ReporteMensualContable
+@{
+    ViewData["Title"] = $"Reporte {Model.NombreMes} {Model.Anio}";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">@Model.GrupoTrabajo.Nombre - @Model.NombreMes @Model.Anio</h4>
+        <div class="d-flex align-items-center gap-2">
+            @if (Model.Cerrado)
+            {
+                <span class="badge bg-secondary"><i class="bi bi-lock-fill me-1"></i> REPORTE CERRADO</span>
+            }
+            else
+            {
+                <span class="badge bg-success"><i class="bi bi-unlock-fill me-1"></i> REPORTE ABIERTO</span>
+            }
+            <span class="text-muted small">Creado el @Model.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy")</span>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" asp-route-grupoId="@Model.GrupoTrabajoId" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Volver a Planilla
+        </a>
+        @if (!Model.Cerrado)
+        {
+            <form asp-action="CerrarMes" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('¿Está seguro de cerrar este mes? Ya no se podrán realizar más cambios.')">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-lock me-1"></i> Cerrar Mes
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card card-custom p-3 text-center bg-light">
+            <span class="text-muted small">Saldo Inicial</span>
+            <h4 class="mb-0">@Model.SaldoInicial.ToString("N2")</h4>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom p-3 text-center bg-light">
+            <span class="text-muted small">Ingresos (+)</span>
+            <h4 class="mb-0 text-success" id="totalIngresos">0.00</h4>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom p-3 text-center bg-light">
+            <span class="text-muted small">Egresos (-)</span>
+            <h4 class="mb-0 text-danger" id="totalEgresos">0.00</h4>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom p-3 text-center border-primary shadow-sm">
+            <span class="text-muted small">Saldo Final (=)</span>
+            <h4 class="mb-0 text-primary" id="saldoFinal">0.00</h4>
+        </div>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom py-3">
+        <h6 class="mb-0"><i class="bi bi-grid-3x3 me-2"></i>Registros de Movimientos</h6>
+        @if (!Model.Cerrado)
+        {
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addRow()">
+                    <i class="bi bi-plus-lg me-1"></i> Agregar Fila
+                </button>
+                <button type="button" class="btn btn-sm btn-primary-custom" onclick="saveAll()">
+                    <i class="bi bi-cloud-arrow-up me-1"></i> Guardar Cambios
+                </button>
+            </div>
+        }
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="excelTable">
+                <thead class="bg-light">
+                    <tr>
+                        <th style="width: 50px;" class="text-center">#</th>
+                        <th style="width: 180px;">Fecha</th>
+                        <th style="width: 200px;">Tipo</th>
+                        <th>Descripción</th>
+                        <th style="width: 200px;" class="text-end">Monto</th>
+                        @if(!Model.Cerrado) { <th style="width: 60px;"></th> }
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    @if (Model.Registros != null && Model.Registros.Any())
+                    {
+                        int count = 1;
+                        foreach (var item in Model.Registros.OrderBy(r => r.Fecha))
+                        {
+                            <tr data-id="@item.Id">
+                                <td class="text-center text-muted">@count</td>
+                                <td><input type="date" class="form-control form-control-sm row-fecha" value="@item.Fecha.ToString("yyyy-MM-dd")" @(Model.Cerrado ? "disabled" : "") /></td>
+                                <td>
+                                    <select class="form-select form-select-sm row-tipo" @(Model.Cerrado ? "disabled" : "") onchange="updateTotals()">
+                                        <!option value="1" @(item.Tipo == TipoMovimientoContable.Ingreso ? "selected" : "")>Ingreso (+)</!option>
+                                        <!option value="0" @(item.Tipo == TipoMovimientoContable.Egreso ? "selected" : "")>Egreso (-)</!option>
+                                    </select>
+                                </td>
+                                <td><input type="text" class="form-control form-control-sm row-descripcion" value="@item.Descripcion" placeholder="Motivo del movimiento..." @(Model.Cerrado ? "disabled" : "") /></td>
+                                <td><input type="number" step="0.01" class="form-control form-control-sm text-end row-monto" value="@item.Monto.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" @(Model.Cerrado ? "disabled" : "") onchange="updateTotals()" /></td>
+                                @if(!Model.Cerrado) {
+                                    <td class="text-center">
+                                        <button class="btn btn-sm text-danger" onclick="deleteRow(this)"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                }
+                            </tr>
+                            count++;
+                        }
+                    }
+                </tbody>
+                @if(!Model.Cerrado) {
+                <tfoot>
+                    <tr>
+                        <td colspan="6" class="p-0">
+                            <button type="button" class="btn btn-link w-100 text-decoration-none py-3 text-muted" onclick="addRow()">
+                                <i class="bi bi-plus-circle me-1"></i> Haga clic aquí para agregar una nueva fila
+                            </button>
+                        </td>
+                    </tr>
+                </tfoot>
+                }
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const reporteId = @Model.Id;
+        const saldoInicial = @Model.SaldoInicial.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+        const isCerrado = @Model.Cerrado.ToString().ToLower();
+
+        function addRow() {
+            if (isCerrado) return;
+            const tbody = document.getElementById('tableBody');
+            const rowCount = tbody.children.length + 1;
+            const today = new Date().toISOString().split('T')[0];
+            
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-id', '0');
+            tr.innerHTML = `
+                <td class="text-center text-muted">${rowCount}</td>
+                <td><input type="date" class="form-control form-control-sm row-fecha" value="${today}" /></td>
+                <td>
+                    <select class="form-select form-select-sm row-tipo" onchange="updateTotals()">
+                        <option value="1">Ingreso (+)</option>
+                        <option value="0">Egreso (-)</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control form-control-sm row-descripcion" value="" placeholder="Motivo del movimiento..." /></td>
+                <td><input type="number" step="0.01" class="form-control form-control-sm text-end row-monto" value="0.00" onchange="updateTotals()" /></td>
+                <td class="text-center">
+                    <button class="btn btn-sm text-danger" onclick="deleteRow(this)"><i class="bi bi-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            updateTotals();
+        }
+
+        function deleteRow(btn) {
+            if (isCerrado) return;
+            const row = btn.closest('tr');
+            row.remove();
+            
+            // Renumber rows
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach((r, idx) => {
+                r.cells[0].innerText = idx + 1;
+            });
+            updateTotals();
+        }
+
+        function updateTotals() {
+            let ingresos = 0;
+            let egresos = 0;
+            
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(row => {
+                const tipo = parseInt(row.querySelector('.row-tipo').value);
+                const monto = parseFloat(row.querySelector('.row-monto').value) || 0;
+                
+                if (tipo === 1) ingresos += monto;
+                else egresos += monto;
+            });
+
+            document.getElementById('totalIngresos').innerText = ingresos.toFixed(2);
+            document.getElementById('totalEgresos').innerText = egresos.toFixed(2);
+            document.getElementById('saldoFinal').innerText = (saldoInicial + ingresos - egresos).toFixed(2);
+        }
+
+        async function saveAll() {
+            if (isCerrado) return;
+            
+            const registros = [];
+            const rows = document.querySelectorAll('#tableBody tr');
+            
+            rows.forEach(row => {
+                registros.push({
+                    id: parseInt(row.getAttribute('data-id')),
+                    fecha: row.querySelector('.row-fecha').value,
+                    tipo: parseInt(row.querySelector('.row-tipo').value),
+                    monto: parseFloat(row.querySelector('.row-monto').value) || 0,
+                    descripcion: row.querySelector('.row-descripcion').value
+                });
+            });
+
+            const btn = event.target.closest('button');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/Contabilidad/GuardarBulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reporteId: reporteId, registros: registros })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Guardado!',
+                        text: 'Los registros se han guardado exitosamente.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    // Refresh view results would be better, but for now we trust the saldo returned
+                    document.getElementById('saldoFinal').innerText = result.saldo.toFixed(2);
+                    window.location.reload(); // Reload to refresh IDs and state
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.message || 'Error al guardar los registros.'
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de Red',
+                    text: 'No se pudo conectar con el servidor.'
+                });
+            } finally {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
+        }
+
+        // Initialize totals on load
+        document.addEventListener('DOMContentLoaded', updateTotals);
+    </script>
+}

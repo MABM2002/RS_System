@@ -1,0 +1,118 @@
+@{
+    ViewData["Title"] = "Reportes de Colaboraciones";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Reportes de Colaboraciones</h4>
+        <p class="text-muted mb-0">Generar reportes por rango de fechas</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Volver
+    </a>
+</div>
+
+<div class="card-custom">
+    <form asp-action="GenerarReporte" method="post">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+                <input type="date" 
+                       class="form-control" 
+                       id="fechaInicio" 
+                       name="fechaInicio" 
+                       value="@ViewBag.FechaInicio?.ToString("yyyy-MM-dd")" 
+                       required />
+            </div>
+            <div class="col-md-4">
+                <label for="fechaFin" class="form-label">Fecha Fin</label>
+                <input type="date" 
+                       class="form-control" 
+                       id="fechaFin" 
+                       name="fechaFin" 
+                       value="@ViewBag.FechaFin?.ToString("yyyy-MM-dd")" 
+                       required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary-custom w-100">
+                    <i class="bi bi-search me-1"></i> Generar Reporte
+                </button>
+            </div>
+        </div>
+    </form>
+    
+    <!-- Acceso rápido -->
+    <div class="row">
+        <div class="col-12">
+            <h6 class="text-muted mb-3">Accesos Rápidos</h6>
+        </div>
+        <div class="col-md-3 mb-2">
+            <button class="btn btn-outline-primary w-100" onclick="reporteHoy()">
+                <i class="bi bi-calendar-day me-1"></i> Hoy
+            </button>
+        </div>
+        <div class="col-md-3 mb-2">
+            <button class="btn btn-outline-primary w-100" onclick="reporteSemana()">
+                <i class="bi bi-calendar-week me-1"></i> Esta Semana
+            </button>
+        </div>
+        <div class="col-md-3 mb-2">
+            <button class="btn btn-outline-primary w-100" onclick="reporteMes()">
+                <i class="bi bi-calendar-month me-1"></i> Este Mes
+            </button>
+        </div>
+        <div class="col-md-3 mb-2">
+            <button class="btn btn-outline-primary w-100" onclick="reporteAnio()">
+                <i class="bi bi-calendar3 me-1"></i> Este Año
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function setFechas(inicio, fin) {
+            document.getElementById('fechaInicio').value = inicio;
+            document.getElementById('fechaFin').value = fin;
+        }
+        
+        function reporteHoy() {
+            const hoy = new Date().toISOString().split('T')[0];
+            setFechas(hoy, hoy);
+        }
+        
+        function reporteSemana() {
+            const hoy = new Date();
+            const inicioSemana = new Date(hoy);
+            inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+            const finSemana = new Date(inicioSemana);
+            finSemana.setDate(inicioSemana.getDate() + 6);
+            
+            setFechas(inicioSemana.toISOString().split('T')[0], finSemana.toISOString().split('T')[0]);
+        }
+        
+        function reporteMes() {
+            const hoy = new Date();
+            const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            const fin = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+            
+            setFechas(inicio.toISOString().split('T')[0], fin.toISOString().split('T')[0]);
+        }
+        
+        function reporteAnio() {
+            const hoy = new Date();
+            const inicio = new Date(hoy.getFullYear(), 0, 1);
+            const fin = new Date(hoy.getFullYear(), 11, 31);
+            
+            setFechas(inicio.toISOString().split('T')[0], fin.toISOString().split('T')[0]);
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <text>
+            toastr.error('@TempData["Error"]');
+            </text>
+        }
+    </script>
+}

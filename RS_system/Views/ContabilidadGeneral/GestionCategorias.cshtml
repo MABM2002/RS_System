@@ -1,0 +1,222 @@
+@{
+    ViewData["Title"] = "Gestión de Categorías";
+    var categoriasIngreso = ViewBag.CategoriasIngreso as List<Rs_system.Models.CategoriaIngreso>;
+    var categoriasEgreso = ViewBag.CategoriasEgreso as List<Rs_system.Models.CategoriaEgreso>;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Gestión de Categorías</h1>
+        <a asp-action="Index" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="row">
+        <!-- Categorías de Ingreso -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-success">Categorías de Ingreso</h6>
+                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearIngreso">
+                        <i class="fas fa-plus"></i> Nueva
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th style="width: 100px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in categoriasIngreso)
+                                {
+                                    <tr>
+                                        <td>@item.Nombre</td>
+                                        <td>@item.Descripcion</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-primary btn-sm" 
+                                                    onclick="editarIngreso(@item.Id, '@item.Nombre', '@item.Descripcion')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <form asp-action="EliminarCategoriaIngreso" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta categoría?');">
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categorías de Egreso -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-danger">Categorías de Egreso</h6>
+                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearEgreso">
+                        <i class="fas fa-plus"></i> Nueva
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th style="width: 100px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in categoriasEgreso)
+                                {
+                                    <tr>
+                                        <td>@item.Nombre</td>
+                                        <td>@item.Descripcion</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-primary btn-sm" 
+                                                    onclick="editarEgreso(@item.Id, '@item.Nombre', '@item.Descripcion')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <form asp-action="EliminarCategoriaEgreso" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta categoría?');">
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Crear Ingreso -->
+<div class="modal fade" id="modalCrearIngreso" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nueva Categoría de Ingreso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="CrearCategoriaIngreso" method="post">
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label>Nombre</label>
+                        <input name="Nombre" class="form-control" required />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Descripción</label>
+                        <input name="Descripcion" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Crear Egreso -->
+<div class="modal fade" id="modalCrearEgreso" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nueva Categoría de Egreso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="CrearCategoriaEgreso" method="post">
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label>Nombre</label>
+                        <input name="Nombre" class="form-control" required />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Descripción</label>
+                        <input name="Descripcion" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar (Compartido y poblado por JS) -->
+<div class="modal fade" id="modalEditar" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tituloEditar">Editar Categoría</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formEditar" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="editId" />
+                    <div class="form-group mb-3">
+                        <label>Nombre</label>
+                        <input name="Nombre" id="editNombre" class="form-control" required />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Descripción</label>
+                        <input name="Descripcion" id="editDescripcion" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editarIngreso(id, nombre, descripcion) {
+            $('#tituloEditar').text('Editar Categoría de Ingreso');
+            $('#formEditar').attr('action', '@Url.Action("EditarCategoriaIngreso")');
+            llenarModal(id, nombre, descripcion);
+        }
+
+        function editarEgreso(id, nombre, descripcion) {
+            $('#tituloEditar').text('Editar Categoría de Egreso');
+            $('#formEditar').attr('action', '@Url.Action("EditarCategoriaEgreso")');
+            llenarModal(id, nombre, descripcion);
+        }
+
+        function llenarModal(id, nombre, descripcion) {
+            $('#editId').val(id);
+            $('#editNombre').val(nombre);
+            $('#editDescripcion').val(descripcion);
+            
+            var modalEl = document.getElementById('modalEditar');
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+    </script>
+}

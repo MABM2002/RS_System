@@ -1,0 +1,208 @@
+@model Rs_system.Models.ViewModels.ArticuloViewModel
+@{
+    ViewData["Title"] = "Nuevo Artículo";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Nuevo Artículo</h4>
+        <p class="text-muted mb-0">Registrar un nuevo activo en el inventario</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Volver a la lista
+    </a>
+</div>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="row">
+        <!-- Left Column: Basic Info -->
+        <div class="col-lg-8">
+            <div class="card-custom mb-4">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="card-title mb-0 ps-2 border-start border-4 border-primary">Información General</h5>
+                </div>
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="Codigo" class="form-label">Código <span class="text-danger">*</span></label>
+                            <input asp-for="Codigo" class="form-control" placeholder="Ej: SILLA-001" autofocus />
+                            <span asp-validation-for="Codigo" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-8">
+                            <label asp-for="Nombre" class="form-label">Nombre del Artículo <span class="text-danger">*</span></label>
+                            <input asp-for="Nombre" class="form-control" placeholder="Ej: Guitarra Acustica Yamaha" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Descripcion" class="form-label">Descripción</label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="3" placeholder="Detalles adicionales, características, color..."></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Marca" class="form-label">Marca</label>
+                            <input asp-for="Marca" class="form-control" placeholder="Ej: Yamaha, Sony" />
+                            <span asp-validation-for="Marca" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Modelo" class="form-label">Modelo</label>
+                            <input asp-for="Modelo" class="form-control" placeholder="Ej: C-40" />
+                            <span asp-validation-for="Modelo" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="card-title mb-0 ps-2 border-start border-4 border-info">Detalles del Activo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="NumeroSerie" class="form-label">Número de Serie</label>
+                            <input asp-for="NumeroSerie" class="form-control" placeholder="S/N..." />
+                            <span asp-validation-for="NumeroSerie" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Precio" class="form-label">Valor Estimado (Moneda)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Precio" class="form-control" type="number" step="0.01" />
+                            </div>
+                            <span asp-validation-for="Precio" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FechaAdquisicion" class="form-label">Fecha de Adquisición</label>
+                        <input asp-for="FechaAdquisicion" type="date" class="form-control" />
+                        <span asp-validation-for="FechaAdquisicion" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Classification & Image -->
+        <div class="col-lg-4">
+            <div class="card-custom mb-4">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="card-title mb-0 ps-2 border-start border-4 border-warning">Clasificación</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="TipoControl" class="form-label fw-bold">Tipo de Inventario <span class="text-danger">*</span></label>
+                        <select asp-for="TipoControl" class="form-select" id="tipoControlSelect">
+                            <option value="UNITARIO">Unitario (Laptops, Proyectores)</option>
+                            <option value="LOTE">Por Lote (Sillas, Cables)</option>
+                        </select>
+                        <div class="form-text">Unitario: Control 1 a 1 por Serie. Lote: Control por Cantidad.</div>
+                        <span asp-validation-for="TipoControl" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3" id="cantidadContainer" style="display:none;">
+                        <label asp-for="CantidadInicial" class="form-label fw-bold text-primary">Cantidad Inicial <span class="text-danger">*</span></label>
+                        <input asp-for="CantidadInicial" class="form-control" type="number" min="1" value="1" />
+                        <span asp-validation-for="CantidadInicial" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CategoriaId" class="form-label">Categoría <span class="text-danger">*</span></label>
+                        <select asp-for="CategoriaId" class="form-select" asp-items="ViewBag.Categorias">
+                            <option value="">-- Seleccionar --</option>
+                        </select>
+                        <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="UbicacionId" class="form-label">Ubicación Inicial <span class="text-danger">*</span></label>
+                        <select asp-for="UbicacionId" class="form-select" asp-items="ViewBag.Ubicaciones">
+                            <option value="">-- Seleccionar --</option>
+                        </select>
+                        <span asp-validation-for="UbicacionId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="EstadoId" class="form-label">Estado Físico <span class="text-danger">*</span></label>
+                        <select asp-for="EstadoId" class="form-select" asp-items="ViewBag.Estados">
+                            <option value="">-- Seleccionar --</option>
+                        </select>
+                        <span asp-validation-for="EstadoId" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input asp-for="Activo" class="form-check-input" type="checkbox" role="switch" checked />
+                            <label asp-for="Activo" class="form-check-label">Artículo Activo</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="card-title mb-0 ps-2 border-start border-4 border-secondary">Imagen</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div class="image-preview-container bg-light rounded d-flex align-items-center justify-content-center mb-2" style="height: 200px; border: 2px dashed #ccc;">
+                            <img id="imagePreview" src="#" alt="Vista Previa" style="max-height: 100%; max-width: 100%; display: none;" />
+                            <span id="placeholderText" class="text-muted">Sin Imagen</span>
+                        </div>
+                        <input asp-for="ImagenFile" class="form-control" type="file" accept="image/*" onchange="previewImage(this)" />
+                        <span asp-validation-for="ImagenFile" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary-custom btn-lg">
+                    <i class="bi bi-save me-2"></i> Guardar Artículo
+                </button>
+                <a asp-action="Index" class="btn btn-light border">Cancelar</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#imagePreview').attr('src', e.target.result).show();
+                    $('#placeholderText').hide();
+                }
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                $('#imagePreview').hide();
+                $('#placeholderText').show();
+            }
+        }
+
+        $(document).ready(function() {
+            function toggleFields() {
+                var tipo = $('#tipoControlSelect').val();
+                if (tipo === 'LOTE') {
+                    $('#cantidadContainer').show();
+                    $('#NumeroSerie').parent().hide(); // Hide Serial for Lote
+                    $('#NumeroSerie').val('');
+                } else {
+                    $('#cantidadContainer').hide();
+                    $('#NumeroSerie').parent().show(); // Show Serial for Unitario
+                    $('#CantidadInicial').val(1);
+                }
+            }
+
+            $('#tipoControlSelect').change(toggleFields);
+            toggleFields(); // Init
+        });
+    </script>
+}
