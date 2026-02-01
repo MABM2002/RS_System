@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Rs_system.Data;
+using Rs_system.Models;
 using Rs_system.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,10 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("PostgreSQL") ??
                        throw new InvalidOperationException("Connection string 'PostgreSQL' not found.");
+var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+dataSourceBuilder.MapEnum<Rs_system.Models.TipoMovimiento>("tipo_movimiento_new");
+
+var dataSource = dataSourceBuilder.Build();
+// ⚠️ HABILITA enums no mapeados
+dataSourceBuilder.EnableUnmappedTypes();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString, npgsqlOptions =>
+    options.UseNpgsql(dataSource, npgsqlOptions =>
     {
+        npgsqlOptions.MapEnum<TipoMovimientoGeneral>("tipo_movimiento_general");
         npgsqlOptions.EnableRetryOnFailure(
             maxRetryCount: 3,
             maxRetryDelay: TimeSpan.FromSeconds(5),
@@ -36,6 +45,10 @@ builder.Services.AddScoped<IUbicacionService, UbicacionService>();
 builder.Services.AddScoped<IArticuloService, ArticuloService>();
 builder.Services.AddScoped<IMovimientoService, MovimientoService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<IContabilidadService, ContabilidadService>();
+builder.Services.AddScoped<IContabilidadGeneralService, ContabilidadGeneralService>();
+builder.Services.AddScoped<IPrestamoService, PrestamoService>();
+builder.Services.AddScoped<IColaboracionService, ColaboracionService>();
 builder.Services.AddSingleton<IQueryCacheService, QueryCacheService>();
 builder.Services.AddMemoryCache(options =>
 {

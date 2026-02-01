@@ -28,9 +28,19 @@ public class ApplicationDbContext : DbContext
     public DbSet<Ofrenda> Ofrendas { get; set; }
     public DbSet<DescuentoOfrenda> DescuentosOfrenda { get; set; }
     
+    
     // Church Members module
     public DbSet<GrupoTrabajo> GruposTrabajo { get; set; }
     public DbSet<Miembro> Miembros { get; set; }
+    public DbSet<ContabilidadRegistro> ContabilidadRegistros { get; set; }
+    public DbSet<ReporteMensualContable> ReportesMensualesContables { get; set; }
+
+    // General church accounting module
+    public DbSet<CategoriaIngreso> CategoriasIngreso { get; set; }
+    public DbSet<CategoriaEgreso> CategoriasEgreso { get; set; }
+    public DbSet<MovimientoGeneral> MovimientosGenerales { get; set; }
+    public DbSet<MovimientoGeneralAdjunto> MovimientosGeneralesAdjuntos { get; set; }
+    public DbSet<ReporteMensualGeneral> ReportesMensualesGenerales { get; set; }
     
     // Inventory module
     public DbSet<Categoria> Categorias { get; set; }
@@ -39,10 +49,26 @@ public class ApplicationDbContext : DbContext
     public DbSet<Existencia> Existencias { get; set; }
     public DbSet<Articulo> Articulos { get; set; }
     public DbSet<MovimientoInventario> MovimientosInventario { get; set; }
+    public DbSet<Prestamo> Prestamos { get; set; }
+    public DbSet<PrestamoDetalle> PrestamoDetalles { get; set; }
+    
+    // Collaborations module
+    public DbSet<TipoColaboracion> TiposColaboracion { get; set; }
+    public DbSet<Colaboracion> Colaboraciones { get; set; }
+    public DbSet<DetalleColaboracion> DetalleColaboraciones { get; set; }
+
 
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        
+        // 1. Registrar el enum de PostgreSQL
+        modelBuilder.HasPostgresEnum<TipoMovimientoGeneral>("tipo_movimiento_general");
+
+        // 2. Asegurar que la propiedad use ese tipo
+        modelBuilder.Entity<MovimientoGeneral>()
+            .Property(e => e.Tipo)
+            .HasColumnType("tipo_movimiento_general");
         base.OnModelCreating(modelBuilder);
         
         // Configure composite key for RolUsuario
@@ -97,7 +123,101 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(m => m.PersonaId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<ContabilidadRegistro>()
+            .HasOne(c => c.GrupoTrabajo)
+            .WithMany()
+            .HasForeignKey(c => c.GrupoTrabajoId)
+            .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<ReporteMensualContable>()
+            .HasOne(r => r.GrupoTrabajo)
+            .WithMany()
+            .HasForeignKey(r => r.GrupoTrabajoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ReporteMensualContable>()
+            .HasMany(r => r.Registros)
+            .WithOne(c => c.ReporteMensual)
+            .HasForeignKey(c => c.ReporteMensualId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // General accounting module relationships
+        modelBuilder.Entity<ReporteMensualGeneral>()
+            .HasMany(r => r.Movimientos)
+            .WithOne(m => m.ReporteMensualGeneral)
+            .HasForeignKey(m => m.ReporteMensualGeneralId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ReporteMensualGeneral>()
+            .HasIndex(r => new { r.Mes, r.Anio })
+            .IsUnique();
+
+        modelBuilder.Entity<MovimientoGeneral>()
+            .HasOne(m => m.CategoriaIngreso)
+            .WithMany(c => c.Movimientos)
+            .HasForeignKey(m => m.CategoriaIngresoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<MovimientoGeneral>()
+            .HasOne(m => m.CategoriaEgreso)
+            .WithMany(c => c.Movimientos)
+            .HasForeignKey(m => m.CategoriaEgresoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<MovimientoGeneral>()
+            .HasMany(m => m.Adjuntos)
+            .WithOne(a => a.MovimientoGeneral)
+            .HasForeignKey(a => a.MovimientoGeneralId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.HasPostgresEnum<TipoMovimiento>("tipo_movimiento");
+
+        modelBuilder.Entity<MovimientoInventario>()
+            .Property(e => e.TipoMovimiento)
+            .HasColumnType("tipo_movimiento");
+        
+        // Collaborations module configuration
+        modelBuilder.Entity<TipoColaboracion>(entity =>
+        {
+            entity.ToTable("tipos_colaboracion", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Nombre).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.MontoSugerido).HasColumnType("decimal(10,2)");
+        });
+
+        modelBuilder.Entity<Colaboracion>(entity =>
+        {
+            entity.ToTable("colaboraciones", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.MontoTotal).HasColumnType("decimal(10,2)");
+            
+            entity.HasOne(e => e.Miembro)
+                .WithMany()
+                .HasForeignKey(e => e.MiembroId)
+                .OnDelete(DeleteBehavior.Restrict);
+                
+            entity.HasMany(e => e.Detalles)
+                .WithOne(d => d.Colaboracion)
+                .HasForeignKey(d => d.ColaboracionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<DetalleColaboracion>(entity =>
+        {
+            entity.ToTable("detalle_colaboraciones", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Monto).HasColumnType("decimal(10,2)");
+            
+            entity.HasOne(e => e.TipoColaboracion)
+                .WithMany(t => t.Detalles)
+                .HasForeignKey(e => e.TipoColaboracionId)
+                .OnDelete(DeleteBehavior.Restrict);
+                
+            entity.HasIndex(e => new { e.ColaboracionId, e.TipoColaboracionId, e.Mes, e.Anio })
+                .IsUnique();
+        });
+
+        
         // Global configuration: Convert all dates to UTC when saving
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
