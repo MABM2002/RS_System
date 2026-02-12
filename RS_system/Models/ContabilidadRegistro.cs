@@ -5,8 +5,8 @@ namespace Rs_system.Models;
 
 public enum TipoMovimientoContable
 {
-    Ingreso,
-    Egreso
+    Ingreso = 1,
+    Egreso = 2
 }
 
 [Table("contabilidad_registros")]

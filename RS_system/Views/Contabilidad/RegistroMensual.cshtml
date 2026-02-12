@@ -99,8 +99,8 @@
                                 <td><input type="date" class="form-control form-control-sm row-fecha" value="@item.Fecha.ToString("yyyy-MM-dd")" @(Model.Cerrado ? "disabled" : "") /></td>
                                 <td>
                                     <select class="form-select form-select-sm row-tipo" @(Model.Cerrado ? "disabled" : "") onchange="updateTotals()">
-                                        <!option value="1" @(item.Tipo == TipoMovimientoContable.Ingreso ? "selected" : "")>Ingreso (+)</!option>
-                                        <!option value="0" @(item.Tipo == TipoMovimientoContable.Egreso ? "selected" : "")>Egreso (-)</!option>
+                                        <option value="1" selected="@(item.Tipo == TipoMovimientoContable.Ingreso)">Ingreso (+)</option>
+                                        <option value="2" selected="@(item.Tipo == TipoMovimientoContable.Egreso)">Egreso (-)</option>
                                     </select>
                                 </td>
                                 <td><input type="text" class="form-control form-control-sm row-descripcion" value="@item.Descripcion" placeholder="Motivo del movimiento..." @(Model.Cerrado ? "disabled" : "") /></td>
@@ -151,7 +151,7 @@
                 <td>
                     <select class="form-select form-select-sm row-tipo" onchange="updateTotals()">
                         <option value="1">Ingreso (+)</option>
-                        <option value="0">Egreso (-)</option>
+                        <option value="2">Egreso (-)</option>
                     </select>
                 </td>
                 <td><input type="text" class="form-control form-control-sm row-descripcion" value="" placeholder="Motivo del movimiento..." /></td>
