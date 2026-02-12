@@ -23,13 +23,106 @@
             <div class="card-body">
                 <form method="get" asp-action="Create">
                     <div class="mb-3">
-                        <label class="form-label">Buscar Artículo</label>
-                        <select name="articuloId" class="form-select" asp-items="ViewBag.Articulos" onchange="this.form.submit()">
-                            <option value="">-- Seleccione un artículo --</option>
-                        </select>
-                        <div class="form-text">Seleccione para cargar datos actuales.</div>
+                        <div class="input-group">
+                            <input type="text" class="form-control" value="@ViewBag.ArticuloNombre" placeholder="Ningún artículo seleccionado" readonly />
+                            <input type="hidden" name="articuloId" id="articuloIdInput" value="@ViewBag.ArticuloId" />
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalBuscarArticulo">
+                                <i class="bi bi-search"></i> Buscar
+                            </button>
+                        </div>
+                        <div class="form-text">Busque y seleccione el artículo para cargar sus datos.</div>
                     </div>
                 </form>
+
+                <!-- Modal Buscador -->
+                <div class="modal fade" id="modalBuscarArticulo" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Buscar Artículo</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="input-group mb-3">
+                                    <input type="text" id="inputBusqueda" class="form-control" placeholder="Nombre, código o descripción...">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="buscarArticulos()">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                    <table class="table table-hover table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Código</th>
+                                                <th>Nombre</th>
+                                                <th>Ubicación</th>
+                                                <th>Stock</th>
+                                                <th>Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="resultadoBusqueda">
+                                            <tr><td colspan="5" class="text-center text-muted">Ingrese un término para buscar...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    document.getElementById('inputBusqueda').addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter') {
+                            buscarArticulos();
+                        }
+                    });
+
+                    async function buscarArticulos() {
+                        const term = document.getElementById('inputBusqueda').value;
+                        if (!term || term.length < 2) {
+                            alert("Ingrese al menos 2 caracteres.");
+                            return;
+                        }
+
+                        const tbody = document.getElementById('resultadoBusqueda');
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center"><div class="spinner-border spinner-border-sm text-primary"></div> Buscando...</td></tr>';
+
+                        try {
+                            const response = await fetch(`@Url.Action("BuscarArticulos")?term=${encodeURIComponent(term)}`);
+                            const data = await response.json();
+
+                            tbody.innerHTML = '';
+                            if (data.length === 0) {
+                                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se encontraron resultados.</td></tr>';
+                                return;
+                            }
+
+                            data.forEach(item => {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td><small>${item.codigo || '-'}</small></td>
+                                    <td>${item.nombre}</td>
+                                    <td><small>${item.ubicacion}</small></td>
+                                    <td><span class="badge bg-secondary">${item.stock}</span></td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-primary" onclick="seleccionarArticulo(${item.id})">
+                                            Seleccionar
+                                        </button>
+                                    </td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                        } catch (error) {
+                            console.error(error);
+                            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al buscar.</td></tr>';
+                        }
+                    }
+
+                    function seleccionarArticulo(id) {
+                        // Redirect to same page with id parameter to load details
+                        window.location.href = '@Url.Action("Create")?articuloId=' + id;
+                    }
+                </script>
 
                 @if (ViewBag.ArticuloId != null)
                 {

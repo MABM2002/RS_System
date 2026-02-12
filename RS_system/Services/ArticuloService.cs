@@ -67,7 +67,8 @@ public class ArticuloService : IArticuloService
                 EstadoColor = a.Estado.Color,
                 UbicacionId = a.UbicacionId,
                 UbicacionNombre = a.Ubicacion.Nombre,
-                Activo = a.Activo
+                Activo = a.Activo,
+                CantidadGlobal = a.CantidadGlobal
             })
             .ToListAsync();
     }

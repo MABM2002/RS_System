@@ -109,6 +109,84 @@ public class ContabilidadGeneralController : Controller
         return Json(new { success = false, message = "Error al guardar los movimientos. Verifique que el mes no esté cerrado." });
     }
 
+    // ==================== Sincronización Offline ====================
+
+    [HttpPost]
+    public async Task<IActionResult> SincronizarOffline([FromBody] List<BulkSaveRequest> transacciones)
+    {
+        if (transacciones == null || !transacciones.Any())
+            return BadRequest("No hay transacciones para sincronizar.");
+
+        var resultados = new List<object>();
+        
+        foreach (var request in transacciones)
+        {
+            try
+            {
+                if (request.ReporteId <= 0)
+                {
+                    resultados.Add(new { 
+                        success = false, 
+                        reporteId = request.ReporteId,
+                        message = "ID de reporte inválido." 
+                    });
+                    continue;
+                }
+
+                var movimientos = request.Movimientos.Select(m => new MovimientoGeneral
+                {
+                    Id = m.Id,
+                    Tipo = m.Tipo,
+                    CategoriaIngresoId = m.CategoriaIngresoId,
+                    CategoriaEgresoId = m.CategoriaEgresoId,
+                    Monto = m.Monto,
+                    Fecha = DateTime.SpecifyKind(m.Fecha, DateTimeKind.Utc),
+                    Descripcion = m.Descripcion ?? "",
+                    NumeroComprobante = m.NumeroComprobante
+                }).ToList();
+
+                var success = await _contabilidadService.GuardarMovimientosBulkAsync(request.ReporteId, movimientos);
+                
+                if (success)
+                {
+                    resultados.Add(new { 
+                        success = true, 
+                        reporteId = request.ReporteId,
+                        message = "Sincronizado exitosamente" 
+                    });
+                }
+                else
+                {
+                    resultados.Add(new { 
+                        success = false, 
+                        reporteId = request.ReporteId,
+                        message = "Error al guardar. El mes puede estar cerrado." 
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                resultados.Add(new { 
+                    success = false, 
+                    reporteId = request.ReporteId,
+                    message = $"Error: {ex.Message}" 
+                });
+            }
+        }
+
+        var exitosos = resultados.Count(r => (bool)((dynamic)r).success);
+        var fallidos = resultados.Count - exitosos;
+
+        return Json(new { 
+            success = exitosos > 0,
+            total = transacciones.Count,
+            exitosos = exitosos,
+            fallidos = fallidos,
+            resultados = resultados
+        });
+    }
+
+
     // ==================== Cerrar Mes ====================
 
     [HttpPost]

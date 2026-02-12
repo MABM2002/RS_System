@@ -12,6 +12,10 @@
             <h5 class="text-secondary">
                 Saldo Actual: <span class="font-weight-bold @(ViewBag.SaldoActual >= 0 ? "text-success" : "text-danger")">@ViewBag.SaldoActual?.ToString("C")</span>
             </h5>
+            <div class="mt-2">
+                <span id="connectionStatus" class="badge bg-secondary"><i class="fas fa-wifi"></i> Verificando...</span>
+                <span id="pendingCount" class="badge bg-warning ml-2" style="display:none;">0 pendientes</span>
+            </div>
         </div>
         <div>
             <a asp-action="Index" class="btn btn-secondary btn-sm">
@@ -139,6 +143,8 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/offline-db.js"></script>
+    <script src="~/js/offline-manager.js"></script>
     <script>
         const esCerrado = @Model.Cerrado.ToString().ToLower();
         const reporteId = @Model.Id;
@@ -329,26 +335,23 @@
             }));
 
             try {
-                const response = await fetch('@Url.Action("GuardarBulk")', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        ReporteId: reporteId,
-                        Movimientos: payloadMovimientos 
-                    })
-                });
-                // ... rest of logic
-
-
-                const result = await response.json();
+                // Use offline manager for save operation
+                const result = await OfflineManager.saveTransaction(
+                    reporteId,
+                    payloadMovimientos,
+                    '@Url.Action("GuardarBulk")'
+                );
+                
                 if (result.success) {
-                    // Show toast or alert
-                    alert('Guardado exitosamente');
-                    location.reload(); 
+                    if (result.offline) {
+                        alert(result.message);
+                        await OfflineManager.updatePendingCount();
+                    } else {
+                        alert('Guardado exitosamente');
+                        location.reload();
+                    }
                 } else {
-                    alert('Error: ' + result.message);
+                    alert('Error: ' + (result.message || 'Error desconocido'));
                 }
             } catch (error) {
                 console.error(error);

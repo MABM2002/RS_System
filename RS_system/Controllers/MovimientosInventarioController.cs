@@ -44,7 +44,7 @@ public class MovimientosInventarioController : Controller
         {
             var articulo = await _articuloService.GetByIdAsync(articuloId.Value);
             if (articulo == null) return NotFound();
-            
+
             ViewBag.ArticuloId = articulo.Id;
             ViewBag.ArticuloNombre = $"{articulo.Codigo} - {articulo.Nombre}";
             ViewBag.UbicacionActual = articulo.UbicacionNombre;
@@ -53,11 +53,42 @@ public class MovimientosInventarioController : Controller
             ViewBag.CantidadGlobal = articulo.CantidadGlobal; // For LOTE validation?
         }
 
-        ViewBag.Articulos = new SelectList((await _articuloService.GetAllAsync()).Select(x => new { x.Id, Nombre = $"{x.Codigo} - {x.Nombre}" }), "Id", "Nombre", articuloId);
+        ViewBag.Articulos =
+            new SelectList(
+                (await _articuloService.GetAllAsync()).Select(x => new { x.Id, Nombre = $"{x.Codigo} - {x.Nombre}" }),
+                "Id", "Nombre", articuloId);
         ViewBag.Ubicaciones = new SelectList(await _ubicacionService.GetAllAsync(), "Id", "Nombre");
-        ViewBag.Estados = new SelectList(await _estadoService.GetAllAsync(), "Id", "Nombre");
-
+        ViewBag.Estados = new SelectList(await _estadoService.GetAllAsync(), "Id", "Nombre"); 
+        
         return View();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> BuscarArticulos(string term)
+    {
+        var articulos = await _articuloService.GetAllAsync();
+        
+        if (!string.IsNullOrWhiteSpace(term))
+        {
+            term = term.ToLower();
+            articulos = articulos
+                .Where(a => 
+                    (a.Nombre != null && a.Nombre.ToLower().Contains(term)) || 
+                    (a.Codigo != null && a.Codigo.ToLower().Contains(term)) ||
+                    (a.Descripcion != null && a.Descripcion.ToLower().Contains(term)))
+                .ToList();
+        }
+
+        // Limit results
+        var resultados = articulos.Take(20).Select(a => new {
+            a.Id,
+            a.Codigo,
+            a.Nombre,
+            Ubicacion = a.UbicacionNombre ?? "Sin ubicación",
+            Stock = a.CantidadGlobal
+        });
+
+        return Json(resultados);
     }
 
     // POST: MovimientosInventario/RegistrarTraslado
