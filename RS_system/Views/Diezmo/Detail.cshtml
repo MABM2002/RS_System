@@ -1,0 +1,465 @@
+@model Rs_system.Models.ViewModels.DiezmoCierreDetalleViewModel
+@{
+    ViewData["Title"] = $"Cierre {Model.Fecha:dd/MM/yyyy}";
+    var cerrado = Model.Cerrado;
+}
+
+<!-- Cabecera -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="mb-1">
+            <i class="bi bi-cash-coin me-2"></i>Cierre de Diezmos — @Model.Fecha.ToString("dd/MM/yyyy")
+            <span class="@Model.EstadoBadge ms-2">@Model.EstadoTexto</span>
+        </h4>
+        @if (!string.IsNullOrEmpty(Model.Observaciones))
+        {
+            <p class="text-muted mb-0">@Model.Observaciones</p>
+        }
+        @if (cerrado && Model.FechaCierre.HasValue)
+        {
+            <small class="text-muted">Cerrado por <strong>@Model.CerradoPor</strong> el @Model.FechaCierre.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+        }
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Volver
+        </a>
+        @if (!cerrado)
+        {
+            <button type="button" class="btn btn-success btn-sm" onclick="confirmClose(@Model.Id)">
+                <i class="bi bi-lock me-1"></i>Cerrar cierre
+            </button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-outline-warning btn-sm" onclick="confirmReopen(@Model.Id)">
+                <i class="bi bi-unlock me-1"></i>Reabrir
+            </button>
+        }
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-1"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-1"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (cerrado)
+{
+    <div class="alert alert-secondary d-flex align-items-center mb-4">
+        <i class="bi bi-lock-fill me-2 fs-5"></i>
+        <strong>Este cierre está sellado.</strong>&nbsp;No se puede modificar. Para editarlo, un Administrador debe reabrirlo.
+    </div>
+}
+
+<!-- BLOQUE 1 — Resumen de totales -->
+<div class="row mb-4 g-3">
+    <div class="col-6 col-md-2">
+        <div class="card-custom text-center py-3">
+            <h6 class="text-muted small mb-1">Recibido</h6>
+            <h5 class="mb-0" id="uiTotalRecibido">$ @Model.TotalRecibido.ToString("N2")</h5>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card-custom text-center py-3">
+             <h6 class="text-muted small mb-1">Cambio</h6>
+             <h5 class="text-warning mb-0" id="uiTotalCambio">$ @Model.TotalCambio.ToString("N2")</h5>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card-custom text-center py-3">
+            <h6 class="text-muted small mb-1">Neto</h6>
+            <h5 class="text-primary mb-0" id="uiTotalNeto">$ @Model.TotalNeto.ToString("N2")</h5>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card-custom text-center py-3">
+            <h6 class="text-muted small mb-1">Salidas</h6>
+            <h5 class="text-danger mb-0" id="uiTotalSalidas">$ @Model.TotalSalidas.ToString("N2")</h5>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div id="wrapperSaldoFinal" class="card-custom text-center py-3 border border-2 @(Model.SaldoFinal >= 0 ? "border-success" : "border-danger")">
+            <h6 class="text-muted small mb-1">Saldo Final</h6>
+            <h4 id="uiSaldoFinal" class="@(Model.SaldoFinal >= 0 ? "text-success" : "text-danger") mb-0 fw-bold">
+                $ @Model.SaldoFinal.ToString("N2")
+            </h4>
+        </div>
+    </div>
+</div>
+
+<!-- BLOQUE 2 — Diezmos por miembro -->
+<div class="card-custom mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0"><i class="bi bi-people me-2"></i>Diezmos por Miembro (@Model.Detalles.Count)</h6>
+        @if (!cerrado)
+        {
+            <button type="button" class="btn btn-primary-custom btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddDetalle">
+                <i class="bi bi-plus-lg me-1"></i>Agregar Diezmo
+            </button>
+        }
+    </div>
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>Miembro</th>
+                    <th class="text-end">Entregado</th>
+                    <th class="text-end">Cambio</th>
+                    <th class="text-end">Neto</th>
+                    <th>Notas</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Detalles.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-2 d-block mb-1"></i>Sin diezmos registrados
+                        </td>
+                    </tr>
+                }
+                @{ var i = 1; }
+                @foreach (var d in Model.Detalles)
+                {
+                    <tr>
+                        <td class="text-muted">@i</td>
+                        <td><strong>@d.NombreMiembro</strong></td>
+                        <td class="text-end">$ @d.MontoEntregado.ToString("N2")</td>
+                        <td class="text-end text-warning">$ @d.CambioEntregado.ToString("N2")</td>
+                        <td class="text-end text-primary fw-bold">$ @d.MontoNeto.ToString("N2")</td>
+                        <td><small class="text-muted">@d.Observaciones</small></td>
+                        <td class="text-center">
+                            @if (!cerrado)
+                            {
+                                <form asp-action="DeleteDetalle" method="post" class="d-inline formDelete" data-confirm-msg="¿Eliminar este diezmo?">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="detalleId" value="@d.Id" />
+                                    <input type="hidden" name="cierreId"  value="@Model.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- BLOQUE 3 — Salidas / Entregas -->
+<div class="card-custom mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0"><i class="bi bi-box-arrow-up me-2"></i>Salidas y Entregas (@Model.Salidas.Count)</h6>
+        @if (!cerrado)
+        {
+            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddSalida">
+                <i class="bi bi-plus-lg me-1"></i>Registrar Salida
+            </button>
+        }
+    </div>
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Beneficiario</th>
+                    <th>Concepto</th>
+                    <th class="text-end">Monto</th>
+                    <th>Recibo</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Salidas.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-2 d-block mb-1"></i>Sin salidas registradas
+                        </td>
+                    </tr>
+                }
+                @foreach (var s in Model.Salidas)
+                {
+                    <tr>
+                        <td><span class="badge bg-secondary">@s.TipoSalidaNombre</span></td>
+                        <td>@(s.BeneficiarioNombre ?? "—")</td>
+                        <td>@s.Concepto</td>
+                        <td class="text-end text-danger fw-bold">$ @s.Monto.ToString("N2")</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(s.NumeroRecibo))
+                            {
+                                <a asp-action="Recibo" asp-route-salidaId="@s.Id" target="_blank"
+                                   class="badge bg-success text-decoration-none">
+                                    <i class="bi bi-receipt me-1"></i>@s.NumeroRecibo
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-action="Recibo" asp-route-salidaId="@s.Id" target="_blank"
+                                   class="btn btn-sm btn-outline-secondary btn-sm py-0">
+                                    <i class="bi bi-receipt me-1"></i>Generar
+                                </a>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (!cerrado)
+                            {
+                                <form asp-action="DeleteSalida" method="post" class="d-inline formDelete" data-confirm-msg="¿Eliminar esta salida?">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="salidaId" value="@s.Id" />
+                                    <input type="hidden" name="cierreId"  value="@Model.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL — Agregar Diezmo por Miembro
+═══════════════════════════════════════════════════════════ -->
+@if (!cerrado)
+{
+    <div class="modal fade" id="modalAddDetalle" tabindex="-1" aria-labelledby="modalAddDetalleLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAddDetalleLabel">
+                        <i class="bi bi-person-plus me-2"></i>Registrar Diezmo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formAddDetalle" asp-action="AddDetalle" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="cierreId" value="@Model.Id" />
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Miembro <span class="text-danger">*</span></label>
+                            <select name="MiembroId" class="form-select select2-miembros" required style="width: 100%;">
+                                <option value="">— Seleccionar o Escribir —</option>
+                                @foreach (var m in Model.MiembrosSelect)
+                                {
+                                    <option value="@m.Value">@m.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label">Monto entregado <span class="text-danger">*</span></label>
+                                <input name="MontoEntregado" type="number" step="0.01" min="0.01"
+                                       class="form-control fw-bold text-success" id="montoEntregado" oninput="calcCambio()" required />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Diezmo (Neto) <span class="text-danger">*</span></label>
+                                <input name="MontoNeto" type="number" step="0.01" min="0.01"
+                                       class="form-control fw-bold text-primary" id="montoNeto" oninput="calcCambio()" required />
+                            </div>
+                        </div>
+                        <div class="mt-3 bg-light border p-2 rounded text-end">
+                            <small class="text-muted mb-0 d-block">Cambio a devolver:</small>
+                            <strong id="cambioDisplay" class="text-warning fs-5">$ 0.00</strong>
+                            <input type="hidden" name="CambioEntregado" id="cambioEntregado" value="0" />
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">Observaciones</label>
+                            <input name="Observaciones" type="text" class="form-control"
+                                   placeholder="Opcional" maxlength="300" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="bi bi-check-lg me-1"></i>Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL — Registrar Salida
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="modalAddSalida" tabindex="-1" aria-labelledby="modalAddSalidaLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAddSalidaLabel">
+                        <i class="bi bi-box-arrow-up me-2"></i>Registrar Salida
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formAddSalida" asp-action="AddSalida" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="cierreId" value="@Model.Id" />
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de salida <span class="text-danger">*</span></label>
+                            <select name="TipoSalidaId" id="tipoSalidaSelect" class="form-select" required>
+                                <option value="">— Seleccionar —</option>
+                                @foreach (var t in Model.TiposSalidaSelect)
+                                {
+                                    <option value="@t.Value">@t.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Beneficiario</label>
+                            <select name="BeneficiarioId" class="form-select">
+                                <option value="">— Sin beneficiario —</option>
+                                @foreach (var b in Model.BeneficiariosSelect)
+                                {
+                                    <option value="@b.Value">@b.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Monto <span class="text-danger">*</span></label>
+                            <input name="Monto" type="number" step="0.01" min="0.01"
+                                   class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Concepto <span class="text-danger">*</span></label>
+                            <input name="Concepto" id="s_concepto" type="text" class="form-control"
+                                   placeholder="Descripción de la salida" maxlength="300" required />
+                        </div>
+
+                        <div class="alert alert-info py-2 small mb-3 text-center">
+                            Total del Diezmo Recibido (Neto): <strong>$ @Model.TotalNeto.ToString("N2")</strong>
+                        </div>
+
+                        @if (Model.SaldoFinal > 0)
+                        {
+                            <div class="alert alert-warning py-2 small mb-0">
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                Saldo disponible: <strong>$ @Model.SaldoFinal.ToString("N2")</strong>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-check-lg me-1"></i>Registrar Salida
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Formularios ocultos para cierre/reapertura -->
+<form id="formCerrar"  asp-action="Close"  method="post" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+</form>
+<form id="formReabrir" asp-action="Reopen" method="post" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+</form>
+
+<!-- CSS para Select2 (asumimos que está en el layout o lo cargamos por CDN si no está) -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
+@section Scripts {
+    <!-- JS para Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Inicializar Select2
+            $('.select2-miembros').select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#modalAddDetalle'),
+                placeholder: "Buscar por nombre, apellido o num...",
+                allowClear: true,
+                width: '100%',
+                language: {
+                    noResults: function() { return "No se encontraron miembros"; },
+                    searching: function() { return "Buscando..."; }
+                }
+            });
+
+            // Lógica para auto-llenar el Concepto de la salida según el Tipo seleccionado
+            $('#tipoSalidaSelect').on('change', function() {
+                var selectedText = $(this).find("option:selected").text();
+                var currentConcepto = $('#s_concepto').val();
+                if (selectedText && selectedText !== '— Seleccionar —') {
+                    if (currentConcepto === '' || currentConcepto === '— Seleccionar —' || currentConcepto !== selectedText) {
+                        $('#s_concepto').val(selectedText);
+                    }
+                } else {
+                    $('#s_concepto').val('');
+                }
+            });
+
+            // Lógica de validación Delete
+            $('.formDelete').on('submit', function (e) {
+                var msg = $(this).data('confirm-msg') || '¿Está seguro de eliminar este registro?';
+                if (!confirm(msg)) e.preventDefault();
+            });
+
+        });
+
+        // Calculo interactivo del cambio (Solo Lectura) en el formulario de Diezmo
+        function calcCambio() {
+            let entregado = parseFloat(document.getElementById('montoEntregado').value) || 0;
+            let neto = parseFloat(document.getElementById('montoNeto').value) || 0;
+            let cambio = entregado - neto;
+            
+            if (cambio < 0) cambio = 0;
+            
+            document.getElementById('cambioDisplay').textContent = '$ ' + cambio.toFixed(2);
+            document.getElementById('cambioEntregado').value = cambio.toFixed(2);
+        }
+        
+        function confirmClose(id) {
+            Swal.fire({
+                title: '¿Cerrar este cierre?',
+                text: 'Una vez cerrado, no se podrán agregar ni modificar diezmos ni salidas.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, cerrar',
+                cancelButtonText: 'Cancelar'
+            }).then(r => { if (r.isConfirmed) document.getElementById('formCerrar').submit(); });
+        }
+
+        function confirmReopen(id) {
+            Swal.fire({
+                title: '¿Reabrir este cierre?',
+                text: 'Esto permitirá nuevamente editar diezmos y salidas.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ffc107',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, reabrir',
+                cancelButtonText: 'Cancelar'
+            }).then(r => { if (r.isConfirmed) document.getElementById('formReabrir').submit(); });
+        }
+    </script>
+}

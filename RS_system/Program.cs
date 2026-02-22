@@ -50,6 +50,11 @@ builder.Services.AddScoped<IContabilidadGeneralService, ContabilidadGeneralServi
 builder.Services.AddScoped<IPrestamoService, PrestamoService>();
 builder.Services.AddScoped<IColaboracionService, ColaboracionService>();
 builder.Services.AddSingleton<IQueryCacheService, QueryCacheService>();
+
+// Diezmos module services
+builder.Services.AddScoped<IDiezmoCalculoService, DiezmoCalculoService>();
+builder.Services.AddScoped<IDiezmoCierreService,  DiezmoCierreService>();
+builder.Services.AddScoped<IDiezmoReciboService,  DiezmoReciboService>();
 builder.Services.AddMemoryCache(options =>
 {
     options.SizeLimit = 1024; // 1024 cache entries max

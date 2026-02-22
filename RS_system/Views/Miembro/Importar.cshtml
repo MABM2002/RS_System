@@ -1,0 +1,65 @@
+@{
+    ViewData["Title"] = "Importar Miembros";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Importar Miembros desde CSV</h1>
+        <a asp-action="Index" class="btn btn-sm btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Volver a la Lista
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Cargar Archivo CSV</h6>
+        </div>
+        <div class="card-body">
+            
+            @if (ViewBag.Errors != null)
+            {
+                <div class="alert alert-danger">
+                    <h4 class="alert-heading">Errores encontrados:</h4>
+                    <p>Por favor corrija los siguientes errores en el archivo CSV y vuelva a intentarlo:</p>
+                    <hr>
+                    <ul class="mb-0">
+                        @foreach (var error in ViewBag.Errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="alert alert-info">
+                <h5>Instrucciones:</h5>
+                <p>El archivo CSV debe tener las siguientes columnas en este orden exacto:</p>
+                <ol>
+                    <li>Nombres</li>
+                    <li>Apellidos</li>
+                    <li>Fecha Nacimiento (formato aceptado por el sistema, e.g. YYYY-MM-DD)</li>
+                    <li>Fecha Ingreso Congregación (formato aceptado por el sistema)</li>
+                    <li>Teléfono</li>
+                    <li>Teléfono de Emergencia</li>
+                    <li>Dirección</li>
+                    <li><strong>ID</strong> del Grupo de Trabajo (Número)</li>
+                    <li>Bautizado en Espíritu Santo (Si/1/True)</li>
+                    <li>Activo (Si/1/True)</li>
+                </ol>
+            </div>
+
+            <form asp-action="Importar" enctype="multipart/form-data" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="form-group">
+                    <label for="file">Seleccionar Archivo CSV</label>
+                    <input type="file" name="file" class="form-control-file" id="file" required accept=".csv">
+                </div>
+
+                <div class="form-group mt-3">
+                    <input type="submit" value="Importar" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

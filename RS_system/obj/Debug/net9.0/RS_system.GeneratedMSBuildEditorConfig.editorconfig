@@ -152,6 +152,30 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29udGFiaWxpZGFkR2VuZXJhbC9SZWdpc3Ryb01lbnN1YWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Diezmo/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vL0NyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Diezmo/Detail.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vL0RldGFpbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Diezmo/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Diezmo/Recibo.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vL1JlY2liby5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_system/RS_system/Views/DiezmoCatalogo/Beneficiarios.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vQ2F0YWxvZ28vQmVuZWZpY2lhcmlvcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_system/RS_system/Views/DiezmoCatalogo/TiposSalida.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vQ2F0YWxvZ28vVGlwb3NTYWxpZGEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/adalberto/RiderProjects/RS_system/RS_system/Views/Estados/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXN0YWRvcy9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

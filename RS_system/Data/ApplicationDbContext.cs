@@ -57,6 +57,13 @@ public class ApplicationDbContext : DbContext
     public DbSet<Colaboracion> Colaboraciones { get; set; }
     public DbSet<DetalleColaboracion> DetalleColaboraciones { get; set; }
 
+    // Diezmos module
+    public DbSet<DiezmoCierre>      DiezmoCierres      { get; set; }
+    public DbSet<DiezmoDetalle>     DiezmoDetalles     { get; set; }
+    public DbSet<DiezmoSalida>      DiezmoSalidas      { get; set; }
+    public DbSet<DiezmoBeneficiario> DiezmoBeneficiarios { get; set; }
+    public DbSet<DiezmoTipoSalida>  DiezmoTiposSalida  { get; set; }
+
 
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -215,6 +222,81 @@ public class ApplicationDbContext : DbContext
                 
             entity.HasIndex(e => new { e.ColaboracionId, e.TipoColaboracionId, e.Mes, e.Anio })
                 .IsUnique();
+        });
+
+        // ── Diezmos module configuration ──────────────────────────────────
+        modelBuilder.Entity<DiezmoCierre>(entity =>
+        {
+            entity.ToTable("diezmo_cierres", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.TotalRecibido).HasColumnType("numeric(12,2)");
+            entity.Property(e => e.TotalCambio).HasColumnType("numeric(12,2)");
+            entity.Property(e => e.TotalNeto).HasColumnType("numeric(12,2)");
+            entity.Property(e => e.TotalSalidas).HasColumnType("numeric(12,2)");
+            entity.Property(e => e.SaldoFinal).HasColumnType("numeric(12,2)");
+
+            // One closure per date
+            entity.HasIndex(e => e.Fecha).IsUnique();
+
+            entity.HasMany(e => e.Detalles)
+                .WithOne(d => d.DiezmoCierre)
+                .HasForeignKey(d => d.DiezmoCierreId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(e => e.Salidas)
+                .WithOne(s => s.DiezmoCierre)
+                .HasForeignKey(s => s.DiezmoCierreId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<DiezmoDetalle>(entity =>
+        {
+            entity.ToTable("diezmo_detalles", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.MontoEntregado).HasColumnType("numeric(12,2)");
+            entity.Property(e => e.CambioEntregado).HasColumnType("numeric(12,2)");
+            entity.Property(e => e.MontoNeto).HasColumnType("numeric(12,2)");
+
+            entity.HasIndex(e => e.DiezmoCierreId);
+            entity.HasIndex(e => e.MiembroId);
+
+            entity.HasOne(e => e.Miembro)
+                .WithMany()
+                .HasForeignKey(e => e.MiembroId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DiezmoSalida>(entity =>
+        {
+            entity.ToTable("diezmo_salidas", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Monto).HasColumnType("numeric(12,2)");
+
+            entity.HasIndex(e => e.DiezmoCierreId);
+
+            entity.HasOne(e => e.TipoSalida)
+                .WithMany(t => t.Salidas)
+                .HasForeignKey(e => e.TipoSalidaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Beneficiario)
+                .WithMany(b => b.Salidas)
+                .HasForeignKey(e => e.BeneficiarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DiezmoTipoSalida>(entity =>
+        {
+            entity.ToTable("diezmo_tipos_salida", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Nombre).HasMaxLength(100).IsRequired();
+        });
+
+        modelBuilder.Entity<DiezmoBeneficiario>(entity =>
+        {
+            entity.ToTable("diezmo_beneficiarios", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Nombre).HasMaxLength(150).IsRequired();
         });
 
         

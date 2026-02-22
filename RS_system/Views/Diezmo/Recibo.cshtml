@@ -1,0 +1,99 @@
+@model Rs_system.Models.DiezmoSalida
+@{
+    ViewData["Title"] = $"Recibo {ViewBag.NumeroRecibo}";
+    Layout = null; // layout propio para impresión
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Recibo @ViewBag.NumeroRecibo</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; color: #212529; }
+        .recibo { max-width: 600px; margin: auto; border: 2px solid #343a40; border-radius: 8px; padding: 30px; }
+        .recibo-header { text-align: center; border-bottom: 2px dashed #ced4da; padding-bottom: 16px; margin-bottom: 20px; }
+        .recibo-header h2 { margin: 0 0 4px; font-size: 1.6rem; }
+        .recibo-header p  { margin: 0; color: #6c757d; font-size: .9rem; }
+        .recibo-nro { font-size: 1.1rem; font-weight: bold; color: #0d6efd; }
+        .recibo-body table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .recibo-body tr td { padding: 8px 12px; }
+        .recibo-body tr td:first-child { font-weight: 600; color: #6c757d; width: 40%; }
+        .recibo-monto { text-align: center; background: #f8f9fa; border-radius: 6px; padding: 16px; margin-bottom: 20px; }
+        .recibo-monto h3 { margin: 0; font-size: 2rem; color: #198754; }
+        .recibo-footer { border-top: 2px dashed #ced4da; padding-top: 16px; font-size: .8rem; color: #6c757d; display: flex; justify-content: space-between; }
+        .firma { margin-top: 40px; text-align: center; }
+        .firma-linea { border-top: 1px solid #343a40; width: 220px; margin: auto; padding-top: 6px; }
+        @@media print {
+            body { padding: 0; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print mb-3" style="text-align:center">
+        <button onclick="window.print()" style="padding:8px 20px;cursor:pointer">
+            🖨️ Imprimir / Guardar PDF
+        </button>
+        <button onclick="window.close()" style="padding:8px 20px;cursor:pointer;margin-left:8px">
+            ✕ Cerrar
+        </button>
+    </div>
+
+    <div class="recibo">
+        <!-- Encabezado -->
+        <div class="recibo-header">
+            <h2>Recibo de Diezmos</h2>
+            <p>Iglesia — módulo de Diezmos</p>
+            <div class="recibo-nro mt-2">@ViewBag.NumeroRecibo</div>
+        </div>
+
+        <!-- Datos -->
+        <div class="recibo-body">
+            <table>
+                <tr>
+                    <td>Fecha:</td>
+                    <td>@Model.Fecha.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+                <tr>
+                    <td>Tipo:</td>
+                    <td>@(Model.TipoSalida?.Nombre ?? "—")</td>
+                </tr>
+                <tr>
+                    <td>Beneficiario:</td>
+                    <td>@(Model.Beneficiario?.Nombre ?? "No especificado")</td>
+                </tr>
+                <tr>
+                    <td>Concepto:</td>
+                    <td>@Model.Concepto</td>
+                </tr>
+                <tr>
+                    <td>Cierre:</td>
+                    <td>@(Model.DiezmoCierre?.Fecha.ToString("dd/MM/yyyy") ?? "—")</td>
+                </tr>
+                <tr>
+                    <td>Emitido por:</td>
+                    <td>@ViewBag.Emisor</td>
+                </tr>
+            </table>
+
+            <!-- Monto destacado -->
+            <div class="recibo-monto">
+                <small style="color:#6c757d">MONTO</small>
+                <h3>$ @Model.Monto.ToString("N2")</h3>
+            </div>
+
+            <!-- Firma -->
+            <div class="firma">
+                <div class="firma-linea">Firma del receptor</div>
+            </div>
+        </div>
+
+        <!-- Pie -->
+        <div class="recibo-footer">
+            <span>Generado: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+            <span>@ViewBag.NumeroRecibo</span>
+        </div>
+    </div>
+</body>
+</html>

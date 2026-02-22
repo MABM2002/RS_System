@@ -1,0 +1,138 @@
+@model List<Rs_system.Models.ViewModels.DiezmoCierreListViewModel>
+@{
+    ViewData["Title"] = "Registro de Diezmos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="mb-1"><i class="bi bi-cash-coin me-2"></i>Registro de Diezmos</h4>
+        <p class="text-muted mb-0">Gestión de cierres periódicos de diezmos</p>
+    </div>
+    <div class="d-flex gap-2">
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownCatalogos" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-gear me-1"></i> Catálogos
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownCatalogos">
+                <li><a class="dropdown-item" asp-controller="DiezmoCatalogo" asp-action="TiposSalida"><i class="bi bi-tags me-2 text-muted"></i>Tipos de Salida</a></li>
+                <li><a class="dropdown-item" asp-controller="DiezmoCatalogo" asp-action="Beneficiarios"><i class="bi bi-people me-2 text-muted"></i>Beneficiarios</a></li>
+            </ul>
+        </div>
+        <a asp-action="Create" class="btn btn-primary-custom">
+            <i class="bi bi-plus-lg me-1"></i> Nuevo Cierre
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-1"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-1"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Filtro por año -->
+<div class="card-custom mb-4">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">Año</label>
+            <select name="anio" class="form-select" asp-items="@(ViewBag.Anios as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)">
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-funnel me-1"></i> Filtrar
+            </button>
+        </div>
+    </form>
+</div>
+<script>document.querySelector('select[name="anio"]').value = '@ViewBag.AnioActual';</script>
+
+<!-- Tarjetas resumen del período -->
+@{
+    var totalNeto     = Model.Sum(c => c.TotalNeto);
+    var totalSalidas  = Model.Sum(c => c.TotalSalidas);
+    var saldoTotal    = Model.Sum(c => c.SaldoFinal);
+}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Total Neto del Período</h6>
+            <h3 class="text-primary mb-0">$ @totalNeto.ToString("N2")</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Total Salidas</h6>
+            <h3 class="text-warning mb-0">$ @totalSalidas.ToString("N2")</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-custom text-center">
+            <h6 class="text-muted mb-2">Saldo Acumulado</h6>
+            <h3 class="@(saldoTotal >= 0 ? "text-success" : "text-danger") mb-0">$ @saldoTotal.ToString("N2")</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de cierres -->
+<div class="card-custom">
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-end">Total Recibido</th>
+                    <th class="text-end">Total Neto</th>
+                    <th class="text-end">Salidas</th>
+                    <th class="text-end">Saldo Final</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No hay cierres registrados para el año seleccionado
+                        </td>
+                    </tr>
+                }
+                @foreach (var cierre in Model)
+                {
+                    <tr>
+                        <td>
+                            <strong>@cierre.Fecha.ToString("dd/MM/yyyy")</strong>
+                            <br><small class="text-muted">@cierre.Fecha.DayOfWeek</small>
+                        </td>
+                        <td class="text-center">
+                            <span class="@cierre.EstadoBadge">@cierre.EstadoTexto</span>
+                        </td>
+                        <td class="text-end">$ @cierre.TotalRecibido.ToString("N2")</td>
+                        <td class="text-end">$ @cierre.TotalNeto.ToString("N2")</td>
+                        <td class="text-end text-warning">$ @cierre.TotalSalidas.ToString("N2")</td>
+                        <td class="text-end @(cierre.SaldoFinal >= 0 ? "text-success" : "text-danger") fw-bold">
+                            $ @cierre.SaldoFinal.ToString("N2")
+                        </td>
+                        <td class="text-center">
+                            <a asp-action="Detail" asp-route-id="@cierre.Id"
+                               class="btn btn-sm btn-outline-primary" title="Ver detalle">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
