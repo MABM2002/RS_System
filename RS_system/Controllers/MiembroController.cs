@@ -17,10 +17,10 @@ public class MiembroController : Controller
     }
 
     // GET: Miembro
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? search = null)
     {
-        var miembros = await _miembroService.GetAllAsync();
-        return View(miembros);
+        var paginatedMembers = await _miembroService.GetPaginatedAsync(page, pageSize, search);
+        return View(paginatedMembers);
     }
 
     // GET: Miembro/Details/5
@@ -128,5 +128,62 @@ public class MiembroController : Controller
     {
         var grupos = await _miembroService.GetGruposTrabajoAsync();
         ViewBag.GruposTrabajo = new SelectList(grupos.Select(g => new { g.Id, g.Nombre }), "Id", "Nombre");
+    }
+
+    // GET: Miembro/Importar
+    public IActionResult Importar()
+    {
+        return View();
+    }
+
+    // POST: Miembro/Importar
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Importar(IFormFile? file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            ModelState.AddModelError("", "Por favor seleccione un archivo CSV.");
+            return View();
+        }
+
+        if (!file.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+        {
+            ModelState.AddModelError("", "El archivo debe ser un CSV.");
+            return View();
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream();
+            var createdBy = User.Identity?.Name ?? "Sistema";
+            var result = await _miembroService.ImportarMiembrosAsync(stream, createdBy);
+
+            if (result.SuccessCount > 0)
+            {
+                TempData["SuccessMessage"] = $"Se importaron {result.SuccessCount} miembros exitosamente.";
+            }
+
+            if (result.Errors.Any())
+            {
+                ViewBag.Errors = result.Errors;
+                if (result.SuccessCount == 0)
+                {
+                    ModelState.AddModelError("", "No se pudo importar ningún miembro. Revise los errores.");
+                }
+                else
+                {
+                    TempData["WarningMessage"] = "Se importaron algunos miembros, pero hubo errores en otras filas.";
+                }
+                return View(); // Stay on page to show errors
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", $"Error al procesar el archivo: {ex.Message}");
+            return View();
+        }
     }
 }

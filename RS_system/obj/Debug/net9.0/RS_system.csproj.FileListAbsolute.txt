@@ -266,7 +266,6 @@
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/tlmqwhkg3d-ifse5yxmqk.gz
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/b6c3bvqukf-ifse5yxmqk.gz
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets.build.json
-/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets.build.json.cache
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets.development.json
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets.build.endpoints.json
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/RS_system.csproj.Up2Date
@@ -277,3 +276,14 @@
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/ref/RS_system.dll
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/lc3k1q6eo4-cr0snyzw1m.gz
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/m7f2490r97-cr0snyzw1m.gz
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/e79wfobnuv-lc8ee02c5q.gz
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/z2cv867s5m-ga728ncyli.gz
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/dpe32h769j-rise9grasc.gz
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/ubjjtv0x1g-4bsvp4jd9h.gz
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/tlvbvx8n5g-pr0jyv6zw7.gz
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets/msbuild.RS_system.Microsoft.AspNetCore.StaticWebAssets.props
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets/msbuild.RS_system.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets/msbuild.build.RS_system.props
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets/msbuild.buildMultiTargeting.RS_system.props
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets/msbuild.buildTransitive.RS_system.props
+/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets.pack.json

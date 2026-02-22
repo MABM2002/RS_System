@@ -261,193 +261,284 @@
  </div>
  
  @section Scripts {
-     <script>
-         let timeoutBusqueda = null;
-         
-         // Búsqueda de miembros
-         document.getElementById('buscarMiembro').addEventListener('input', function(e) {
-             const termino = e.target.value;
-             const resultadosDiv = document.getElementById('resultadosBusqueda');
-             
-             clearTimeout(timeoutBusqueda);
-             
-             if (termino.length < 2) {
-                 resultadosDiv.style.display = 'none';
-                 return;
-             }
-             
-             timeoutBusqueda = setTimeout(async () => {
-                 try {
-                     const response = await fetch('@Url.Action("BuscarMiembros", "Colaboracion")?termino=' + encodeURIComponent(termino));
-                     const miembros = await response.json();
-                     
-                     if (miembros.length === 0) {
-                         resultadosDiv.innerHTML = '<div class="list-group-item text-muted">No se encontraron resultados</div>';
-                         resultadosDiv.style.display = 'block';
-                         return;
-                     }
-                     
-                     let html = '';
-                     miembros.forEach(miembro => {
-                         html += `
-                             <button type="button" class="list-group-item list-group-item-action" onclick="seleccionarMiembro(${miembro.id}, '${miembro.text}')">
-                                 <div class="d-flex justify-content-between align-items-center">
-                                     <div>
-                                         <i class="bi bi-person me-2"></i>
-                                         <strong>${miembro.text}</strong>
-                                     </div>
-                                     ${miembro.telefono ? '<small class="text-muted">' + miembro.telefono + '</small>' : ''}
-                                 </div>
-                             </button>
-                         `;
-                     });
-                     
-                     resultadosDiv.innerHTML = html;
-                     resultadosDiv.style.display = 'block';
-                 } catch (error) {
-                     console.error('Error al buscar miembros:', error);
-                 }
-             }, 300);
-         });
-         
-         // Cerrar resultados cuando se hace clic fuera
-         document.addEventListener('click', function(e) {
-             const buscarInput = document.getElementById('buscarMiembro');
-             const resultadosDiv = document.getElementById('resultadosBusqueda');
-             
-             if (!buscarInput.contains(e.target) && !resultadosDiv.contains(e.target)) {
-                 resultadosDiv.style.display = 'none';
-             }
-         });
-         
-         function seleccionarMiembro(id, nombre) {
-             document.getElementById('miembroIdHidden').value = id;
-             document.getElementById('nombreMiembroSeleccionado').textContent = nombre;
-             document.getElementById('miembroSeleccionado').style.display = 'block';
-             document.getElementById('buscarMiembro').value = '';
-             document.getElementById('buscarMiembro').style.display = 'none';
-             document.getElementById('resultadosBusqueda').style.display = 'none';
-             
-             // Cargar historial de pagos
-             cargarHistorialPagos(id);
-         }
-         
-         function limpiarMiembro() {
-             document.getElementById('miembroIdHidden').value = '';
-             document.getElementById('miembroSeleccionado').style.display = 'none';
-             document.getElementById('buscarMiembro').style.display = 'block';
-             document.getElementById('buscarMiembro').focus();
-             
-             // Ocultar historial
-             document.getElementById('infoUltimosPagos').style.display = 'none';
-             document.getElementById('listaUltimosPagos').innerHTML = '';
-         }
-         
-         async function cargarHistorialPagos(miembroId) {
-             const contenedor = document.getElementById('infoUltimosPagos');
-             const lista = document.getElementById('listaUltimosPagos');
-             
-             lista.innerHTML = '<div class="spinner-border spinner-border-sm text-info" role="status"></div> Cargando historial...';
-             contenedor.style.display = 'block';
-             
-             try {
-                 const response = await fetch('@Url.Action("ObtenerUltimosPagos", "Colaboracion")?miembroId=' + miembroId);
-                 const pagos = await response.json();
-                 
-                 if (pagos && pagos.length > 0) {
-                     let html = '';
-                     pagos.forEach(p => {
-                         const colorClass = p.ultimoMes > 0 ? 'bg-white text-info border border-info' : 'bg-secondary text-white';
-                         html += `
-                             <span class="badge ${colorClass} fw-normal p-2">
-                                 <strong>${p.nombreTipo}:</strong> ${p.ultimoPeriodoTexto}
-                             </span>
-                         `;
-                     });
-                     lista.innerHTML = html;
-                 } else {
-                     lista.innerHTML = '<span class="text-muted small">No hay historial de pagos registrado.</span>';
-                 }
-             } catch (error) {
-                 console.error('Error al cargar historial:', error);
-                 lista.innerHTML = '<span class="text-danger small"><i class="bi bi-exclamation-circle"></i> Error al cargar historial</span>';
-             }
-         }
-         
-         function calcularSugerido() {
-             try {
-                 // Obtener valores
-                 const mesInicial = parseInt(document.getElementById('mesInicial').value);
-                 const anioInicial = parseInt(document.getElementById('anioInicial').value);
-                 const mesFinal = parseInt(document.getElementById('mesFinal').value);
-                 const anioFinal = parseInt(document.getElementById('anioFinal').value);
-                 
-                 // Calcular total de meses
-                 const fechaInicial = new Date(anioInicial, mesInicial - 1, 1);
-                 const fechaFinal = new Date(anioFinal, mesFinal - 1, 1);
-                 
-                 let totalMeses = 0;
-                 if (fechaFinal >= fechaInicial) {
-                     totalMeses = ((anioFinal - anioInicial) * 12) + (mesFinal - mesInicial) + 1;
-                 }
-                 
-                 // Obtener tipos seleccionados y sus montos
-                 const tiposCheckboxes = document.querySelectorAll('.tipo-checkbox:checked');
-                 const totalTipos = tiposCheckboxes.length;
-                 
-                 // Calcular monto sugerido total
-                 let montoSugeridoTotal = 0;
-                 tiposCheckboxes.forEach(checkbox => {
-                     const montoPorMes = parseFloat(checkbox.getAttribute('data-monto')) || 0;
-                     montoSugeridoTotal += montoPorMes * totalMeses;
-                 });
-                 
-                 // Actualizar UI
-                 document.getElementById('totalMeses').textContent = totalMeses;
-                 document.getElementById('totalTipos').textContent = totalTipos;
-                 document.getElementById('montoSugerido').textContent = montoSugeridoTotal.toFixed(2);
-                 
-                 // Comparar con monto ingresado
-                 const montoIngresado = parseFloat(document.getElementById('montoTotal').value) || 0;
-                 const alertaDiv = document.getElementById('alertaDiferencia');
-                 const mensajeSpan = document.getElementById('mensajeDiferencia');
-                 
-                 if (montoIngresado > 0) {
-                     if (Math.abs(montoIngresado - montoSugeridoTotal) > 0.01) {
-                         const diferencia = montoIngresado - montoSugeridoTotal;
-                         if (diferencia > 0) {
-                             mensajeSpan.textContent = `Sobra: $${diferencia.toFixed(2)}`;
-                             alertaDiv.className = 'alert alert-info py-1 px-2 mb-0 mt-2';
-                         } else {
-                             mensajeSpan.textContent = `Falta: $${Math.abs(diferencia).toFixed(2)}`;
-                             alertaDiv.className = 'alert alert-warning py-1 px-2 mb-0 mt-2';
-                         }
-                         alertaDiv.style.display = 'block';
-                     } else {
-                         alertaDiv.style.display = 'none';
-                     }
-                 } else {
-                     alertaDiv.style.display = 'none';
-                 }
-             } catch (error) {
-                 console.error('Error al calcular sugerido:', error);
-             }
-         }
-         
-         // Calcular cuando cambia el monto total
-         document.getElementById('montoTotal')?.addEventListener('input', calcularSugerido);
-         
-         // Calcular al cargar la página
-         document.addEventListener('DOMContentLoaded', function() {
-             calcularSugerido();
-         });
-         
-        // Show error messages
-        @if (TempData["Error"] != null)
-        {
-            <text>
-            toastr.error('@TempData["Error"]');
-            </text>
+    <!-- Offline Support Scripts -->
+    <script src="~/js/colaboraciones-offline-db.js"></script>
+    <script src="~/js/colaboraciones-sync.js"></script>
+    
+    <script>
+        let timeoutBusqueda = null;
+        
+        // Búsqueda de miembros
+        document.getElementById('buscarMiembro').addEventListener('input', function(e) {
+            const termino = e.target.value;
+            const resultadosDiv = document.getElementById('resultadosBusqueda');
+            
+            clearTimeout(timeoutBusqueda);
+            
+            if (termino.length < 2) {
+                resultadosDiv.style.display = 'none';
+                return;
+            }
+            
+            timeoutBusqueda = setTimeout(async () => {
+                try {
+                    const response = await fetch('@Url.Action("BuscarMiembros", "Colaboracion")?termino=' + encodeURIComponent(termino));
+                    const miembros = await response.json();
+                    
+                    if (miembros.length === 0) {
+                        resultadosDiv.innerHTML = '<div class="list-group-item text-muted">No se encontraron resultados</div>';
+                        resultadosDiv.style.display = 'block';
+                        return;
+                    }
+                    
+                    let html = '';
+                    miembros.forEach(miembro => {
+                        html += `
+                            <button type="button" class="list-group-item list-group-item-action" onclick="seleccionarMiembro(${miembro.id}, '${miembro.text}')">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-person me-2"></i>
+                                        <strong>${miembro.text}</strong>
+                                    </div>
+                                    ${miembro.telefono ? '<small class="text-muted">' + miembro.telefono + '</small>' : ''}
+                                </div>
+                            </button>
+                        `;
+                    });
+                    
+                    resultadosDiv.innerHTML = html;
+                    resultadosDiv.style.display = 'block';
+                } catch (error) {
+                    console.error('Error al buscar miembros:', error);
+                }
+            }, 300);
+        });
+        
+        // Cerrar resultados cuando se hace clic fuera
+        document.addEventListener('click', function(e) {
+            const buscarInput = document.getElementById('buscarMiembro');
+            const resultadosDiv = document.getElementById('resultadosBusqueda');
+            
+            if (!buscarInput.contains(e.target) && !resultadosDiv.contains(e.target)) {
+                resultadosDiv.style.display = 'none';
+            }
+        });
+        
+        function seleccionarMiembro(id, nombre) {
+            document.getElementById('miembroIdHidden').value = id;
+            document.getElementById('nombreMiembroSeleccionado').textContent = nombre;
+            document.getElementById('miembroSeleccionado').style.display = 'block';
+            document.getElementById('buscarMiembro').value = '';
+            document.getElementById('buscarMiembro').style.display = 'none';
+            document.getElementById('resultadosBusqueda').style.display = 'none';
+            
+            // Cargar historial de pagos
+            cargarHistorialPagos(id);
         }
-    </script>
+        
+        function limpiarMiembro() {
+            document.getElementById('miembroIdHidden').value = '';
+            document.getElementById('miembroSeleccionado').style.display = 'none';
+            document.getElementById('buscarMiembro').style.display = 'block';
+            document.getElementById('buscarMiembro').focus();
+            
+            // Ocultar historial
+            document.getElementById('infoUltimosPagos').style.display = 'none';
+            document.getElementById('listaUltimosPagos').innerHTML = '';
+        }
+        
+        async function cargarHistorialPagos(miembroId) {
+            const contenedor = document.getElementById('infoUltimosPagos');
+            const lista = document.getElementById('listaUltimosPagos');
+            
+            lista.innerHTML = '<div class="spinner-border spinner-border-sm text-info" role="status"></div> Cargando historial...';
+            contenedor.style.display = 'block';
+            
+            try {
+                const response = await fetch('@Url.Action("ObtenerUltimosPagos", "Colaboracion")?miembroId=' + miembroId);
+                const pagos = await response.json();
+                
+                if (pagos && pagos.length > 0) {
+                    let html = '';
+                    pagos.forEach(p => {
+                        const colorClass = p.ultimoMes > 0 ? 'bg-white text-info border border-info' : 'bg-secondary text-white';
+                        html += `
+                            <span class="badge ${colorClass} fw-normal p-2">
+                                <strong>${p.nombreTipo}:</strong> ${p.ultimoPeriodoTexto}
+                            </span>
+                        `;
+                    });
+                    lista.innerHTML = html;
+                } else {
+                    lista.innerHTML = '<span class="text-muted small">No hay historial de pagos registrado.</span>';
+                }
+            } catch (error) {
+                console.error('Error al cargar historial:', error);
+                lista.innerHTML = '<span class="text-danger small"><i class="bi bi-exclamation-circle"></i> Error al cargar historial</span>';
+            }
+        }
+        
+        function calcularSugerido() {
+            try {
+                // Obtener valores
+                const mesInicial = parseInt(document.getElementById('mesInicial').value);
+                const anioInicial = parseInt(document.getElementById('anioInicial').value);
+                const mesFinal = parseInt(document.getElementById('mesFinal').value);
+                const anioFinal = parseInt(document.getElementById('anioFinal').value);
+                
+                // Calcular total de meses
+                const fechaInicial = new Date(anioInicial, mesInicial - 1, 1);
+                const fechaFinal = new Date(anioFinal, mesFinal - 1, 1);
+                
+                let totalMeses = 0;
+                if (fechaFinal >= fechaInicial) {
+                    totalMeses = ((anioFinal - anioInicial) * 12) + (mesFinal - mesInicial) + 1;
+                }
+                
+                // Obtener tipos seleccionados y sus montos
+                const tiposCheckboxes = document.querySelectorAll('.tipo-checkbox:checked');
+                const totalTipos = tiposCheckboxes.length;
+                
+                // Calcular monto sugerido total
+                let montoSugeridoTotal = 0;
+                tiposCheckboxes.forEach(checkbox => {
+                    const montoPorMes = parseFloat(checkbox.getAttribute('data-monto')) || 0;
+                    montoSugeridoTotal += montoPorMes * totalMeses;
+                });
+                
+                // Actualizar UI
+                document.getElementById('totalMeses').textContent = totalMeses;
+                document.getElementById('totalTipos').textContent = totalTipos;
+                document.getElementById('montoSugerido').textContent = montoSugeridoTotal.toFixed(2);
+                
+                // Comparar con monto ingresado
+                const montoIngresado = parseFloat(document.getElementById('montoTotal').value) || 0;
+                const alertaDiv = document.getElementById('alertaDiferencia');
+                const mensajeSpan = document.getElementById('mensajeDiferencia');
+                
+                if (montoIngresado > 0) {
+                    if (Math.abs(montoIngresado - montoSugeridoTotal) > 0.01) {
+                        const diferencia = montoSugeridoTotal - montoIngresado; // Corrected calculation for difference
+                        if (diferencia > 0) {
+                            mensajeSpan.textContent = `Falta: $${diferencia.toFixed(2)}`;
+                            alertaDiv.className = 'alert alert-warning py-1 px-2 mb-0 mt-2';
+                        } else {
+                            mensajeSpan.textContent = `Sobra: $${Math.abs(diferencia).toFixed(2)}`;
+                            alertaDiv.className = 'alert alert-info py-1 px-2 mb-0 mt-2';
+                        }
+                        alertaDiv.style.display = 'block';
+                    } else {
+                        alertaDiv.style.display = 'none';
+                    }
+                } else {
+                    alertaDiv.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error al calcular sugerido:', error);
+            }
+        }
+        
+        // Calcular cuando cambia el monto total
+        document.getElementById('montoTotal')?.addEventListener('input', calcularSugerido);
+        
+        // ===== OFFLINE-FIRST FORM SUBMISSION =====
+        document.getElementById('colaboracionForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
+            // Gather form data
+            const miembroId = document.getElementById('miembroIdHidden').value;
+            const mesInicial = document.getElementById('mesInicial').value;
+            const anioInicial = document.getElementById('anioInicial').value;
+            const mesFinal = document.getElementById('mesFinal').value;
+            const anioFinal = document.getElementById('anioFinal').value;
+            const montoTotal = document.getElementById('montoTotal').value;
+            const observaciones = document.querySelector('[name="Observaciones"]').value;
+            const tipoPrioritario = document.getElementById('tipoPrioritario').value;
+            
+            // Get selected tipos
+            const tiposSeleccionados = Array.from(document.querySelectorAll('.tipo-checkbox:checked'))
+                .map(cb => cb.value);
+            
+            // Validate
+            if (!miembroId) {
+                toastr.error('Por favor seleccione un miembro');
+                return;
+            }
+            
+            if (tiposSeleccionados.length === 0) {
+                toastr.error('Por favor seleccione al menos un tipo de colaboración');
+                return;
+            }
+            
+            if (!montoTotal || parseFloat(montoTotal) <= 0) {
+                toastr.error('Por favor ingrese un monto válido');
+                return;
+            }
+            
+            // Prepare data object
+            const colaboracionData = {
+                miembroId: parseInt(miembroId),
+                mesInicial: parseInt(mesInicial),
+                anioInicial: parseInt(anioInicial),
+                mesFinal: parseInt(mesFinal),
+                anioFinal: parseInt(anioFinal),
+                montoTotal: parseFloat(montoTotal),
+                observaciones: observaciones,
+                tiposSeleccionados: tiposSeleccionados,
+                tipoPrioritario: tipoPrioritario || null,
+                registradoPor: '@User.Identity?.Name'
+            };
+            
+            // Disable submit button
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+            
+            try {
+                // Use sync manager to save (handles online/offline automatically)
+                const result = await ColaboracionesSyncManager.saveColaboracion(colaboracionData);
+                
+                if (result.success) {
+                    if (result.offline) {
+                        toastr.warning(result.message);
+                        
+                        // Clear form
+                        setTimeout(() => {
+                            window.location.href = '@Url.Action("Index", "Colaboracion")';
+                        }, 2000);
+                    } else {
+                        toastr.success(result.message);
+                        
+                        // Redirect to index
+                        setTimeout(() => {
+                            window.location.href = '@Url.Action("Index", "Colaboracion")';
+                        }, 1500);
+                    }
+                } else {
+                    toastr.error(result.message || 'Error al guardar');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                toastr.error('Error inesperado: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        });
+        
+        // Calcular al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            calcularSugerido();
+        });
+        
+       // Show error messages
+       @if (TempData["Error"] != null)
+       {
+           <text>
+           toastr.error('@TempData["Error"]');
+           </text>
+       }
+   </script>
 }
