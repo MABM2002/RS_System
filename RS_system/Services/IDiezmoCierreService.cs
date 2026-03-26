@@ -24,6 +24,7 @@ public interface IDiezmoCierreService
 
     // ── Flujo de cierre ──
     Task CerrarCierreAsync(long cierreId, string usuario);
+    Task RecalcularCierreAsync(long cierreId, string usuario);
     Task ReabrirCierreAsync(long cierreId, string usuario);
 
     // ── Totales ──

@@ -86,7 +86,6 @@ public class DiezmoController : Controller
     // ─────────────────────────────────────────────────────────────────────────
     // GET: /Diezmo/Detail/{id} — Pantalla operativa
     // ─────────────────────────────────────────────────────────────────────────
-    [Permission("Diezmo.Index")]
     public async Task<IActionResult> Detail(long id)
     {
         var cierre = await _cierreService.GetCierreByIdAsync(id);
@@ -153,7 +152,6 @@ public class DiezmoController : Controller
     // ─────────────────────────────────────────────────────────────────────────
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Permission("Diezmo.AddDetalle")]
     public async Task<IActionResult> AddDetalle(long cierreId, DiezmoDetalleFormViewModel vm)
     {
         if (!ModelState.IsValid)
@@ -186,12 +184,12 @@ public class DiezmoController : Controller
     // POST: /Diezmo/DeleteDetalle
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Permission("Diezmo.AddDetalle")]
     public async Task<IActionResult> DeleteDetalle(long detalleId, long cierreId)
     {
         try
         {
             await _cierreService.EliminarDetalleAsync(detalleId, UsuarioActual());
+            await _cierreService.RecalcularCierreAsync(detalleId, UsuarioActual());
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 return await GetTotalesJsonAsync(cierreId);
 
@@ -212,7 +210,6 @@ public class DiezmoController : Controller
     // ─────────────────────────────────────────────────────────────────────────
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Permission("Diezmo.AddSalida")]
     public async Task<IActionResult> AddSalida(long cierreId, DiezmoSalidaFormViewModel vm)
     {
         if (!ModelState.IsValid)
@@ -245,12 +242,12 @@ public class DiezmoController : Controller
     // POST: /Diezmo/DeleteSalida
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Permission("Diezmo.AddSalida")]
     public async Task<IActionResult> DeleteSalida(long salidaId, long cierreId)
     {
         try
         {
             await _cierreService.EliminarSalidaAsync(salidaId, UsuarioActual());
+            await _cierreService.RecalcularCierreAsync(cierreId, UsuarioActual());
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 return await GetTotalesJsonAsync(cierreId);
 
@@ -271,7 +268,6 @@ public class DiezmoController : Controller
     // ─────────────────────────────────────────────────────────────────────────
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Permission("Diezmo.Close")]
     public async Task<IActionResult> Close(long id)
     {
         try
@@ -287,12 +283,20 @@ public class DiezmoController : Controller
         return RedirectToAction(nameof(Detail), new { id });
     }
 
+    [HttpPost]
+    public async Task<IActionResult> RecalcularSaldos(long id)
+    {
+        await _cierreService.RecalcularCierreAsync(id, UsuarioActual());
+        TempData["SuccessMessage"] = "Saldos recalculados correctamente.";
+        return RedirectToAction(nameof(Detail), new { id });
+    }
+    
+    
     // ─────────────────────────────────────────────────────────────────────────
     // POST: /Diezmo/Reopen/{id}  — Solo Administrador
     // ─────────────────────────────────────────────────────────────────────────
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Permission("Diezmo.Reopen")]
     public async Task<IActionResult> Reopen(long id)
     {
         try
@@ -311,7 +315,6 @@ public class DiezmoController : Controller
     // ─────────────────────────────────────────────────────────────────────────
     // GET: /Diezmo/Recibo/{salidaId}
     // ─────────────────────────────────────────────────────────────────────────
-    [Permission("Diezmo.Index")]
     public async Task<IActionResult> Recibo(long salidaId)
     {
         var numero = await _reciboService.GenerarNumeroReciboAsync(salidaId);

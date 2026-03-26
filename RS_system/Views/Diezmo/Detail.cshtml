@@ -24,6 +24,14 @@
         <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-arrow-left me-1"></i>Volver
         </a>
+        <form asp-action="RecalcularSaldos" method="post" class="d-inline"
+              onsubmit="return confirm('¿Deseas recalcular los saldos?');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-outline-warning btn-sm">
+                <i class="bi bi-arrow-repeat me-1"></i>Recalcular
+            </button>
+        </form>
         @if (!cerrado)
         {
             <button type="button" class="btn btn-success btn-sm" onclick="confirmClose(@Model.Id)">
@@ -110,7 +118,7 @@
         }
     </div>
     <div class="table-responsive">
-        <table class="table-custom">
+        <table class="table-custom" id="tableDiezmos">
             <thead>
                 <tr>
                     <th style="width: 50px;">#</th>
@@ -174,7 +182,7 @@
         }
     </div>
     <div class="table-responsive">
-        <table class="table-custom">
+        <table class="table-custom" id="tableSalidas">
             <thead>
                 <tr>
                     <th>Tipo</th>
@@ -416,13 +424,82 @@
                 }
             });
 
-            // Lógica de validación Delete
-            $('.formDelete').on('submit', function (e) {
-                var msg = $(this).data('confirm-msg') || '¿Está seguro de eliminar este registro?';
-                if (!confirm(msg)) e.preventDefault();
+            bindDeleteEvents();
+
+            // AJAX submit para Agregar Diezmo y actualizar cálculos en tiempo real
+            $('#formAddDetalle').on('submit', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var btn = form.find('button[type="submit"]');
+                var originalHtml = btn.html();
+                
+                btn.html('<i class="bi bi-hourglass-split me-1"></i>Calculando...').prop('disabled', true);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize(),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function(response) {
+                        // 1. Actualizar cálculos en las tarjetas UI
+                        $('#uiTotalRecibido').text('$ ' + response.totalRecibido.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#uiTotalCambio').text('$ ' + response.totalCambio.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#uiTotalNeto').text('$ ' + response.totalNeto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#uiTotalSalidas').text('$ ' + response.totalSalidas.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        
+                        var saldo = response.saldoFinal;
+                        $('#uiSaldoFinal').text('$ ' + saldo.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        
+                        var wrapper = $('#wrapperSaldoFinal');
+                        var uiSaldo = $('#uiSaldoFinal');
+                        
+                        if (saldo >= 0) {
+                            wrapper.removeClass('border-danger').addClass('border-success');
+                            uiSaldo.removeClass('text-danger').addClass('text-success');
+                        } else {
+                            wrapper.removeClass('border-success').addClass('border-danger');
+                            uiSaldo.removeClass('text-success').addClass('text-danger');
+                        }
+
+                        // 2. Ocultar modal y limpiar campos
+                        $('#modalAddDetalle').modal('hide');
+                        form[0].reset();
+                        document.getElementById('cambioDisplay').textContent = '$ 0.00';
+                        $('#cambioEntregado').val(0);
+                        $('.select2-miembros').val(null).trigger('change');
+
+                        // 3. Recargar la tabla silenciosamente para mostrar el nuevo elemento
+                        $.get(location.href, function(html) {
+                            var nuevaTabla = $(html).find('#tableDiezmos').html();
+                            $('#tableDiezmos').html(nuevaTabla);
+                            bindDeleteEvents(); 
+                        });
+
+                        Swal.mixin({
+                            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
+                        }).fire({
+                            icon: 'success', title: 'Diezmo guardado con éxito'
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error', title: 'Error', text: xhr.responseText || 'Ocurrió un error al guardar el diezmo'
+                        });
+                    },
+                    complete: function() {
+                        btn.html(originalHtml).prop('disabled', false);
+                    }
+                });
             });
 
         });
+
+        function bindDeleteEvents() {
+            $('.formDelete').off('submit').on('submit', function (e) {
+                var msg = $(this).data('confirm-msg') || '¿Está seguro de eliminar este registro?';
+                if (!confirm(msg)) e.preventDefault();
+            });
+        }
 
         // Calculo interactivo del cambio (Solo Lectura) en el formulario de Diezmo
         function calcCambio() {

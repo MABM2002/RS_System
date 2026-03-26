@@ -91,12 +91,16 @@ public class DiezmoCierreService : IDiezmoCierreService
     {
         var cierre = await GetCierreOrThrowAsync(cierreId);
         GuardarSiAbierto(cierre);
-
-        // Se invierte la lógica: El net (Diezmo) se introduce manual. El cambio es derivado.
+        
         var neto = vm.MontoNeto;
         var cambio = vm.MontoEntregado - neto;
-        if (cambio < 0) cambio = 0; // Prevenir errores; si entregó menos del neto se asume cambio 0
+        if (cambio < 0) cambio = 0;
 
+        cierre.TotalCambio += cambio;
+        cierre.TotalNeto += neto;
+        cierre.TotalRecibido += vm.MontoEntregado;
+        cierre.SaldoFinal = cierre.TotalNeto - cierre.TotalSalidas;
+        
         var detalle = new DiezmoDetalle
         {
             DiezmoCierreId   = cierreId,
@@ -110,10 +114,12 @@ public class DiezmoCierreService : IDiezmoCierreService
             CreadoEn         = DateTime.UtcNow,
             ActualizadoEn    = DateTime.UtcNow
         };
-
+        
         _context.DiezmoDetalles.Add(detalle);
         await _context.SaveChangesAsync();
-        await RecalcularTotalesAsync(cierreId);
+        
+        _context.Entry(cierre).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
     }
 
     public async Task EliminarDetalleAsync(long detalleId, string usuario)
@@ -128,11 +134,12 @@ public class DiezmoCierreService : IDiezmoCierreService
         detalle.Eliminado      = true;
         detalle.ActualizadoEn  = DateTime.UtcNow;
         detalle.ActualizadoPor = usuario;
+        _context.Entry(detalle).State = EntityState.Modified;
         await _context.SaveChangesAsync();
 
         await RegistrarBitacoraAsync(detalle.DiezmoCierreId, "ELIMINAR_DETALLE",
             $"Detalle #{detalleId} eliminado", usuario);
-        await RecalcularTotalesAsync(detalle.DiezmoCierreId);
+        //await RecalcularTotalesAsync(detalle.DiezmoCierreId);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -173,6 +180,9 @@ public class DiezmoCierreService : IDiezmoCierreService
 
         salida.Eliminado    = true;
         salida.ActualizadoEn = DateTime.UtcNow;
+        
+        _context.Entry(salida).State = EntityState.Modified;
+            
         await _context.SaveChangesAsync();
 
         await RegistrarBitacoraAsync(salida.DiezmoCierreId, "ELIMINAR_SALIDA",
@@ -187,22 +197,46 @@ public class DiezmoCierreService : IDiezmoCierreService
     public async Task CerrarCierreAsync(long cierreId, string usuario)
     {
         var cierre = await GetCierreByIdAsync(cierreId)
-            ?? throw new InvalidOperationException("Cierre no encontrado.");
+                     ?? throw new InvalidOperationException("Cierre no encontrado.");
 
         if (cierre.Cerrado)
             throw new InvalidOperationException("El cierre ya se encuentra cerrado.");
 
-        // Recalcular por si hay cambios recientes antes de sellar
-        _calculo.RecalcularTotales(cierre);
+        cierre = _calculo.RecalcularTotales(cierre);
 
         cierre.Cerrado       = true;
         cierre.FechaCierre   = DateTime.UtcNow;
         cierre.CerradoPor    = usuario;
         cierre.ActualizadoEn = DateTime.UtcNow;
         cierre.ActualizadoPor = usuario;
-
+        _context.Entry(cierre).State = EntityState.Modified;
         await _context.SaveChangesAsync();
+    
         await RegistrarBitacoraAsync(cierreId, "CIERRE", $"Cierre sellado. Saldo final: {cierre.SaldoFinal:C}", usuario);
+        
+    }
+    
+    
+    public async Task RecalcularCierreAsync(long cierreId, string usuario)
+    {
+        var cierre = await GetCierreByIdAsync(cierreId)
+                     ?? throw new InvalidOperationException("Cierre no encontrado.");
+
+        if (cierre.Cerrado)
+            throw new InvalidOperationException("El cierre ya se encuentra cerrado.");
+
+        cierre = _calculo.RecalcularTotales(cierre);
+
+        cierre.Cerrado       = false;
+        //cierre.FechaCierre   = DateTime.UtcNow;
+        //cierre.CerradoPor    = usuario;
+        cierre.ActualizadoEn = DateTime.UtcNow;
+        cierre.ActualizadoPor = usuario;
+        _context.Entry(cierre).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+    
+        await RegistrarBitacoraAsync(cierreId, "RECALCULO_CIERRE", $"Recalculo Realizado. Saldo final: {cierre.SaldoFinal:C}", usuario);
+        
     }
 
     public async Task ReabrirCierreAsync(long cierreId, string usuario)
@@ -217,7 +251,8 @@ public class DiezmoCierreService : IDiezmoCierreService
         cierre.CerradoPor     = null;
         cierre.ActualizadoEn  = DateTime.UtcNow;
         cierre.ActualizadoPor = usuario;
-
+        
+        _context.Entry(cierre).State = EntityState.Modified;
         await _context.SaveChangesAsync();
         await RegistrarBitacoraAsync(cierreId, "REAPERTURA", "Cierre reabierto", usuario);
     }
