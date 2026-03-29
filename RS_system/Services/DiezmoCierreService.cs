@@ -142,6 +142,32 @@ public class DiezmoCierreService : IDiezmoCierreService
         //await RecalcularTotalesAsync(detalle.DiezmoCierreId);
     }
 
+    public async Task ActualizarDetalleAsync(long detalleId, DiezmoDetalleFormViewModel vm, string usuario)
+    {
+        var detalle = await _context.DiezmoDetalles
+            .FirstOrDefaultAsync(d => d.Id == detalleId && !d.Eliminado)
+            ?? throw new InvalidOperationException("Detalle no encontrado.");
+
+        var cierre = await GetCierreOrThrowAsync(detalle.DiezmoCierreId);
+        GuardarSiAbierto(cierre);
+
+        detalle.MiembroId       = vm.MiembroId;
+        detalle.MontoEntregado  = vm.MontoEntregado;
+        detalle.MontoNeto       = vm.MontoNeto;
+        var cambio = vm.MontoEntregado - vm.MontoNeto;
+        detalle.CambioEntregado = cambio < 0 ? 0 : cambio;
+        detalle.Observaciones   = vm.Observaciones;
+        detalle.ActualizadoEn   = DateTime.UtcNow;
+        detalle.ActualizadoPor  = usuario;
+
+        _context.Entry(detalle).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+
+        await RegistrarBitacoraAsync(detalle.DiezmoCierreId, "ACTUALIZAR_DETALLE",
+            $"Detalle #{detalleId} actualizado. Nuevo neto: {vm.MontoNeto:C}", usuario);
+        await RecalcularTotalesAsync(detalle.DiezmoCierreId);
+    }
+
     // ──────────────────────────────────────────────────────────────────────────
     // Salidas
     // ──────────────────────────────────────────────────────────────────────────
@@ -187,6 +213,29 @@ public class DiezmoCierreService : IDiezmoCierreService
 
         await RegistrarBitacoraAsync(salida.DiezmoCierreId, "ELIMINAR_SALIDA",
             $"Salida #{salidaId} eliminada", usuario);
+        await RecalcularTotalesAsync(salida.DiezmoCierreId);
+    }
+
+    public async Task ActualizarSalidaAsync(long salidaId, DiezmoSalidaFormViewModel vm, string usuario)
+    {
+        var salida = await _context.DiezmoSalidas
+            .FirstOrDefaultAsync(s => s.Id == salidaId && !s.Eliminado)
+            ?? throw new InvalidOperationException("Salida no encontrada.");
+
+        var cierre = await GetCierreOrThrowAsync(salida.DiezmoCierreId);
+        GuardarSiAbierto(cierre);
+
+        salida.TipoSalidaId   = vm.TipoSalidaId;
+        salida.BeneficiarioId = vm.BeneficiarioId;
+        salida.Monto          = vm.Monto;
+        salida.Concepto       = vm.Concepto;
+        salida.ActualizadoEn  = DateTime.UtcNow;
+
+        _context.Entry(salida).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+
+        await RegistrarBitacoraAsync(salida.DiezmoCierreId, "ACTUALIZAR_SALIDA",
+            $"Salida #{salidaId} actualizada. Nuevo monto: {vm.Monto:C}", usuario);
         await RecalcularTotalesAsync(salida.DiezmoCierreId);
     }
 

@@ -129,6 +129,8 @@ public class DiezmoController : Controller
             Salidas = cierre.Salidas.Select(s => new DiezmoSalidaRowViewModel
             {
                 Id                 = s.Id,
+                TipoSalidaId       = s.TipoSalidaId,
+                BeneficiarioId     = s.BeneficiarioId,
                 TipoSalidaNombre   = s.TipoSalida?.Nombre ?? "—",
                 BeneficiarioNombre = s.Beneficiario?.Nombre,
                 Monto              = s.Monto,
@@ -205,6 +207,38 @@ public class DiezmoController : Controller
         return RedirectToAction(nameof(Detail), new { id = cierreId });
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateDetalle(long cierreId, long detalleId, DiezmoDetalleFormViewModel vm)
+    {
+        if (!ModelState.IsValid)
+        {
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return BadRequest("Datos inválidos.");
+
+            TempData["ErrorMessage"] = "Datos inválidos. Verifique el formulario.";
+            return RedirectToAction(nameof(Detail), new { id = cierreId });
+        }
+
+        try
+        {
+            await _cierreService.ActualizarDetalleAsync(detalleId, vm, UsuarioActual());
+            await _cierreService.RecalcularCierreAsync(cierreId, UsuarioActual());
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return await GetTotalesJsonAsync(cierreId);
+
+            TempData["SuccessMessage"] = "Diezmo actualizado correctamente.";
+        }
+        catch (InvalidOperationException ex)
+        {
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return BadRequest(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Detail), new { id = cierreId });
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // POST: /Diezmo/AddSalida
     // ─────────────────────────────────────────────────────────────────────────
@@ -263,6 +297,37 @@ public class DiezmoController : Controller
         return RedirectToAction(nameof(Detail), new { id = cierreId });
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateSalida(long cierreId, long salidaId, DiezmoSalidaFormViewModel vm)
+    {
+        if (!ModelState.IsValid)
+        {
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return BadRequest("Datos inválidos.");
+
+            TempData["ErrorMessage"] = "Datos inválidos. Verifique el formulario.";
+            return RedirectToAction(nameof(Detail), new { id = cierreId });
+        }
+
+        try
+        {
+            await _cierreService.ActualizarSalidaAsync(salidaId, vm, UsuarioActual());
+            await _cierreService.RecalcularCierreAsync(cierreId, UsuarioActual());
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return await GetTotalesJsonAsync(cierreId);
+
+            TempData["SuccessMessage"] = "Salida actualizada correctamente.";
+        }
+        catch (InvalidOperationException ex)
+        {
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return BadRequest(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Detail), new { id = cierreId });
+    }
     // ─────────────────────────────────────────────────────────────────────────
     // POST: /Diezmo/Close/{id}
     // ─────────────────────────────────────────────────────────────────────────

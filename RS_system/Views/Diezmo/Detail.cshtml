@@ -160,12 +160,32 @@
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
+
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-edit-detalle" title="Actualizar"
+                                        data-bs-toggle="modal" data-bs-target="#modalEditDetalle"
+                                        data-id="@d.Id"
+                                        data-miembro="@d.MiembroId"
+                                        data-entregado="@d.MontoEntregado.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-neto="@d.MontoNeto.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-cambio="@d.CambioEntregado.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-obs="@d.Observaciones">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
                             }
                         </td>
                     </tr>
                     i++;
                 }
             </tbody>
+            <tfoot>
+                <tr class="table-light">
+                    <th colspan="2" class="text-end">Total:</th>
+                    <th class="text-end text-success" id="tf_entregado">$ @Model.TotalRecibido.ToString("N2")</th>
+                    <th class="text-end text-warning" id="tf_cambio">$ @Model.TotalCambio.ToString("N2")</th>
+                    <th class="text-end text-primary" id="tf_neto">$ @Model.TotalNeto.ToString("N2")</th>
+                    <th colspan="2"></th>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>
@@ -236,11 +256,28 @@
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
+                                
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-edit-salida" title="Actualizar"
+                                        data-bs-toggle="modal" data-bs-target="#modalEditSalida"
+                                        data-id="@s.Id"
+                                        data-tipo="@s.TipoSalidaId"
+                                        data-beneficiario="@s.BeneficiarioId"
+                                        data-monto="@s.Monto.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-concepto="@s.Concepto">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
                             }
                         </td>
                     </tr>
                 }
             </tbody>
+            <tfoot>
+                <tr class="table-light">
+                    <th colspan="3" class="text-end">Total:</th>
+                    <th class="text-end text-danger" id="tf_montoSalida">$ @Model.TotalSalidas.ToString("N2")</th>
+                    <th colspan="2"></th>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>
@@ -290,6 +327,9 @@
                             <strong id="cambioDisplay" class="text-warning fs-5">$ 0.00</strong>
                             <input type="hidden" name="CambioEntregado" id="cambioEntregado" value="0" />
                         </div>
+                        <div id="alertNetoMayorAdd" class="alert alert-info py-2 small mt-3 mb-0 text-center d-none">
+                            El diezmo neto no puede ser mayor al monto entregado.
+                        </div>
                         <div class="mt-3">
                             <label class="form-label">Observaciones</label>
                             <input name="Observaciones" type="text" class="form-control"
@@ -298,8 +338,72 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary-custom">
+                        <button type="submit" id="btnSubmitAddDetalle" class="btn btn-primary-custom">
                             <i class="bi bi-check-lg me-1"></i>Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL — Editar Diezmo por Miembro
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="modalEditDetalle" tabindex="-1" aria-labelledby="modalEditDetalleLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditDetalleLabel">
+                        <i class="bi bi-person-check me-2"></i>Actualizar Diezmo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formEditDetalle" asp-action="UpdateDetalle" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="cierreId" value="@Model.Id" />
+                    <input type="hidden" name="detalleId" id="edit_detalleId" />
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Miembro <span class="text-danger">*</span></label>
+                            <select name="MiembroId" id="edit_miembroSelect" class="form-select select2-miembros-edit" required style="width: 100%;">
+                                <option value="">— Seleccionar o Escribir —</option>
+                                @foreach (var m in Model.MiembrosSelect)
+                                {
+                                    <option value="@m.Value">@m.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label">Monto entregado <span class="text-danger">*</span></label>
+                                <input name="MontoEntregado" type="number" step="0.01" min="0.01"
+                                       class="form-control fw-bold text-success" id="edit_montoEntregado" oninput="calcCambioEdit()" required />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Diezmo (Neto) <span class="text-danger">*</span></label>
+                                <input name="MontoNeto" type="number" step="0.01" min="0.01"
+                                       class="form-control fw-bold text-primary" id="edit_montoNeto" oninput="calcCambioEdit()" required />
+                            </div>
+                        </div>
+                        <div class="mt-3 bg-light border p-2 rounded text-end">
+                            <small class="text-muted mb-0 d-block">Cambio a devolver:</small>
+                            <strong id="edit_cambioDisplay" class="text-warning fs-5">$ 0.00</strong>
+                            <input type="hidden" name="CambioEntregado" id="edit_cambioEntregado" value="0" />
+                        </div>
+                        <div id="alertNetoMayorEdit" class="alert alert-info py-2 small mt-3 mb-0 text-center d-none">
+                            El diezmo neto no puede ser mayor al monto entregado.
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">Observaciones</label>
+                            <input name="Observaciones" id="edit_obs" type="text" class="form-control"
+                                   placeholder="Opcional" maxlength="300" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" id="btnSubmitEditDetalle" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Actualizar
                         </button>
                     </div>
                 </form>
@@ -345,31 +449,102 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Monto <span class="text-danger">*</span></label>
-                            <input name="Monto" type="number" step="0.01" min="0.01"
-                                   class="form-control" required />
+                            <input name="Monto" id="salida_monto" type="number" step="0.01" min="0.01"
+                                   class="form-control" oninput="validarMontoSalida()" required />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Concepto <span class="text-danger">*</span></label>
                             <input name="Concepto" id="s_concepto" type="text" class="form-control"
                                    placeholder="Descripción de la salida" maxlength="300" required />
                         </div>
-
-                        <div class="alert alert-info py-2 small mb-3 text-center">
-                            Total del Diezmo Recibido (Neto): <strong>$ @Model.TotalNeto.ToString("N2")</strong>
+                        <div id="alertMaxSalida" class="alert alert-info py-2 small mb-3 text-center d-none">
+                            El monto sobrepasa el Saldo Final disponible.
                         </div>
 
-                        @if (Model.SaldoFinal > 0)
-                        {
-                            <div class="alert alert-warning py-2 small mb-0">
-                                <i class="bi bi-exclamation-triangle me-1"></i>
-                                Saldo disponible: <strong>$ @Model.SaldoFinal.ToString("N2")</strong>
-                            </div>
-                        }
+                        <div class="alert alert-info py-2 small mb-3 text-center">
+                            Total del Diezmo Recibido (Neto): <strong class="val-total-neto">$ @Model.TotalNeto.ToString("N2")</strong>
+                        </div>
+
+                        <div class="alert alert-warning py-2 small mb-0">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            Saldo disponible: <strong class="val-saldo-final">$ @Model.SaldoFinal.ToString("N2")</strong>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger">
+                        <button type="submit" id="btnSubmitSalida" class="btn btn-danger">
                             <i class="bi bi-check-lg me-1"></i>Registrar Salida
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL — Editar Salida
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="modalEditSalida" tabindex="-1" aria-labelledby="modalEditSalidaLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditSalidaLabel">
+                        <i class="bi bi-pencil-square me-2"></i>Actualizar Salida
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formEditSalida" asp-action="UpdateSalida" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="cierreId" value="@Model.Id" />
+                    <input type="hidden" name="salidaId" id="edit_salidaId" />
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de salida <span class="text-danger">*</span></label>
+                            <select name="TipoSalidaId" id="edit_tipoSalidaSelect" class="form-select" required>
+                                <option value="">— Seleccionar —</option>
+                                @foreach (var t in Model.TiposSalidaSelect)
+                                {
+                                    <option value="@t.Value">@t.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Beneficiario</label>
+                            <select name="BeneficiarioId" id="edit_beneficiarioSelect" class="form-select">
+                                <option value="">— Sin beneficiario —</option>
+                                @foreach (var b in Model.BeneficiariosSelect)
+                                {
+                                    <option value="@b.Value">@b.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Monto <span class="text-danger">*</span></label>
+                            <input name="Monto" id="edit_monto" type="number" step="0.01" min="0.01"
+                                   class="form-control" oninput="validarMontoEditSalida()" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Concepto <span class="text-danger">*</span></label>
+                            <input name="Concepto" id="edit_concepto" type="text" class="form-control"
+                                   placeholder="Descripción de la salida" maxlength="300" required />
+                        </div>
+                        <div id="alertMaxEditSalida" class="alert alert-info py-2 small mb-3 text-center d-none">
+                            El monto sobrepasa el Saldo Final disponible.
+                        </div>
+
+                        <div class="alert alert-info py-2 small mb-3 text-center">
+                            Total del Diezmo Recibido (Neto): <strong class="val-total-neto">$ @Model.TotalNeto.ToString("N2")</strong>
+                        </div>
+
+                        <div class="alert alert-warning py-2 small mb-0">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            Saldo disponible: <strong class="val-saldo-final">$ @Model.SaldoFinal.ToString("N2")</strong>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" id="btnSubmitEditSalida" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Actualizar Salida
                         </button>
                     </div>
                 </form>
@@ -398,10 +573,31 @@
 
     <script>
         $(document).ready(function() {
+            var currentTotalNeto = @Model.SaldoFinal.ToString("0.#####", System.Globalization.CultureInfo.InvariantCulture);
+            window.updateCurrentTotalNeto = function(newTotal) {
+                currentTotalNeto = newTotal;
+            };
+            window.getCurrentTotalNeto = function() {
+                return currentTotalNeto;
+            };
+
             // Inicializar Select2
             $('.select2-miembros').select2({
                 theme: "bootstrap-5",
                 dropdownParent: $('#modalAddDetalle'),
+                placeholder: "Buscar por nombre, apellido o num...",
+                allowClear: true,
+                width: '100%',
+                language: {
+                    noResults: function() { return "No se encontraron miembros"; },
+                    searching: function() { return "Buscando..."; }
+                }
+            });
+
+            // Inicializar Select2 edit
+            $('.select2-miembros-edit').select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#modalEditDetalle'),
                 placeholder: "Buscar por nombre, apellido o num...",
                 allowClear: true,
                 width: '100%',
@@ -450,6 +646,18 @@
                         var saldo = response.saldoFinal;
                         $('#uiSaldoFinal').text('$ ' + saldo.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                         
+                        window.updateCurrentTotalNeto(response.saldoFinal);
+                        if (typeof validarMontoSalida === "function") validarMontoSalida();
+                        if (typeof validarMontoEditSalida === "function") validarMontoEditSalida();
+
+                        $('.val-total-neto').text('$ ' + response.totalNeto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('.val-saldo-final').text('$ ' + saldo.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
+                        $('#tf_entregado').text('$ ' + response.totalRecibido.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#tf_cambio').text('$ ' + response.totalCambio.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#tf_neto').text('$ ' + response.totalNeto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#tf_montoSalida').text('$ ' + response.totalSalidas.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
                         var wrapper = $('#wrapperSaldoFinal');
                         var uiSaldo = $('#uiSaldoFinal');
                         
@@ -492,6 +700,188 @@
                 });
             });
 
+            // Llenar Modal Actualizar Detalle
+            $('#modalEditDetalle').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var id = button.data('id');
+                var miembro = button.data('miembro');
+                var entregado = button.data('entregado');
+                var neto = button.data('neto');
+                var cambio = button.data('cambio');
+                var obs = button.data('obs');
+
+                var modal = $(this);
+                modal.find('#edit_detalleId').val(id);
+                var $miembroSelect = modal.find('#edit_miembroSelect');
+                $miembroSelect.val(miembro).trigger('change');
+
+                modal.find('#edit_montoEntregado').val(entregado);
+                modal.find('#edit_montoNeto').val(neto);
+                modal.find('#edit_cambioEntregado').val(cambio);
+                modal.find('#edit_obs').val(obs);
+                
+                document.getElementById('edit_cambioDisplay').textContent = '$ ' + parseFloat(cambio || 0).toFixed(2);
+            });
+
+            // AJAX submit para Actualizar Detalle
+            $('#formEditDetalle').on('submit', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var btn = form.find('button[type="submit"]');
+                var originalHtml = btn.html();
+                
+                btn.html('<i class="bi bi-hourglass-split me-1"></i>Actualizando...').prop('disabled', true);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize(),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function(response) {
+                        $('#uiTotalRecibido').text('$ ' + response.totalRecibido.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#uiTotalCambio').text('$ ' + response.totalCambio.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#uiTotalNeto').text('$ ' + response.totalNeto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#uiTotalSalidas').text('$ ' + response.totalSalidas.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        
+                        var saldo = response.saldoFinal;
+                        $('#uiSaldoFinal').text('$ ' + saldo.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        
+                        window.updateCurrentTotalNeto(response.saldoFinal);
+                        if (typeof validarMontoSalida === "function") validarMontoSalida();
+                        if (typeof validarMontoEditSalida === "function") validarMontoEditSalida();
+
+                        $('.val-total-neto').text('$ ' + response.totalNeto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('.val-saldo-final').text('$ ' + saldo.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
+                        $('#tf_entregado').text('$ ' + response.totalRecibido.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#tf_cambio').text('$ ' + response.totalCambio.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#tf_neto').text('$ ' + response.totalNeto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#tf_montoSalida').text('$ ' + response.totalSalidas.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
+                        var wrapper = $('#wrapperSaldoFinal');
+                        var uiSaldo = $('#uiSaldoFinal');
+                        
+                        if (saldo >= 0) {
+                            wrapper.removeClass('border-danger').addClass('border-success');
+                            uiSaldo.removeClass('text-danger').addClass('text-success');
+                        } else {
+                            wrapper.removeClass('border-success').addClass('border-danger');
+                            uiSaldo.removeClass('text-success').addClass('text-danger');
+                        }
+
+                        $('#modalEditDetalle').modal('hide');
+
+                        $.get(location.href, function(html) {
+                            var nuevaTabla = $(html).find('#tableDiezmos').html();
+                            $('#tableDiezmos').html(nuevaTabla);
+                            bindDeleteEvents(); 
+                        });
+
+                        Swal.mixin({
+                            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
+                        }).fire({
+                            icon: 'success', title: 'Diezmo actualizado con éxito'
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error', title: 'Error', text: xhr.responseText || 'Ocurrió un error al actualizar el diezmo'
+                        });
+                    },
+                    complete: function() {
+                        btn.html(originalHtml).prop('disabled', false);
+                    }
+                });
+            });
+
+            // Llenar Modal Actualizar Salida
+            $('#modalEditSalida').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var id = button.data('id');
+                var tipo = button.data('tipo');
+                var beneficiario = button.data('beneficiario');
+                var monto = button.data('monto');
+                var concepto = button.data('concepto');
+
+                var modal = $(this);
+                modal.find('#edit_salidaId').val(id);
+                modal.find('#edit_tipoSalidaSelect').val(tipo);
+                modal.find('#edit_beneficiarioSelect').val(beneficiario || '');
+                modal.find('#edit_monto').val(monto);
+                modal.find('#edit_concepto').val(concepto);
+            });
+
+            // AJAX submit para Actualizar Salida
+            $('#formEditSalida').on('submit', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var btn = form.find('button[type="submit"]');
+                var originalHtml = btn.html();
+                
+                btn.html('<i class="bi bi-hourglass-split me-1"></i>Actualizando...').prop('disabled', true);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize(),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function(response) {
+                        $('#uiTotalRecibido').text('$ ' + response.totalRecibido.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#uiTotalCambio').text('$ ' + response.totalCambio.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#uiTotalNeto').text('$ ' + response.totalNeto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#uiTotalSalidas').text('$ ' + response.totalSalidas.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        
+                        var saldo = response.saldoFinal;
+                        $('#uiSaldoFinal').text('$ ' + saldo.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        
+                        window.updateCurrentTotalNeto(response.saldoFinal);
+                        if (typeof validarMontoSalida === "function") validarMontoSalida();
+                        if (typeof validarMontoEditSalida === "function") validarMontoEditSalida();
+
+                        $('.val-total-neto').text('$ ' + response.totalNeto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('.val-saldo-final').text('$ ' + saldo.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
+                        $('#tf_entregado').text('$ ' + response.totalRecibido.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#tf_cambio').text('$ ' + response.totalCambio.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#tf_neto').text('$ ' + response.totalNeto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        $('#tf_montoSalida').text('$ ' + response.totalSalidas.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
+                        var wrapper = $('#wrapperSaldoFinal');
+                        var uiSaldo = $('#uiSaldoFinal');
+                        
+                        if (saldo >= 0) {
+                            wrapper.removeClass('border-danger').addClass('border-success');
+                            uiSaldo.removeClass('text-danger').addClass('text-success');
+                        } else {
+                            wrapper.removeClass('border-success').addClass('border-danger');
+                            uiSaldo.removeClass('text-success').addClass('text-danger');
+                        }
+
+                        $('#modalEditSalida').modal('hide');
+
+                        $.get(location.href, function(html) {
+                            var nuevaTabla = $(html).find('#tableSalidas').html();
+                            $('#tableSalidas').html(nuevaTabla);
+                            bindDeleteEvents(); 
+                        });
+
+                        Swal.mixin({
+                            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
+                        }).fire({
+                            icon: 'success', title: 'Salida actualizada con éxito'
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error', title: 'Error', text: xhr.responseText || 'Ocurrió un error al actualizar la salida'
+                        });
+                    },
+                    complete: function() {
+                        btn.html(originalHtml).prop('disabled', false);
+                    }
+                });
+            });
+
         });
 
         function bindDeleteEvents() {
@@ -507,6 +897,17 @@
             let neto = parseFloat(document.getElementById('montoNeto').value) || 0;
             let cambio = entregado - neto;
             
+            let alertDiv = document.getElementById('alertNetoMayorAdd');
+            let btnSubmit = document.getElementById('btnSubmitAddDetalle');
+
+            if (neto > entregado && entregado > 0) {
+                alertDiv.classList.remove('d-none');
+                btnSubmit.classList.add('d-none');
+            } else {
+                alertDiv.classList.add('d-none');
+                btnSubmit.classList.remove('d-none');
+            }
+
             if (cambio < 0) cambio = 0;
             
             document.getElementById('cambioDisplay').textContent = '$ ' + cambio.toFixed(2);
@@ -537,6 +938,58 @@
                 confirmButtonText: 'Sí, reabrir',
                 cancelButtonText: 'Cancelar'
             }).then(r => { if (r.isConfirmed) document.getElementById('formReabrir').submit(); });
+        }
+
+        // Calculo interactivo del cambio en modo edicion
+        function calcCambioEdit() {
+            let entregado = parseFloat(document.getElementById('edit_montoEntregado').value) || 0;
+            let neto = parseFloat(document.getElementById('edit_montoNeto').value) || 0;
+            let cambio = entregado - neto;
+            
+            let alertDiv = document.getElementById('alertNetoMayorEdit');
+            let btnSubmit = document.getElementById('btnSubmitEditDetalle');
+
+            if (neto > entregado && entregado > 0) {
+                alertDiv.classList.remove('d-none');
+                btnSubmit.classList.add('d-none');
+            } else {
+                alertDiv.classList.add('d-none');
+                btnSubmit.classList.remove('d-none');
+            }
+
+            if (cambio < 0) cambio = 0;
+            
+            document.getElementById('edit_cambioDisplay').textContent = '$ ' + cambio.toFixed(2);
+            document.getElementById('edit_cambioEntregado').value = cambio.toFixed(2);
+        }
+
+        // Validacion dinamica para el limite de Salidas
+        function validarMontoSalida() {
+            let monto = parseFloat(document.getElementById('salida_monto').value) || 0;
+            let alertDiv = document.getElementById('alertMaxSalida');
+            let btnSubmit = document.getElementById('btnSubmitSalida');
+
+            if (window.getCurrentTotalNeto && monto > window.getCurrentTotalNeto()+ monto) {
+                alertDiv.classList.remove('d-none');
+                btnSubmit.classList.add('d-none');
+            } else {
+                alertDiv.classList.add('d-none');
+                btnSubmit.classList.remove('d-none');
+            }
+        }
+
+        function validarMontoEditSalida() {
+            let monto = parseFloat(document.getElementById('edit_monto').value) || 0;
+            let alertDiv = document.getElementById('alertMaxEditSalida');
+            let btnSubmit = document.getElementById('btnSubmitEditSalida');
+
+            if (window.getCurrentTotalNeto && monto > (window.getCurrentTotalNeto() + monto)) {
+                alertDiv.classList.remove('d-none');
+                btnSubmit.classList.add('d-none');
+            } else {
+                alertDiv.classList.add('d-none');
+                btnSubmit.classList.remove('d-none');
+            }
         }
     </script>
 }

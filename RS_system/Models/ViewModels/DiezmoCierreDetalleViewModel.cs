@@ -75,6 +75,8 @@ public class DiezmoDetalleRowViewModel
 public class DiezmoSalidaRowViewModel
 {
     public long    Id              { get; set; }
+    public long    TipoSalidaId    { get; set; }
+    public long?   BeneficiarioId  { get; set; }
     public string  TipoSalidaNombre { get; set; } = string.Empty;
     public string? BeneficiarioNombre { get; set; }
     public decimal Monto           { get; set; }

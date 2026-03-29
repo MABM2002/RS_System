@@ -16,10 +16,12 @@ public interface IDiezmoCierreService
 
     // ── Detalles ──
     Task AgregarDetalleAsync(long cierreId, DiezmoDetalleFormViewModel vm, string usuario);
+    Task ActualizarDetalleAsync(long detalleId, DiezmoDetalleFormViewModel vm, string usuario);
     Task EliminarDetalleAsync(long detalleId, string usuario);
 
     // ── Salidas ──
     Task AgregarSalidaAsync(long cierreId, DiezmoSalidaFormViewModel vm, string usuario);
+    Task ActualizarSalidaAsync(long salidaId, DiezmoSalidaFormViewModel vm, string usuario);
     Task EliminarSalidaAsync(long salidaId, string usuario);
 
     // ── Flujo de cierre ──
