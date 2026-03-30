@@ -573,12 +573,12 @@
 
     <script>
         $(document).ready(function() {
-            var currentTotalNeto = @Model.SaldoFinal.ToString("0.#####", System.Globalization.CultureInfo.InvariantCulture);
+            var currentSaldoFinal = @Model.SaldoFinal.ToString("0.#####", System.Globalization.CultureInfo.InvariantCulture);
             window.updateCurrentTotalNeto = function(newTotal) {
-                currentTotalNeto = newTotal;
+                currentSaldoFinal = newTotal;
             };
-            window.getCurrentTotalNeto = function() {
-                return currentTotalNeto;
+            window.getCurrentSaldoFinal = function() {
+                return currentSaldoFinal;
             };
 
             // Inicializar Select2
@@ -809,6 +809,9 @@
                 modal.find('#edit_beneficiarioSelect').val(beneficiario || '');
                 modal.find('#edit_monto').val(monto);
                 modal.find('#edit_concepto').val(concepto);
+                
+                document.getElementById('edit_monto').dataset.originalMonto = monto;
+                if (typeof validarMontoEditSalida === "function") validarMontoEditSalida();
             });
 
             // AJAX submit para Actualizar Salida
@@ -969,7 +972,7 @@
             let alertDiv = document.getElementById('alertMaxSalida');
             let btnSubmit = document.getElementById('btnSubmitSalida');
 
-            if (window.getCurrentTotalNeto && monto > window.getCurrentTotalNeto()+ monto) {
+            if (window.getCurrentSaldoFinal && monto > window.getCurrentSaldoFinal()) {
                 alertDiv.classList.remove('d-none');
                 btnSubmit.classList.add('d-none');
             } else {
@@ -979,11 +982,18 @@
         }
 
         function validarMontoEditSalida() {
-            let monto = parseFloat(document.getElementById('edit_monto').value) || 0;
+            let montoInput = document.getElementById('edit_monto');
+            let montoNuevo = parseFloat(montoInput.value) || 0;
+            let montoOriginal = parseFloat(montoInput.dataset.originalMonto) || 0;
             let alertDiv = document.getElementById('alertMaxEditSalida');
             let btnSubmit = document.getElementById('btnSubmitEditSalida');
 
-            if (window.getCurrentTotalNeto && monto > (window.getCurrentTotalNeto() + monto)) {
+            let maxPermitido = 0;
+            if (window.getCurrentSaldoFinal !== undefined) {
+                 maxPermitido = window.getCurrentSaldoFinal() + montoOriginal;
+            }
+
+            if (window.getCurrentSaldoFinal !== undefined && montoNuevo > maxPermitido) {
                 alertDiv.classList.remove('d-none');
                 btnSubmit.classList.add('d-none');
             } else {
