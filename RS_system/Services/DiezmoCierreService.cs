@@ -84,7 +84,7 @@ public class DiezmoCierreService : IDiezmoCierreService
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-    // Detalles
+    // DetallesReabrirCierreAsync
     // ──────────────────────────────────────────────────────────────────────────
 
     public async Task AgregarDetalleAsync(long cierreId, DiezmoDetalleFormViewModel vm, string usuario)
