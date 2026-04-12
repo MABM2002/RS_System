@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "XhNtFEAMO5DpVR9uI/jV5eLQrnDE4oGlhI0qLqlgLR4=",
+  "Hash": "pLqjRSOZicvEX+yHkp+LdlW1if/DhUI72wTc0GlEbxA=",
   "Source": "RS_system",
   "BasePath": "_content/RS_system",
   "Mode": "Default",
@@ -4658,6 +4658,27 @@
       "OriginalItemSpec": "wwwroot/Assets/logo.png"
     },
     {
+      "Identity": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/Assets/recibotemplate.png",
+      "SourceId": "RS_system",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/",
+      "BasePath": "_content/RS_system",
+      "RelativePath": "Assets/recibotemplate#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "q1yojoa6hj",
+      "Integrity": "osre9ENQBGOhm1cnoInIN7tW3mEL3Tk5PoHMTALM0ZQ=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/Assets/recibotemplate.png"
+    },
+    {
       "Identity": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/css/all.min.css",
       "SourceId": "RS_system",
       "SourceType": "Discovered",
@@ -8002,6 +8023,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-+atJCfJaTY8ofgt+dWO1t84kYE3aDHP6RSMirrJsIwg="
+        }
+      ]
+    },
+    {
+      "Route": "Assets/recibotemplate.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/Assets/recibotemplate.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "153972"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"osre9ENQBGOhm1cnoInIN7tW3mEL3Tk5PoHMTALM0ZQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 12 Apr 2026 16:50:44 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-osre9ENQBGOhm1cnoInIN7tW3mEL3Tk5PoHMTALM0ZQ="
+        }
+      ]
+    },
+    {
+      "Route": "Assets/recibotemplate.q1yojoa6hj.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/Assets/recibotemplate.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "153972"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"osre9ENQBGOhm1cnoInIN7tW3mEL3Tk5PoHMTALM0ZQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 12 Apr 2026 16:50:44 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "q1yojoa6hj"
+        },
+        {
+          "Name": "label",
+          "Value": "Assets/recibotemplate.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-osre9ENQBGOhm1cnoInIN7tW3mEL3Tk5PoHMTALM0ZQ="
         }
       ]
     },

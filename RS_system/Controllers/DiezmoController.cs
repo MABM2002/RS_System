@@ -1,10 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Rs_system.Data;
 using Rs_system.Filters;
+using Rs_system.Models;
 using Rs_system.Models.ViewModels;
 using Rs_system.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using RS_system.Helpers;
 
 namespace Rs_system.Controllers;
 
@@ -14,15 +18,21 @@ public class DiezmoController : Controller
     private readonly IDiezmoCierreService  _cierreService;
     private readonly IDiezmoReciboService  _reciboService;
     private readonly IMiembroService       _miembroService;
+    private readonly IConfiguracionService _configService;
+    private readonly ApplicationDbContext  _dbContext;
 
     public DiezmoController(
         IDiezmoCierreService  cierreService,
         IDiezmoReciboService  reciboService,
-        IMiembroService       miembroService)
+        IMiembroService       miembroService,
+        IConfiguracionService configService,
+        ApplicationDbContext  dbContext)
     {
         _cierreService  = cierreService;
         _reciboService  = reciboService;
         _miembroService = miembroService;
+        _configService  = configService;
+        _dbContext      = dbContext;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -386,6 +396,38 @@ public class DiezmoController : Controller
         var salida = await _reciboService.GetSalidaParaReciboAsync(salidaId);
 
         if (salida == null) return NotFound();
+
+        // Insertar registro en recibos_generados si no existe
+        var yaExiste = await _dbContext.RecibosGenerados
+            .AnyAsync(r => r.NumRecibo == numero);
+
+        if (!yaExiste)
+        {
+            var fecha = salida.Fecha.ToLocalTime();
+            var nombreIglesia = await _configService.GetValorOrDefaultAsync("NAME_CHURCH", "FarmMan");
+            var montoEnLetras = string.Format("{0} DÓLARES ESTADOUNIDENSES", UtilidadesStatic.ConvertirNumeroALetras(salida.Monto));
+            var usuario = UsuarioActual();
+
+            var recibo = new RecibosGenerados
+            {
+                NumRecibo          = numero,
+                NombreBeneficiario = salida.Beneficiario?.Nombre ?? "No especificado",
+                NombreIglesia      = nombreIglesia,
+                MontoDecimal       = salida.Monto,
+                MontoTexto         = montoEnLetras,
+                Dia                = fecha.Day,
+                Mes                = fecha.Month,
+                Anio               = fecha.Year,
+                Concepto           = salida.Concepto,
+                IdSalida           = salida.Id,
+                FechaGeneracion    = DateTime.UtcNow,
+                Eliminado          = false,
+                CreadoPor          = usuario
+            };
+
+            _dbContext.RecibosGenerados.Add(recibo);
+            await _dbContext.SaveChangesAsync();
+        }
 
         ViewBag.NumeroRecibo = numero;
         ViewBag.Emisor       = UsuarioActual();

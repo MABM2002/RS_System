@@ -1,4 +1,5 @@
-@model Rs_system.Models.DiezmoSalida
+@using RS_system.Helpers;
+@model Rs_system.Models.DiezmoSalida;
 @{
     ViewData["Title"] = $"Recibo {ViewBag.NumeroRecibo}";
     Layout = null;
@@ -15,16 +16,20 @@
     // NOTA: No existe helper de conversión a letras en el proyecto.
     // Se muestra el monto numérico como referencia; el campo "letras"
     // queda disponible para impresión manual si se requiere.
-    var montoEnLetras = "[Monto en letras — agregar helper si se requiere]";
-
-    // NOTA: El nombre de la iglesia no está modelado.
-    // Si se agrega una propiedad de configuración global, reemplazar aquí.
-    var nombreIglesia = "Iglesia — módulo de Diezmos";
+    var montoEnLetras = string.Format("{0} DÓLARES ESTADOUNIDENSES", UtilidadesStatic.ConvertirNumeroALetras(Model.Monto)); // "[Monto en letras — agregar helper si se requiere]";
 
     var beneficiario = Model.Beneficiario?.Nombre ?? "No especificado";
     var concepto = Model.Concepto ?? "";
     var numeroRecibo = ViewBag.NumeroRecibo ?? "";
 }
+
+@inject Rs_system.Services.IConfiguracionService ConfigService
+@{
+    // NOTA: El nombre de la iglesia no está modelado.
+    // Si se agrega una propiedad de configuración global, reemplazar aquí.
+    var nombreIglesia = await ConfigService.GetValorOrDefaultAsync("NAME_CHURCH", "FarmMan");//"Iglesia — módulo de Diezmos";
+}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -135,8 +140,9 @@
   }
 
   .field-num {
-    font-size: 13pt;
+    font-size: 10pt;
     font-weight: bold;
+    color: red;
   }
 
   .field-letras {
@@ -166,16 +172,15 @@
 <div class="page">
 
   <!-- RECIBO 1 (Copia Original - parte superior) -->
-  <div class="receipt" id="recibo1">
-    <!-- TODO: Reemplazar este placeholder con la imagen base64 del recibo -->
-    <div class="img-placeholder">[Imagen de fondo del recibo — agregar aquí]</div>
+  <div class="receipt" id="recibo1" style="border-style: solid; border-width:1px">
+    <img src="~/Assets/recibotemplate.png" alt="Fondo del recibo" />
 
     <!-- N.º -->
     <input class="field field-num" style="left:444.35pt; top:44.6pt; width:80pt;"
       type="text" value="@numeroRecibo" readonly id="num1"/>
 
     <!-- Cantidad en número -->
-    <input class="field" style="left:446.5pt; top:71.45pt; width:74pt;"
+    <input class="field" style="left:448.5pt; top:69.45pt; width:74pt;"
       type="text" value="@montoStr" readonly id="cantidad1"/>
 
     <!-- Nombre Iglesia -->
@@ -183,15 +188,15 @@
       type="text" value="@nombreIglesia" readonly id="iglesia1"/>
 
     <!-- Dia -->
-    <input class="field" style="left:412.3pt; top:113.65pt; width:23pt; text-align:center;"
+    <input class="field" style="left:412.3pt; top:114.65pt; width:23pt; text-align:center;"
       type="text" value="@dia" readonly maxlength="2" id="dia1"/>
 
     <!-- Mes -->
-    <input class="field" style="left:450.5pt; top:112.55pt; width:23pt; text-align:center;"
+    <input class="field" style="left:450.5pt; top:114.55pt; width:23pt; text-align:center;"
       type="text" value="@mes" readonly maxlength="2" id="mes1"/>
 
     <!-- Año -->
-    <input class="field" style="left:491.55pt; top:113.25pt; width:23pt; text-align:center;"
+    <input class="field" style="left:491.55pt; top:114.25pt; width:23pt; text-align:center;"
       type="text" value="@anio" readonly maxlength="2" id="year1"/>
 
     <!-- Cantidad en letras -->
@@ -203,7 +208,7 @@
       type="text" value="@concepto" readonly id="concepto1"/>
 
     <!-- X (checkmark) -->
-    <input class="field field-x" style="left:177.1pt; top:198.25pt; width:15pt; text-align:center;"
+    <input class="field field-x" style="left:175.1pt; top:200.25pt; width:15pt; text-align:center;"
       type="text" value="X" readonly maxlength="1" id="x1"/>
 
     <!-- Beneficiario -->
@@ -213,9 +218,8 @@
   </div>
 
   <!-- RECIBO 2 (Copia - parte inferior) -->
-  <div class="receipt" id="recibo2">
-    <!-- TODO: Reemplazar este placeholder con la imagen base64 del recibo (copia) -->
-    <div class="img-placeholder">[Imagen de fondo del recibo (copia) — agregar aquí]</div>
+  <div class="receipt" id="recibo2"  style="border-style: solid; border-width:1px">
+    <img src="~/Assets/recibotemplate.png" alt="Fondo del recibo (copia)" />
 
     <!-- N.º -->
     <input class="field field-num" style="left:444.35pt; top:45.2pt; width:80pt;"
@@ -250,7 +254,7 @@
       type="text" value="@concepto" readonly id="concepto2"/>
 
     <!-- X (checkmark) -->
-    <input class="field field-x" style="left:176.45pt; top:198.1pt; width:15pt; text-align:center;"
+    <input class="field field-x" style="left:174.45pt; top:200.1pt; width:15pt; text-align:center;"
       type="text" value="X" readonly maxlength="1" id="x2"/>
 
     <!-- Beneficiario -->

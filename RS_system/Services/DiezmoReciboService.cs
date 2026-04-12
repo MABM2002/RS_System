@@ -25,7 +25,7 @@ public class DiezmoReciboService : IDiezmoReciboService
             return salida.NumeroRecibo;
 
         var anio = salida.CreadoEn.Year;
-        var correlativo = $"RECDZ-{anio}-{salidaId:D6}";
+        var correlativo = $"RECDZ-{anio}-{salidaId:D3}";
 
         salida.NumeroRecibo  = correlativo;
         salida.ActualizadoEn = DateTime.UtcNow;

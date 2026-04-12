@@ -62,6 +62,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<DiezmoSalida>      DiezmoSalidas      { get; set; }
     public DbSet<DiezmoBeneficiario> DiezmoBeneficiarios { get; set; }
     public DbSet<DiezmoTipoSalida>  DiezmoTiposSalida  { get; set; }
+    public DbSet<RecibosGenerados>  RecibosGenerados   { get; set; }
 
     // Dynamic Documents module
     public DbSet<Documento> Documentos { get; set; }
@@ -305,7 +306,25 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Nombre).HasMaxLength(150).IsRequired();
         });
 
-        
+        modelBuilder.Entity<RecibosGenerados>(entity =>
+        {
+            entity.ToTable("recibos_generados", "public");
+            entity.HasKey(e => e.NumRecibo);
+            entity.Property(e => e.NumRecibo).HasMaxLength(30).IsRequired();
+            entity.Property(e => e.NombreBeneficiario).HasMaxLength(150).IsRequired();
+            entity.Property(e => e.NombreIglesia).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.MontoDecimal).HasColumnType("numeric(15,2)");
+            entity.Property(e => e.CreadoPor).HasMaxLength(100).IsRequired();
+
+            entity.HasOne(e => e.DiezmoSalida)
+                .WithMany()
+                .HasForeignKey(e => e.IdSalida)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.IdSalida);
+        });
+
+
         // Global configuration: Convert all dates to UTC when saving
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
