@@ -63,7 +63,7 @@ public class UsuarioController : Controller
                 return View(model);
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            //using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 var persona = new Persona
@@ -107,12 +107,12 @@ public class UsuarioController : Controller
                     await _context.SaveChangesAsync();
                 }
 
-                await transaction.CommitAsync();
+                //await transaction.CommitAsync();
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception)
             {
-                await transaction.RollbackAsync();
+               // await transaction.RollbackAsync();
                 ModelState.AddModelError("", "Ocurrió un error al crear el usuario.");
             }
         }
@@ -164,7 +164,7 @@ public class UsuarioController : Controller
 
             if (usuario == null) return NotFound();
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            // using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 // Update Persona
@@ -200,12 +200,12 @@ public class UsuarioController : Controller
                 }
 
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                // await transaction.CommitAsync();
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception)
             {
-                await transaction.RollbackAsync();
+                // await transaction.RollbackAsync();
                 ModelState.AddModelError("", "Ocurrió un error al actualizar el usuario.");
             }
         }

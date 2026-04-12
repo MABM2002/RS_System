@@ -38,7 +38,6 @@ public class DiezmoController : Controller
     // ─────────────────────────────────────────────────────────────────────────
     // GET: /Diezmo — Listado de cierres
     // ─────────────────────────────────────────────────────────────────────────
-    [Permission("Diezmo.Index")]
     public async Task<IActionResult> Index(int? anio)
     {
         anio ??= DateTime.Today.Year;
@@ -65,14 +64,12 @@ public class DiezmoController : Controller
     // ─────────────────────────────────────────────────────────────────────────
     // GET: /Diezmo/Create
     // ─────────────────────────────────────────────────────────────────────────
-    [Permission("Diezmo.Create")]
     public IActionResult Create()
         => View(new DiezmoCierreCreateViewModel());
 
     // POST: /Diezmo/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Permission("Diezmo.Create")]
     public async Task<IActionResult> Create(DiezmoCierreCreateViewModel vm)
     {
         if (!ModelState.IsValid)
