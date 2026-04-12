@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Rs_system.Models;
-
 namespace Rs_system.Data;
 
 public class ApplicationDbContext : DbContext
@@ -64,7 +63,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<DiezmoBeneficiario> DiezmoBeneficiarios { get; set; }
     public DbSet<DiezmoTipoSalida>  DiezmoTiposSalida  { get; set; }
 
-
+    // Dynamic Documents module
+    public DbSet<Documento> Documentos { get; set; }
+    public DbSet<DocumentoDetalle> DocumentoDetalles { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -81,6 +82,10 @@ public class ApplicationDbContext : DbContext
         // Configure composite key for RolUsuario
         modelBuilder.Entity<RolUsuario>()
             .HasKey(ru => new { ru.UsuarioId, ru.RolId });
+
+        modelBuilder.Entity<Documento>().HasKey(e =>  e.IdDocumento);
+        modelBuilder.Entity<DocumentoDetalle>().HasKey(e =>  e.IdDetalle);
+        
         
         // Configure relationships
         modelBuilder.Entity<RolUsuario>()
@@ -111,6 +116,7 @@ public class ApplicationDbContext : DbContext
             .HasOne(p => p.Modulo)
             .WithMany(m => m.Permisos)
             .HasForeignKey(p => p.ModuloId);
+        
         
         modelBuilder.Entity<Usuario>()
             .HasOne(u => u.Persona)

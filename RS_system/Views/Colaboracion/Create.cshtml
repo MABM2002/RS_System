@@ -261,9 +261,7 @@
  </div>
  
  @section Scripts {
-    <!-- Offline Support Scripts -->
-    <script src="~/js/colaboraciones-offline-db.js"></script>
-    <script src="~/js/colaboraciones-sync.js"></script>
+
     
     <script>
         let timeoutBusqueda = null;
@@ -441,91 +439,11 @@
         // Calcular cuando cambia el monto total
         document.getElementById('montoTotal')?.addEventListener('input', calcularSugerido);
         
-        // ===== OFFLINE-FIRST FORM SUBMISSION =====
-        document.getElementById('colaboracionForm')?.addEventListener('submit', async function(e) {
-            e.preventDefault(); // Prevent default form submission
-            
-            // Gather form data
-            const miembroId = document.getElementById('miembroIdHidden').value;
-            const mesInicial = document.getElementById('mesInicial').value;
-            const anioInicial = document.getElementById('anioInicial').value;
-            const mesFinal = document.getElementById('mesFinal').value;
-            const anioFinal = document.getElementById('anioFinal').value;
-            const montoTotal = document.getElementById('montoTotal').value;
-            const observaciones = document.querySelector('[name="Observaciones"]').value;
-            const tipoPrioritario = document.getElementById('tipoPrioritario').value;
-            
-            // Get selected tipos
-            const tiposSeleccionados = Array.from(document.querySelectorAll('.tipo-checkbox:checked'))
-                .map(cb => cb.value);
-            
-            // Validate
-            if (!miembroId) {
-                toastr.error('Por favor seleccione un miembro');
-                return;
-            }
-            
-            if (tiposSeleccionados.length === 0) {
-                toastr.error('Por favor seleccione al menos un tipo de colaboración');
-                return;
-            }
-            
-            if (!montoTotal || parseFloat(montoTotal) <= 0) {
-                toastr.error('Por favor ingrese un monto válido');
-                return;
-            }
-            
-            // Prepare data object
-            const colaboracionData = {
-                miembroId: parseInt(miembroId),
-                mesInicial: parseInt(mesInicial),
-                anioInicial: parseInt(anioInicial),
-                mesFinal: parseInt(mesFinal),
-                anioFinal: parseInt(anioFinal),
-                montoTotal: parseFloat(montoTotal),
-                observaciones: observaciones,
-                tiposSeleccionados: tiposSeleccionados,
-                tipoPrioritario: tipoPrioritario || null,
-                registradoPor: '@User.Identity?.Name'
-            };
-            
-            // Disable submit button
+        document.getElementById('colaboracionForm')?.addEventListener('submit', function() {
+            // Disable submit button on native sumbit to prevent double clicks
             const submitBtn = this.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
-            
-            try {
-                // Use sync manager to save (handles online/offline automatically)
-                const result = await ColaboracionesSyncManager.saveColaboracion(colaboracionData);
-                
-                if (result.success) {
-                    if (result.offline) {
-                        toastr.warning(result.message);
-                        
-                        // Clear form
-                        setTimeout(() => {
-                            window.location.href = '@Url.Action("Index", "Colaboracion")';
-                        }, 2000);
-                    } else {
-                        toastr.success(result.message);
-                        
-                        // Redirect to index
-                        setTimeout(() => {
-                            window.location.href = '@Url.Action("Index", "Colaboracion")';
-                        }, 1500);
-                    }
-                } else {
-                    toastr.error(result.message || 'Error al guardar');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnText;
-                }
-            } catch (error) {
-                console.error('Form submission error:', error);
-                toastr.error('Error inesperado: ' + error.message);
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnText;
-            }
         });
         
         // Calcular al cargar la página

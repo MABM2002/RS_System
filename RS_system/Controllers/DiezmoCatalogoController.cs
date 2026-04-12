@@ -106,6 +106,7 @@ public class DiezmoCatalogoController : Controller
     public async Task<IActionResult> Beneficiarios()
     {
         var lista = await _context.DiezmoBeneficiarios
+            .Include(x => x.Persona)
             .Where(x => !x.Eliminado)
             .OrderBy(x => x.Nombre)
             .ToListAsync();
@@ -122,13 +123,52 @@ public class DiezmoCatalogoController : Controller
             return RedirectToAction(nameof(Beneficiarios));
         }
 
+        Persona? persona = null;
+        if (!string.IsNullOrWhiteSpace(vm.Nombres) && !string.IsNullOrWhiteSpace(vm.Apellidos))
+        {
+            if (vm.IdPersona.HasValue && vm.IdPersona.Value > 0)
+            {
+                persona = await _context.Personas.FindAsync(vm.IdPersona.Value);
+            }
+            
+            if (persona == null)
+            {
+                persona = new Persona
+                {
+                    CreadoEn = DateTime.UtcNow,
+                    Activo = true
+                };
+                _context.Personas.Add(persona);
+            }
+
+            persona.Nombres = vm.Nombres;
+            persona.Apellidos = vm.Apellidos;
+            persona.Dui = vm.Dui;
+            persona.Telefono = vm.Telefono;
+            persona.Direccion = vm.Direccion;
+            persona.ActualizadoEn = DateTime.UtcNow;
+            
+            // Save immediately to get the ID if new
+            try
+            {
+                _context.Entry(persona).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Persona no se pudo actualizar.";
+            }
+            
+        }
+
         if (vm.Id == 0)
         {
             var nuevo = new DiezmoBeneficiario
             {
                 Nombre      = vm.Nombre,
                 Descripcion = vm.Descripcion,
-                CreadoPor   = UsuarioActual()
+                CreadoPor   = UsuarioActual(),
+                IdPersona   = persona?.Id
             };
             _context.DiezmoBeneficiarios.Add(nuevo);
             TempData["SuccessMessage"] = "Beneficiario creado.";
@@ -142,12 +182,25 @@ public class DiezmoCatalogoController : Controller
             dbItem.Descripcion    = vm.Descripcion;
             dbItem.ActualizadoPor = UsuarioActual();
             dbItem.ActualizadoEn  = DateTime.UtcNow;
+            
+            if (persona != null)
+            {
+                dbItem.IdPersona = persona.Id;
+            }
+
             _context.Update(dbItem);
             
             TempData["SuccessMessage"] = "Beneficiario actualizado.";
         }
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = "Beneficiario no actualizado.";
+        }
         return RedirectToAction(nameof(Beneficiarios));
     }
 

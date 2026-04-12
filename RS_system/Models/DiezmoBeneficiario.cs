@@ -43,6 +43,12 @@ public class DiezmoBeneficiario
     [StringLength(100)]
     public string? ActualizadoPor { get; set; }
 
+    [Column("idpersona")]
+    public long? IdPersona { get; set; }
+
+    [ForeignKey("IdPersona")]
+    public virtual Persona? Persona { get; set; }
+
     // Navegación
     public virtual ICollection<DiezmoSalida> Salidas { get; set; } = new List<DiezmoSalida>();
 }

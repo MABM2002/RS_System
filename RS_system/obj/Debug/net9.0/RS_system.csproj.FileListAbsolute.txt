@@ -287,3 +287,6 @@
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets/msbuild.buildMultiTargeting.RS_system.props
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets/msbuild.buildTransitive.RS_system.props
 /home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/staticwebassets.pack.json
+/home/adalberto/RiderProjects/RS_system/RS_system/bin/Debug/net9.0/DocumentFormat.OpenXml.dll
+/home/adalberto/RiderProjects/RS_system/RS_system/bin/Debug/net9.0/DocumentFormat.OpenXml.Framework.dll
+/home/adalberto/RiderProjects/RS_system/RS_system/bin/Debug/net9.0/System.IO.Packaging.dll

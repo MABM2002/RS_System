@@ -1,10 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "3JUQhcRdx7k=",
+  "dgSpecHash": "k4MyJaP7F6s=",
   "success": true,
   "projectFilePath": "/home/adalberto/RiderProjects/RS_system/RS_system/RS_system.csproj",
   "expectedPackageFiles": [
     "/home/adalberto/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
+    "/home/adalberto/.nuget/packages/documentformat.openxml/3.5.1/documentformat.openxml.3.5.1.nupkg.sha512",
+    "/home/adalberto/.nuget/packages/documentformat.openxml.framework/3.5.1/documentformat.openxml.framework.3.5.1.nupkg.sha512",
     "/home/adalberto/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/home/adalberto/.nuget/packages/microsoft.aspnetcore.cryptography.internal/9.0.5/microsoft.aspnetcore.cryptography.internal.9.0.5.nupkg.sha512",
     "/home/adalberto/.nuget/packages/microsoft.aspnetcore.cryptography.keyderivation/9.0.5/microsoft.aspnetcore.cryptography.keyderivation.9.0.5.nupkg.sha512",
@@ -51,6 +53,7 @@
     "/home/adalberto/.nuget/packages/system.composition.hosting/7.0.0/system.composition.hosting.7.0.0.nupkg.sha512",
     "/home/adalberto/.nuget/packages/system.composition.runtime/7.0.0/system.composition.runtime.7.0.0.nupkg.sha512",
     "/home/adalberto/.nuget/packages/system.composition.typedparts/7.0.0/system.composition.typedparts.7.0.0.nupkg.sha512",
+    "/home/adalberto/.nuget/packages/system.io.packaging/8.0.1/system.io.packaging.8.0.1.nupkg.sha512",
     "/home/adalberto/.nuget/packages/system.io.pipelines/7.0.0/system.io.pipelines.7.0.0.nupkg.sha512",
     "/home/adalberto/.nuget/packages/system.reflection.metadata/7.0.0/system.reflection.metadata.7.0.0.nupkg.sha512",
     "/home/adalberto/.nuget/packages/system.runtime.compilerservices.unsafe/6.0.0/system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",

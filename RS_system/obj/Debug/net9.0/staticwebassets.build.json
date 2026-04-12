@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "+FXAnVEiBN4QPAgXgrKcaB3la7CPhvsrHhwf8PQfX6E=",
+  "Hash": "XhNtFEAMO5DpVR9uI/jV5eLQrnDE4oGlhI0qLqlgLR4=",
   "Source": "RS_system",
   "BasePath": "_content/RS_system",
   "Mode": "Default",
@@ -6653,6 +6653,48 @@
       "OriginalItemSpec": "wwwroot/manifest.json"
     },
     {
+      "Identity": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/Plantillas/DiezmoRecibo.docx",
+      "SourceId": "RS_system",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/",
+      "BasePath": "_content/RS_system",
+      "RelativePath": "Plantillas/DiezmoRecibo#[.{fingerprint}]?.docx",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "v9csq66mpm",
+      "Integrity": "3cC8BTvjui+EC1us3r7a0SXPIcdwDtnSUjxsy3urGVo=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/Plantillas/DiezmoRecibo.docx"
+    },
+    {
+      "Identity": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/Plantillas/test.docx",
+      "SourceId": "RS_system",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/",
+      "BasePath": "_content/RS_system",
+      "RelativePath": "Plantillas/test#[.{fingerprint}]?.docx",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "k8uq4diiaz",
+      "Integrity": "bGyGT8qiVDvjBQcFGv7HYyYyFh9KMLvXdpzypJQgRok=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/Plantillas/test.docx"
+    },
+    {
       "Identity": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/service-worker.js",
       "SourceId": "RS_system",
       "SourceType": "Discovered",
@@ -6695,6 +6737,27 @@
       "OriginalItemSpec": "wwwroot/uploads/miembros/02958366-eb79-4433-859c-9eff0bfd8ccf.png"
     },
     {
+      "Identity": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/26fa6015-f665-4dcf-89ab-029cdbc846ea.png",
+      "SourceId": "RS_system",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/",
+      "BasePath": "_content/RS_system",
+      "RelativePath": "uploads/miembros/26fa6015-f665-4dcf-89ab-029cdbc846ea#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "5vvkv3dy60",
+      "Integrity": "r2YIfSaJfzaUlCDP84OSDs05sde3aeZThCMGGQfabaw=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/miembros/26fa6015-f665-4dcf-89ab-029cdbc846ea.png"
+    },
+    {
       "Identity": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/2a6a6bb4-7785-4453-bfc7-fb2c099a5a57.jpg",
       "SourceId": "RS_system",
       "SourceType": "Discovered",
@@ -6714,6 +6777,48 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/uploads/miembros/2a6a6bb4-7785-4453-bfc7-fb2c099a5a57.jpg"
+    },
+    {
+      "Identity": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/a565c71f-a6fd-456c-a554-89b88c93cde2.png",
+      "SourceId": "RS_system",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/",
+      "BasePath": "_content/RS_system",
+      "RelativePath": "uploads/miembros/a565c71f-a6fd-456c-a554-89b88c93cde2#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "6axl572n12",
+      "Integrity": "vhypf03pHqZIP25buWxLJX/kpHHeWAdqdW2CZsGfaZc=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/miembros/a565c71f-a6fd-456c-a554-89b88c93cde2.png"
+    },
+    {
+      "Identity": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/bdcca77a-3e8e-4d84-bb3c-6178fea1da28.pdf",
+      "SourceId": "RS_system",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/",
+      "BasePath": "_content/RS_system",
+      "RelativePath": "uploads/miembros/bdcca77a-3e8e-4d84-bb3c-6178fea1da28#[.{fingerprint}]?.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "k588o2h58c",
+      "Integrity": "uHR+Yk2lbz6Sb9Ud186ApJlOhD5EgwzCATp92ZEfCtY=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/miembros/bdcca77a-3e8e-4d84-bb3c-6178fea1da28.pdf"
     },
     {
       "Identity": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/d13ff774-351a-4f11-a61a-8d743652f444.png",
@@ -41502,6 +41607,170 @@
       ]
     },
     {
+      "Route": "Plantillas/DiezmoRecibo.docx",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/Plantillas/DiezmoRecibo.docx",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "144607"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"3cC8BTvjui+EC1us3r7a0SXPIcdwDtnSUjxsy3urGVo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 03 Jun 2025 04:04:18 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-3cC8BTvjui+EC1us3r7a0SXPIcdwDtnSUjxsy3urGVo="
+        }
+      ]
+    },
+    {
+      "Route": "Plantillas/DiezmoRecibo.v9csq66mpm.docx",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/Plantillas/DiezmoRecibo.docx",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "144607"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"3cC8BTvjui+EC1us3r7a0SXPIcdwDtnSUjxsy3urGVo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 03 Jun 2025 04:04:18 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "v9csq66mpm"
+        },
+        {
+          "Name": "label",
+          "Value": "Plantillas/DiezmoRecibo.docx"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-3cC8BTvjui+EC1us3r7a0SXPIcdwDtnSUjxsy3urGVo="
+        }
+      ]
+    },
+    {
+      "Route": "Plantillas/test.docx",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/Plantillas/test.docx",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6657"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"bGyGT8qiVDvjBQcFGv7HYyYyFh9KMLvXdpzypJQgRok=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 30 Mar 2026 04:33:43 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-bGyGT8qiVDvjBQcFGv7HYyYyFh9KMLvXdpzypJQgRok="
+        }
+      ]
+    },
+    {
+      "Route": "Plantillas/test.k8uq4diiaz.docx",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/Plantillas/test.docx",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6657"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"bGyGT8qiVDvjBQcFGv7HYyYyFh9KMLvXdpzypJQgRok=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 30 Mar 2026 04:33:43 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "k8uq4diiaz"
+        },
+        {
+          "Name": "label",
+          "Value": "Plantillas/test.docx"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-bGyGT8qiVDvjBQcFGv7HYyYyFh9KMLvXdpzypJQgRok="
+        }
+      ]
+    },
+    {
       "Route": "RS_system.bundle.scp.css",
       "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/obj/Debug/net9.0/compressed/b6c3bvqukf-ifse5yxmqk.gz",
       "Selectors": [
@@ -42478,6 +42747,88 @@
       ]
     },
     {
+      "Route": "uploads/miembros/26fa6015-f665-4dcf-89ab-029cdbc846ea.5vvkv3dy60.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/26fa6015-f665-4dcf-89ab-029cdbc846ea.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6524402"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"r2YIfSaJfzaUlCDP84OSDs05sde3aeZThCMGGQfabaw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 31 Mar 2026 23:24:33 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "5vvkv3dy60"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/miembros/26fa6015-f665-4dcf-89ab-029cdbc846ea.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-r2YIfSaJfzaUlCDP84OSDs05sde3aeZThCMGGQfabaw="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/miembros/26fa6015-f665-4dcf-89ab-029cdbc846ea.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/26fa6015-f665-4dcf-89ab-029cdbc846ea.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6524402"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"r2YIfSaJfzaUlCDP84OSDs05sde3aeZThCMGGQfabaw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 31 Mar 2026 23:24:33 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-r2YIfSaJfzaUlCDP84OSDs05sde3aeZThCMGGQfabaw="
+        }
+      ]
+    },
+    {
       "Route": "uploads/miembros/2a6a6bb4-7785-4453-bfc7-fb2c099a5a57.03554clw28.jpg",
       "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/2a6a6bb4-7785-4453-bfc7-fb2c099a5a57.jpg",
       "Selectors": [],
@@ -42556,6 +42907,170 @@
         {
           "Name": "integrity",
           "Value": "sha256-/CxQ5mpk8PcwVK8GKhmGtf4ye3U1AgzYuUCs/HCtA9w="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/miembros/a565c71f-a6fd-456c-a554-89b88c93cde2.6axl572n12.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/a565c71f-a6fd-456c-a554-89b88c93cde2.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "8314762"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"vhypf03pHqZIP25buWxLJX/kpHHeWAdqdW2CZsGfaZc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 31 Mar 2026 23:21:18 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6axl572n12"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/miembros/a565c71f-a6fd-456c-a554-89b88c93cde2.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-vhypf03pHqZIP25buWxLJX/kpHHeWAdqdW2CZsGfaZc="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/miembros/a565c71f-a6fd-456c-a554-89b88c93cde2.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/a565c71f-a6fd-456c-a554-89b88c93cde2.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "8314762"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"vhypf03pHqZIP25buWxLJX/kpHHeWAdqdW2CZsGfaZc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 31 Mar 2026 23:21:18 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-vhypf03pHqZIP25buWxLJX/kpHHeWAdqdW2CZsGfaZc="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/miembros/bdcca77a-3e8e-4d84-bb3c-6178fea1da28.k588o2h58c.pdf",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/bdcca77a-3e8e-4d84-bb3c-6178fea1da28.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "5728962"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"uHR+Yk2lbz6Sb9Ud186ApJlOhD5EgwzCATp92ZEfCtY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 31 Mar 2026 23:24:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "k588o2h58c"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/miembros/bdcca77a-3e8e-4d84-bb3c-6178fea1da28.pdf"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-uHR+Yk2lbz6Sb9Ud186ApJlOhD5EgwzCATp92ZEfCtY="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/miembros/bdcca77a-3e8e-4d84-bb3c-6178fea1da28.pdf",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_system/RS_system/wwwroot/uploads/miembros/bdcca77a-3e8e-4d84-bb3c-6178fea1da28.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "5728962"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"uHR+Yk2lbz6Sb9Ud186ApJlOhD5EgwzCATp92ZEfCtY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 31 Mar 2026 23:24:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-uHR+Yk2lbz6Sb9Ud186ApJlOhD5EgwzCATp92ZEfCtY="
         }
       ]
     },

@@ -27,4 +27,20 @@ public class BeneficiarioViewModel
 
     [StringLength(300)]
     public string? Descripcion { get; set; }
+
+    public long? IdPersona { get; set; }
+
+    [StringLength(100)]
+    public string? Nombres { get; set; }
+
+    [StringLength(100)]
+    public string? Apellidos { get; set; }
+
+    [StringLength(12)]
+    public string? Dui { get; set; }
+
+    [StringLength(20)]
+    public string? Telefono { get; set; }
+
+    public string? Direccion { get; set; }
 }

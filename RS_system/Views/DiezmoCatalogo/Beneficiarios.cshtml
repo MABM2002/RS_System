@@ -14,7 +14,7 @@
         <a asp-controller="Diezmo" asp-action="Index" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-arrow-left me-1"></i>Volver a Diezmos
         </a>
-        <button type="button" class="btn btn-primary-custom btn-sm" onclick="openModal(0, '', '')">
+        <button type="button" class="btn btn-primary-custom btn-sm" onclick="openModal(this)" data-id="0" data-nombre="" data-descripcion="" data-idpersona="" data-nombres="" data-apellidos="" data-dui="" data-telefono="" data-direccion="">
             <i class="bi bi-plus-lg me-1"></i>Nuevo Beneficiario
         </button>
     </div>
@@ -40,7 +40,8 @@
         <table class="table-custom" id="tblBeneficiarios">
             <thead>
                 <tr>
-                    <th>Nombre</th>
+                    <th>Nombre Completo (Persona)</th>
+                    <th>Nombre Beneficiario</th>
                     <th>Descripción</th>
                     <th class="text-center">Estado</th>
                     <th class="text-center">Acciones</th>
@@ -50,7 +51,8 @@
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td class="fw-bold">@item.Nombre</td>
+                        <td class="fw-bold">@(item.Persona != null ? $"{item.Persona.Nombres} {item.Persona.Apellidos}" : "N/A")</td>
+                        <td>@item.Nombre</td>
                         <td><small class="text-muted">@item.Descripcion</small></td>
                         <td class="text-center">
                             @if (item.Activo)
@@ -64,7 +66,16 @@
                         </td>
                         <td class="text-center">
                             <button class="btn btn-sm btn-outline-primary" 
-                                    onclick="openModal(@item.Id, '@item.Nombre.Replace("'","\\'")', '@(item.Descripcion?.Replace("'","\\'") ?? "")')" 
+                                    onclick="openModal(this)" 
+                                    data-id="@item.Id"
+                                    data-nombre="@item.Nombre"
+                                    data-descripcion="@item.Descripcion"
+                                    data-idpersona="@item.IdPersona"
+                                    data-nombres="@item.Persona?.Nombres"
+                                    data-apellidos="@item.Persona?.Apellidos"
+                                    data-dui="@item.Persona?.Dui"
+                                    data-telefono="@item.Persona?.Telefono"
+                                    data-direccion="@item.Persona?.Direccion"
                                     title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </button>
@@ -101,15 +112,51 @@
             <form asp-action="GuardarBeneficiario" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="Id" id="b_id" value="0" />
+                <input type="hidden" name="IdPersona" id="b_idpersona" value="" />
                 <div class="modal-body">
+                    <h6 class="text-primary mb-3">Datos del Beneficiario</h6>
+
                     <div class="mb-3">
-                        <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                        <label class="form-label">Nombre del Beneficiario / Institución <span class="text-danger">*</span></label>
                         <input type="text" name="Nombre" id="b_nombre" class="form-control" required maxlength="150" />
+                        <small class="form-text text-muted">Nombre que aparecerá en los reportes de salida.</small>
+
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Descripción</label>
-                        <textarea name="Descripcion" id="b_desc" class="form-control" rows="3" maxlength="300"></textarea>
+                        <textarea name="Descripcion" id="b_desc" class="form-control" rows="2" maxlength="300"></textarea>
                     </div>
+                    
+                    <hr />
+                    <h6 class="text-primary mb-3">Datos de la Persona (Opcional)</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombres</label>
+                            <input type="text" name="Nombres" id="p_nombres" class="form-control" maxlength="100" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Apellidos</label>
+                            <input type="text" name="Apellidos" id="p_apellidos" class="form-control" maxlength="100" />
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">DUI</label>
+                            <input type="text" name="Dui" id="p_dui" class="form-control" maxlength="12" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="text" name="Telefono" id="p_telefono" class="form-control" maxlength="20" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Dirección</label>
+                        <textarea name="Direccion" id="p_direccion" class="form-control" rows="2"></textarea>
+                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -122,12 +169,24 @@
 
 @section Scripts {
     <script>
-        function openModal(id, nombre, desc) {
+        function openModal(btn) {
+            const id = btn.getAttribute('data-id');
+            const nombre = btn.getAttribute('data-nombre');
+            const desc = btn.getAttribute('data-descripcion');
+            
             document.getElementById('b_id').value = id;
             document.getElementById('b_nombre').value = nombre;
             document.getElementById('b_desc').value = desc;
             
-            document.getElementById('modalTitle').innerText = id === 0 ? 'Nuevo Beneficiario' : 'Editar Beneficiario';
+            // Persona fields
+            document.getElementById('b_idpersona').value = btn.getAttribute('data-idpersona') || '';
+            document.getElementById('p_nombres').value = btn.getAttribute('data-nombres') || '';
+            document.getElementById('p_apellidos').value = btn.getAttribute('data-apellidos') || '';
+            document.getElementById('p_dui').value = btn.getAttribute('data-dui') || '';
+            document.getElementById('p_telefono').value = btn.getAttribute('data-telefono') || '';
+            document.getElementById('p_direccion').value = btn.getAttribute('data-direccion') || '';
+            
+            document.getElementById('modalTitle').innerText = (id === '0' || id === 0) ? 'Nuevo Beneficiario' : 'Editar Beneficiario';
             
             var modal = new bootstrap.Modal(document.getElementById('modalCrud'));
             modal.show();

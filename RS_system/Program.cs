@@ -4,17 +4,16 @@ using Npgsql;
 using Rs_system.Data;
 using Rs_system.Models;
 using Rs_system.Services;
+using RS_system.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("PostgreSQL") ??
                        throw new InvalidOperationException("Connection string 'PostgreSQL' not found.");
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
 dataSourceBuilder.MapEnum<Rs_system.Models.TipoMovimiento>("tipo_movimiento_new");
 
 var dataSource = dataSourceBuilder.Build();
-// ⚠️ HABILITA enums no mapeados
 dataSourceBuilder.EnableUnmappedTypes();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -55,6 +54,10 @@ builder.Services.AddSingleton<IQueryCacheService, QueryCacheService>();
 builder.Services.AddScoped<IDiezmoCalculoService, DiezmoCalculoService>();
 builder.Services.AddScoped<IDiezmoCierreService,  DiezmoCierreService>();
 builder.Services.AddScoped<IDiezmoReciboService,  DiezmoReciboService>();
+
+// Plantillas de Documentos dinámicos
+builder.Services.AddScoped<IGeneradorDocumentoService, GeneradorDocumentoService>();
+
 builder.Services.AddMemoryCache(options =>
 {
     options.SizeLimit = 1024; // 1024 cache entries max
