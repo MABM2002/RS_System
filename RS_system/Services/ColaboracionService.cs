@@ -270,6 +270,8 @@ public class ColaboracionService : IColaboracionService
     
     public async Task<Colaboracion?> GetColaboracionByIdAsync(long id)
     {
+        
+
         return await _context.Colaboraciones
             .Include(c => c.Miembro)
                 .ThenInclude(m => m.Persona)

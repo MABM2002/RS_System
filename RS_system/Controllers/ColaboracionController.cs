@@ -1,6 +1,9 @@
+using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Npgsql;
+using Rs_system.Data;
 using Rs_system.Models.ViewModels;
 using Rs_system.Services;
 
@@ -11,15 +14,17 @@ public class ColaboracionController : Controller
 {
     private readonly IColaboracionService _colaboracionService;
     private readonly IMiembroService _miembroService;
-    
+    private readonly IPostgresDirectExecutor _postgresExecutor;
     public ColaboracionController(
         IColaboracionService colaboracionService,
-        IMiembroService miembroService)
+        IMiembroService miembroService,
+        IPostgresDirectExecutor postgresDirectExecutor)
     {
         _colaboracionService = colaboracionService;
         _miembroService = miembroService;
+        _postgresExecutor = postgresDirectExecutor;
     }
-    
+
     // GET: Colaboracion
     public async Task<IActionResult> Index()
     {
@@ -34,7 +39,7 @@ public class ColaboracionController : Controller
             return View(new List<ColaboracionHeadIndexViewModel>());
         }
     }
-    
+
     // GET: Colaboracion/Create
     public async Task<IActionResult> Create(int jornada)
     {
@@ -50,7 +55,7 @@ public class ColaboracionController : Controller
                 TiposDisponibles = await _colaboracionService.GetTiposActivosAsync(),
                 IdJornada = jornada
             };
-            
+
             await CargarMiembrosAsync();
             return View(viewModel);
         }
@@ -60,7 +65,7 @@ public class ColaboracionController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-    
+
     // POST: Colaboracion/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -72,7 +77,7 @@ public class ColaboracionController : Controller
             {
                 var registradoPor = User.Identity?.Name ?? "Sistema";
                 await _colaboracionService.RegistrarColaboracionAsync(model, registradoPor);
-                
+                await RecalcularColaboracion(model.IdJornada);
                 TempData["Success"] = "Colaboración registrada exitosamente";
                 return RedirectToAction(nameof(Index));
             }
@@ -81,13 +86,13 @@ public class ColaboracionController : Controller
                 ModelState.AddModelError("", $"Error al registrar: {ex.Message}");
             }
         }
-        
+
         // Recargar datos para la vista
         model.TiposDisponibles = await _colaboracionService.GetTiposActivosAsync();
         await CargarMiembrosAsync();
         return View(model);
     }
-    
+
     // GET: Colaboracion/Details/5 (individual collaboration)
     public async Task<IActionResult> Details(long id)
     {
@@ -114,6 +119,7 @@ public class ColaboracionController : Controller
     {
         try
         {
+            await RecalcularColaboracion(id);
             var jornada = await _colaboracionService.GetColaboracionHeadByIdAsync(id);
             if (jornada == null)
             {
@@ -138,6 +144,7 @@ public class ColaboracionController : Controller
         try
         {
             var cerradoPor = User.Identity?.Name ?? "Sistema";
+            await RecalcularColaboracion(id);
             var resultado = await _colaboracionService.RealizarCierreDiarioAsync(id, cerradoPor);
 
             if (resultado.Success)
@@ -165,7 +172,7 @@ public class ColaboracionController : Controller
         ViewBag.FechaFin = DateTime.Now.Date;
         return View();
     }
-    
+
     // POST: Colaboracion/GenerarReporte
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -175,11 +182,11 @@ public class ColaboracionController : Controller
         {
             // Ajustar fecha fin para incluir todo el día
             var fechaFinAjustada = fechaFin.Date.AddDays(1).AddSeconds(-1);
-            
+
             var reporte = await _colaboracionService.GenerarReportePorFechasAsync(
-                fechaInicio.Date, 
+                fechaInicio.Date,
                 fechaFinAjustada);
-            
+
             return View("Reporte", reporte);
         }
         catch (Exception ex)
@@ -188,7 +195,7 @@ public class ColaboracionController : Controller
             return RedirectToAction(nameof(Reportes));
         }
     }
-    
+
     // GET: Colaboracion/EstadoCuenta/5
     public async Task<IActionResult> EstadoCuenta(long id)
     {
@@ -224,8 +231,9 @@ public class ColaboracionController : Controller
                 return Json(new { success = false, message = "Error al crear la jornada" });
             }
 
-            return Json(new { 
-                success = true, 
+            return Json(new
+            {
+                success = true,
                 message = $"Jornada creada exitosamente para la fecha {request.Fecha:dd/MM/yyyy}",
                 jornadaId = head.Id
             });
@@ -235,7 +243,7 @@ public class ColaboracionController : Controller
             return Json(new { success = false, message = $"Error al crear jornada: {ex.Message}" });
         }
     }
-    
+
     // GET: Colaboracion/BuscarMiembros?termino=juan
     [HttpGet]
     public async Task<IActionResult> BuscarMiembros(string termino)
@@ -244,13 +252,13 @@ public class ColaboracionController : Controller
         {
             return Json(new List<object>());
         }
-        
+
         try
         {
             var miembros = await _miembroService.GetAllAsync();
-            
+
             var resultados = miembros
-                .Where(m => 
+                .Where(m =>
                     m.Nombres.Contains(termino, StringComparison.OrdinalIgnoreCase) ||
                     m.Apellidos.Contains(termino, StringComparison.OrdinalIgnoreCase) ||
                     $"{m.Nombres} {m.Apellidos}".Contains(termino, StringComparison.OrdinalIgnoreCase))
@@ -262,7 +270,7 @@ public class ColaboracionController : Controller
                     telefono = m.Telefono
                 })
                 .ToList();
-            
+
             return Json(resultados);
         }
         catch (Exception ex)
@@ -270,7 +278,7 @@ public class ColaboracionController : Controller
             return Json(new List<object>());
         }
     }
-    
+
     // GET: Colaboracion/ObtenerUltimosPagos?miembroId=5
     [HttpGet]
     public async Task<IActionResult> ObtenerUltimosPagos(long miembroId)
@@ -285,7 +293,7 @@ public class ColaboracionController : Controller
             return Json(new List<object>());
         }
     }
-    
+
     // Helper methods
     private async Task CargarMiembrosAsync()
     {
@@ -299,5 +307,43 @@ public class ColaboracionController : Controller
             "Id",
             "NombreCompleto"
         );
+    }
+
+    private async Task RecalcularColaboracion(long id)
+    {
+        try
+        {
+            var parameters = new[]
+            {
+            new NpgsqlParameter("p_colaboracion_head_id", NpgsqlTypes.NpgsqlDbType.Integer)
+            {
+        Value = (int)id
+    },
+    new NpgsqlParameter("p_total_anterior", NpgsqlTypes.NpgsqlDbType.Numeric)
+    {
+        Direction = ParameterDirection.Output
+    },
+    new NpgsqlParameter("p_total_nuevo", NpgsqlTypes.NpgsqlDbType.Numeric)
+    {
+        Direction = ParameterDirection.Output
+    },
+    new NpgsqlParameter("p_colaboraciones_count", NpgsqlTypes.NpgsqlDbType.Integer)
+    {
+        Direction = ParameterDirection.Output
+    },
+    new NpgsqlParameter("p_detalles_count", NpgsqlTypes.NpgsqlDbType.Integer)
+    {
+        Direction = ParameterDirection.Output
+    }
+};
+
+            await _postgresExecutor.ExecuteStoredProcedureWithOutputAsync("recalcular_colaboracion_por_id", parameters);
+
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
     }
 }

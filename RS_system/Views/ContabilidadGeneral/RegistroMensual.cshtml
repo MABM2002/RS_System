@@ -78,9 +78,13 @@
                     <tbody id="tbodyRegistros">
                         <!-- Rows rendered by JS -->
                     </tbody>
-                    @if (!Model.Cerrado)
-                    {
+                
                         <tfoot>
+                            <tr class="table-secondary">
+                                <td colspan="7" class="text-end font-weight-bold">Total:</td>
+                                <td class="text-end font-weight-bold" id="totalMonto">0.00</td>
+                                <td></td>
+                            </tr>
                             <tr>
                                 <td colspan="9" class="text-center p-2">
                                     <button class="btn btn-outline-primary btn-sm" onclick="agregarFila()">
@@ -89,7 +93,6 @@
                                 </td>
                             </tr>
                         </tfoot>
-                    }
                 </table>
             </div>
         </div>
@@ -180,10 +183,23 @@
         const catsIngreso = rawCatsIngreso.map(c => ({ id: c.Id || c.id, nombre: c.Nombre || c.nombre }));
         const catsEgreso = rawCatsEgreso.map(c => ({ id: c.Id || c.id, nombre: c.Nombre || c.nombre }));
 
+        function calculateTotal() {
+            let total = 0;
+            registros.forEach(reg => {
+                const monto = parseFloat(reg.monto) || 0;
+                if (reg.tipo === 1) {
+                    total += monto; // Ingreso - suma
+                } else if (reg.tipo === 2) {
+                    total -= monto; // Egreso - resta
+                }
+            });
+            return total;
+        }
+
         function renderTable() {
             const tbody = document.getElementById('tbodyRegistros');
             tbody.innerHTML = '';
-            
+
             registros.forEach((reg, index) => {
                 const tr = document.createElement('tr');
                 tr.dataset.index = index;
@@ -251,6 +267,25 @@
                 }
                 tbody.appendChild(tr);
             });
+            
+            // Update total
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const total = calculateTotal();
+            const totalElement = document.getElementById('totalMonto');
+            if (totalElement) {
+                totalElement.textContent = total.toFixed(2);
+                // Add color based on positive/negative
+                if (total >= 0) {
+                    totalElement.classList.remove('text-danger');
+                    totalElement.classList.add('text-success');
+                } else {
+                    totalElement.classList.remove('text-success');
+                    totalElement.classList.add('text-danger');
+                }
+            }
         }
 
         function renderCatsOptions(tipo, selectedId) {
@@ -293,6 +328,7 @@
                 else reg.categoriaEgresoId = val;
             } else if (field === 'monto') {
                 reg.monto = parseFloat(value) || 0;
+                updateTotal(); // Update total when monto changes
             } else {
                 reg[field] = value;
             }
@@ -477,6 +513,7 @@
             agregarFila();
         } else {
             renderTable();
+            updateTotal(); // Initialize total on page load
         }
     </script>
 }

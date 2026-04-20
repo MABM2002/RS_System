@@ -290,3 +290,4 @@
 /home/adalberto/RiderProjects/RS_system/RS_system/bin/Debug/net9.0/DocumentFormat.OpenXml.dll
 /home/adalberto/RiderProjects/RS_system/RS_system/bin/Debug/net9.0/DocumentFormat.OpenXml.Framework.dll
 /home/adalberto/RiderProjects/RS_system/RS_system/bin/Debug/net9.0/System.IO.Packaging.dll
+/home/adalberto/RiderProjects/RS_System/RS_system/obj/Debug/net9.0/RS_system.sourcelink.json
