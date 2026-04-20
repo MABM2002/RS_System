@@ -52,6 +52,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<PrestamoDetalle> PrestamoDetalles { get; set; }
     
     // Collaborations module
+    public DbSet<ColaboracionHead> ColaboracionHeads { get; set; }
     public DbSet<TipoColaboracion> TiposColaboracion { get; set; }
     public DbSet<Colaboracion> Colaboraciones { get; set; }
     public DbSet<DetalleColaboracion> DetalleColaboraciones { get; set; }
@@ -191,6 +192,27 @@ public class ApplicationDbContext : DbContext
             .HasColumnType("tipo_movimiento");
         
         // Collaborations module configuration
+        modelBuilder.Entity<ColaboracionHead>(entity =>
+        {
+            entity.ToTable("colaboracion_heads", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Total).HasColumnType("numeric(12,2)");
+            entity.Property(e => e.CreadoPor).HasMaxLength(100);
+            entity.Property(e => e.CerradoPor).HasMaxLength(100);
+
+            // One head per date
+            entity.HasIndex(e => e.Fecha).IsUnique();
+            
+            // Index for closing status
+            entity.HasIndex(e => e.EsCerrado);
+            entity.HasIndex(e => e.FechaCierre);
+
+            entity.HasMany(e => e.Colaboraciones)
+                .WithOne(c => c.ColaboracionHead)
+                .HasForeignKey(c => c.ColaboracionHeadId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<TipoColaboracion>(entity =>
         {
             entity.ToTable("tipos_colaboracion", "public");
@@ -204,12 +226,17 @@ public class ApplicationDbContext : DbContext
             entity.ToTable("colaboraciones", "public");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.MontoTotal).HasColumnType("decimal(10,2)");
-            
+
             entity.HasOne(e => e.Miembro)
                 .WithMany()
                 .HasForeignKey(e => e.MiembroId)
                 .OnDelete(DeleteBehavior.Restrict);
-                
+
+            entity.HasOne(e => e.ColaboracionHead)
+                .WithMany(h => h.Colaboraciones)
+                .HasForeignKey(e => e.ColaboracionHeadId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasMany(e => e.Detalles)
                 .WithOne(d => d.Colaboracion)
                 .HasForeignKey(d => d.ColaboracionId)

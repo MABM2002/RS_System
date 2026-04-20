@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/adalberto/RiderProjects/RS_system/RS_system/RS_system.csproj": {}
+    "/home/adalberto/RiderProjects/RS_System/RS_system/RS_system.csproj": {}
   },
   "projects": {
-    "/home/adalberto/RiderProjects/RS_system/RS_system/RS_system.csproj": {
+    "/home/adalberto/RiderProjects/RS_System/RS_system/RS_system.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/adalberto/RiderProjects/RS_system/RS_system/RS_system.csproj",
+        "projectUniqueName": "/home/adalberto/RiderProjects/RS_System/RS_system/RS_system.csproj",
         "projectName": "RS_system",
-        "projectPath": "/home/adalberto/RiderProjects/RS_system/RS_system/RS_system.csproj",
+        "projectPath": "/home/adalberto/RiderProjects/RS_System/RS_system/RS_system.csproj",
         "packagesPath": "/home/adalberto/.nuget/packages/",
-        "outputPath": "/home/adalberto/RiderProjects/RS_system/RS_system/obj/",
+        "outputPath": "/home/adalberto/RiderProjects/RS_System/RS_system/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/adalberto/.nuget/NuGet/NuGet.Config"

@@ -43,7 +43,9 @@ public class RegistrarColaboracionViewModel
     [Display(Name = "Observaciones")]
     public string? Observaciones { get; set; }
     
+    public int IdJornada {get;set;}
     // Para cargar en el formulario
+    
     public List<TipoColaboracion> TiposDisponibles { get; set; } = new();
     
     // Propiedad calculada: Total de meses

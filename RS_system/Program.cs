@@ -50,6 +50,9 @@ builder.Services.AddScoped<IPrestamoService, PrestamoService>();
 builder.Services.AddScoped<IColaboracionService, ColaboracionService>();
 builder.Services.AddSingleton<IQueryCacheService, QueryCacheService>();
 
+// PostgreSQL direct executor (para procedimientos almacenados y consultas directas)
+builder.Services.AddScoped<IPostgresDirectExecutor, PostgresDirectExecutor>();
+
 // Diezmos module services
 builder.Services.AddScoped<IDiezmoCalculoService, DiezmoCalculoService>();
 builder.Services.AddScoped<IDiezmoCierreService,  DiezmoCierreService>();

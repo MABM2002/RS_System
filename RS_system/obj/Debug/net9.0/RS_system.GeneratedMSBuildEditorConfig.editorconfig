@@ -17,337 +17,341 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = RS_system
 build_property.RootNamespace = RS_system
-build_property.ProjectDir = /home/adalberto/RiderProjects/RS_system/RS_system/
+build_property.ProjectDir = /home/adalberto/RiderProjects/RS_System/RS_system/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = /home/adalberto/RiderProjects/RS_system/RS_system
+build_property.MSBuildProjectDirectory = /home/adalberto/RiderProjects/RS_System/RS_system
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Areas/Identity/Pages/_ViewStart.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Areas/Identity/Pages/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Account/AccessDenied.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Account/AccessDenied.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9BY2Nlc3NEZW5pZWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Account/Login.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9Mb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Account/Register.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Account/Register.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9SZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Articulos/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Articulos/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXJ0aWN1bG9zL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Articulos/Details.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Articulos/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXJ0aWN1bG9zL0RldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Articulos/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Articulos/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXJ0aWN1bG9zL0VkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Articulos/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Articulos/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXJ0aWN1bG9zL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/AsistenciaCulto/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/AsistenciaCulto/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXNpc3RlbmNpYUN1bHRvL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/AsistenciaCulto/Delete.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/AsistenciaCulto/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXNpc3RlbmNpYUN1bHRvL0RlbGV0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/AsistenciaCulto/Details.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/AsistenciaCulto/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXNpc3RlbmNpYUN1bHRvL0RldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/AsistenciaCulto/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/AsistenciaCulto/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXNpc3RlbmNpYUN1bHRvL0VkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/AsistenciaCulto/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/AsistenciaCulto/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXNpc3RlbmNpYUN1bHRvL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Categorias/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Categorias/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2F0ZWdvcmlhcy9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Categorias/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Categorias/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2F0ZWdvcmlhcy9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Categorias/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Categorias/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2F0ZWdvcmlhcy9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Colaboracion/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Colaboracion/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29sYWJvcmFjaW9uL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Colaboracion/Details.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Colaboracion/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29sYWJvcmFjaW9uL0RldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Colaboracion/EstadoCuenta.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Colaboracion/EstadoCuenta.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29sYWJvcmFjaW9uL0VzdGFkb0N1ZW50YS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Colaboracion/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Colaboracion/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29sYWJvcmFjaW9uL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Colaboracion/Reporte.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Colaboracion/Jornada.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29sYWJvcmFjaW9uL0pvcm5hZGEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Colaboracion/Reporte.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29sYWJvcmFjaW9uL1JlcG9ydGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Colaboracion/Reportes.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Colaboracion/Reportes.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29sYWJvcmFjaW9uL1JlcG9ydGVzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Configuracion/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Configuracion/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29uZmlndXJhY2lvbi9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Configuracion/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Configuracion/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29uZmlndXJhY2lvbi9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Contabilidad/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Contabilidad/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29udGFiaWxpZGFkL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Contabilidad/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Contabilidad/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29udGFiaWxpZGFkL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Contabilidad/RegistroMensual.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Contabilidad/RegistroMensual.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29udGFiaWxpZGFkL1JlZ2lzdHJvTWVuc3VhbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/ContabilidadGeneral/Consolidado.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/ContabilidadGeneral/Consolidado.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29udGFiaWxpZGFkR2VuZXJhbC9Db25zb2xpZGFkby5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/ContabilidadGeneral/GestionCategorias.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/ContabilidadGeneral/GestionCategorias.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29udGFiaWxpZGFkR2VuZXJhbC9HZXN0aW9uQ2F0ZWdvcmlhcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/ContabilidadGeneral/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/ContabilidadGeneral/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29udGFiaWxpZGFkR2VuZXJhbC9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/ContabilidadGeneral/RegistroMensual.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/ContabilidadGeneral/RegistroMensual.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ29udGFiaWxpZGFkR2VuZXJhbC9SZWdpc3Ryb01lbnN1YWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Diezmo/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Diezmo/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Diezmo/Detail.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Diezmo/Detail.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vL0RldGFpbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Diezmo/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Diezmo/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Diezmo/Recibo.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Diezmo/Recibo.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vL1JlY2liby5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/DiezmoCatalogo/Beneficiarios.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/DiezmoCatalogo/Beneficiarios.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vQ2F0YWxvZ28vQmVuZWZpY2lhcmlvcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/DiezmoCatalogo/TiposSalida.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/DiezmoCatalogo/TiposSalida.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGllem1vQ2F0YWxvZ28vVGlwb3NTYWxpZGEuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Estados/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Estados/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXN0YWRvcy9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Estados/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Estados/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXN0YWRvcy9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Estados/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Estados/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXN0YWRvcy9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Home/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Home/Privacy.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Miembro/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Miembro/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWllbWJyby9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Miembro/Details.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Miembro/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWllbWJyby9EZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Miembro/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Miembro/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWllbWJyby9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Miembro/Importar.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Miembro/Importar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWllbWJyby9JbXBvcnRhci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Miembro/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Miembro/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWllbWJyby9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Modulo/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Modulo/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTW9kdWxvL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Modulo/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Modulo/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTW9kdWxvL0VkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Modulo/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Modulo/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTW9kdWxvL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/MovimientosInventario/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/MovimientosInventario/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTW92aW1pZW50b3NJbnZlbnRhcmlvL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/MovimientosInventario/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/MovimientosInventario/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTW92aW1pZW50b3NJbnZlbnRhcmlvL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/MovimientosInventario/PrestamosActivos.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/MovimientosInventario/PrestamosActivos.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTW92aW1pZW50b3NJbnZlbnRhcmlvL1ByZXN0YW1vc0FjdGl2b3MuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Ofrenda/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Ofrenda/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT2ZyZW5kYS9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Ofrenda/Details.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Ofrenda/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT2ZyZW5kYS9EZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Ofrenda/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Ofrenda/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT2ZyZW5kYS9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Ofrenda/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Ofrenda/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT2ZyZW5kYS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Permiso/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Permiso/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGVybWlzby9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Permiso/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Permiso/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGVybWlzby9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Permiso/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Permiso/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGVybWlzby9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Rol/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Rol/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Rol/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Rol/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sL0VkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Rol/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Rol/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Rol/Permissions.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Rol/Permissions.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sL1Blcm1pc3Npb25zLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Shared/Components/Menu/Default.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Shared/Components/Menu/Default.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0NvbXBvbmVudHMvTWVudS9EZWZhdWx0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Shared/Components/Menu/_MenuItem.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Shared/Components/Menu/_MenuItem.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0NvbXBvbmVudHMvTWVudS9fTWVudUl0ZW0uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Shared/Error.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Shared/_LoginPartial.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Shared/_LoginPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19Mb2dpblBhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Shared/_ValidationScriptsPartial.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/TipoColaboracion/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/TipoColaboracion/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVGlwb0NvbGFib3JhY2lvbi9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/TipoColaboracion/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/TipoColaboracion/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVGlwb0NvbGFib3JhY2lvbi9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/TipoColaboracion/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/TipoColaboracion/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVGlwb0NvbGFib3JhY2lvbi9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Ubicaciones/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Ubicaciones/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVWJpY2FjaW9uZXMvQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Ubicaciones/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Ubicaciones/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVWJpY2FjaW9uZXMvRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Ubicaciones/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Ubicaciones/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVWJpY2FjaW9uZXMvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Usuario/Create.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Usuario/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXN1YXJpby9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Usuario/Edit.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Usuario/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXN1YXJpby9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Usuario/Index.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Usuario/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXN1YXJpby9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/_ViewImports.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/_ViewStart.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/adalberto/RiderProjects/RS_system/RS_system/Views/Shared/_Layout.cshtml]
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-19m3f5pdq7

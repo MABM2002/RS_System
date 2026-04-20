@@ -1,19 +1,19 @@
-@model IEnumerable<Rs_system.Models.Colaboracion>
+@model IEnumerable<Rs_system.Models.ViewModels.ColaboracionHeadIndexViewModel>
 @{
-    ViewData["Title"] = "Colaboraciones";
+    ViewData["Title"] = "Jornadas de Colaboración";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="mb-1">Colaboraciones Económicas</h4>
-        <p class="text-muted mb-0">Registro de colaboraciones mensuales de los miembros</p>
+        <h4 class="mb-1">Jornadas de Colaboración</h4>
+        <p class="text-muted mb-0">Resumen diario de colaboraciones agrupadas por jornada</p>
     </div>
     <div>
+        <button type="button" class="btn btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#modalCrearJornada">
+            <i class="bi bi-calendar-plus me-1"></i> Nueva Jornada
+        </button>
         <a asp-action="Reportes" class="btn btn-outline-primary me-2">
             <i class="bi bi-file-earmark-bar-graph me-1"></i> Reportes
-        </a>
-        <a asp-action="Create" class="btn btn-primary-custom">
-            <i class="bi bi-plus-lg me-1"></i> Nueva Colaboración
         </a>
     </div>
 </div>
@@ -24,7 +24,7 @@
         <div class="card-custom text-center">
             <h6 class="text-muted mb-2">Total Recaudado Hoy</h6>
             <h3 class="text-primary mb-0">
-                $@Model.Where(c => c.FechaRegistro.Date == DateTime.Today).Sum(c => c.MontoTotal).ToString("N2")
+                $@(Model.Where(h => h.Fecha.Date == DateTime.Today).Sum(h => h.Total).ToString("N2"))
             </h3>
         </div>
     </div>
@@ -32,30 +32,30 @@
         <div class="card-custom text-center">
             <h6 class="text-muted mb-2">Colaboraciones Hoy</h6>
             <h3 class="text-success mb-0">
-                @Model.Count(c => c.FechaRegistro.Date == DateTime.Today)
+                @Model.Where(h => h.Fecha.Date == DateTime.Today).Sum(h => h.CantidadColaboraciones)
             </h3>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card-custom text-center">
-            <h6 class="text-muted mb-2">Total Registros</h6>
+            <h6 class="text-muted mb-2">Total Jornadas</h6>
             <h3 class="text-info mb-0">@Model.Count()</h3>
         </div>
     </div>
 </div>
 
-<!-- Collaborations Table -->
+<!-- Jornadas Table -->
 <div class="card-custom">
     <div class="table-responsive">
         <table class="table-custom">
             <thead>
                 <tr>
                     <th>Fecha</th>
-                    <th>Miembro</th>
-                    <th>Tipos</th>
-                    <th>Período</th>
-                    <th>Monto</th>
-                    <th>Registrado por</th>
+                    <th>Total Recaudado</th>
+                    <th>Cantidad</th>
+                    <th>Estado</th>
+                    <th>Creado por</th>
+                    <th>Creado en</th>
                     <th class="text-center">Acciones</th>
                 </tr>
             </thead>
@@ -64,67 +64,97 @@
                 {
                     <tr>
                         <td colspan="7" class="text-center text-muted py-4">
-                            <i class="bi bi-cash-coin fs-1 d-block mb-2"></i>
-                            No hay colaboraciones registradas
+                            <i class="bi bi-calendar-check fs-1 d-block mb-2"></i>
+                            No hay jornadas registradas
                         </td>
                     </tr>
                 }
-                @foreach (var colaboracion in Model)
+                @foreach (var jornada in Model)
                 {
                     <tr>
                         <td>
-                            <strong>@colaboracion.FechaRegistro.ToString("dd/MM/yyyy")</strong><br>
-                            <small class="text-muted">@colaboracion.FechaRegistro.ToString("HH:mm")</small>
+                            <strong>@jornada.Fecha.ToString("dd/MM/yyyy")</strong><br>
+                            <small class="text-muted">@jornada.Fecha.ToString("dddd", new System.Globalization.CultureInfo("es-ES"))</small>
                         </td>
                         <td>
-                            <strong>@colaboracion.Miembro.Persona.Nombres @colaboracion.Miembro.Persona.Apellidos</strong>
+                            <strong class="text-success">$@jornada.Total.ToString("N2")</strong>
                         </td>
                         <td>
-                            @{
-                                var tipos = colaboracion.Detalles.Select(d => d.TipoColaboracion.Nombre).Distinct();
-                            }
-                            @foreach (var tipo in tipos)
+                            <span class="badge bg-primary">@jornada.CantidadColaboraciones colaboraciones</span>
+                        </td>
+                        <td>
+                            @if (jornada.EsCerrado)
                             {
-                                <span class="badge bg-primary me-1">@tipo</span>
+                                <span class="badge bg-success">
+                                    <i class="bi bi-lock me-1"></i> Cerrado
+                                </span>
+                                <br>
+                                <small class="text-muted">
+                                    @jornada.FechaCierre?.ToString("dd/MM/yyyy HH:mm")<br>
+                                    @(jornada.CerradoPor ?? "Sistema")
+                                </small>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-unlock me-1"></i> Abierto
+                                </span>
                             }
                         </td>
                         <td>
-                            @{
-                                var ordenados = colaboracion.Detalles.OrderBy(d => d.Anio).ThenBy(d => d.Mes).ToList();
-                                var primero = ordenados.First();
-                                var ultimo = ordenados.Last();
-                                
-                                if (primero.Anio == ultimo.Anio && primero.Mes == ultimo.Mes)
-                                {
-                                    var fecha = new DateTime(primero.Anio, primero.Mes, 1);
-                                    <text>@fecha.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES"))</text>
-                                }
-                                else
-                                {
-                                    var fechaInicio = new DateTime(primero.Anio, primero.Mes, 1);
-                                    var fechaFin = new DateTime(ultimo.Anio, ultimo.Mes, 1);
-                                    <text>@fechaInicio.ToString("MMM yyyy", new System.Globalization.CultureInfo("es-ES")) - @fechaFin.ToString("MMM yyyy", new System.Globalization.CultureInfo("es-ES"))</text>
-                                }
-                            }
+                            <small>@(jornada.CreadoPor ?? "Sistema")</small>
                         </td>
                         <td>
-                            <strong class="text-success">$@colaboracion.MontoTotal.ToString("N2")</strong>
-                        </td>
-                        <td>
-                            <small>@(colaboracion.RegistradoPor ?? "Sistema")</small>
+                            <small>@jornada.CreadoEn.ToString("dd/MM/yyyy HH:mm")</small>
                         </td>
                         <td class="text-center">
-                            <a asp-action="Details" asp-route-id="@colaboracion.Id" class="btn btn-sm btn-outline-primary" title="Ver detalles">
-                                <i class="bi bi-eye"></i>
+                            <a asp-action="Jornada" asp-route-id="@jornada.Id" class="btn btn-sm btn-outline-primary mb-1" title="Ver detalles de la jornada">
+                                <i class="bi bi-eye me-1"></i> Detalles
                             </a>
-                            <a asp-action="EstadoCuenta" asp-route-id="@colaboracion.MiembroId" class="btn btn-sm btn-outline-info" title="Estado de cuenta">
-                                <i class="bi bi-file-text"></i>
-                            </a>
+                            @if (!jornada.EsCerrado && jornada.Total > 0)
+                            {
+                                <form asp-action="CierreDiario" asp-route-id="@jornada.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-success mb-1" title="Cerrar jornada y sincronizar con contabilidad"
+                                            onclick="return confirm('¿Está seguro de cerrar la jornada del @jornada.Fecha.ToString("dd/MM/yyyy")?\\nTotal: $@jornada.Total.ToString("N2")\\n\\nEsta acción bloqueará la jornada y creará un movimiento contable.')">
+                                        <i class="bi bi-lock me-1"></i> Cerrar
+                                    </button>
+                                </form>
+                            }
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Modal para crear nueva jornada -->
+<div class="modal fade" id="modalCrearJornada" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crear Nueva Jornada</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCrearJornada">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label for="fechaJornada" class="form-label">Fecha de la Jornada</label>
+                        <input type="date" class="form-control" id="fechaJornada" name="fecha" required 
+                               value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                        <div class="form-text">Seleccione la fecha para la jornada de colaboración</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary-custom" id="btnCrearJornada">
+                    <i class="bi bi-calendar-plus me-1"></i> Crear Jornada
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -143,5 +173,65 @@
             toastr.error('@TempData["Error"]');
             </text>
         }
+
+        // Crear jornada
+        document.getElementById('btnCrearJornada').addEventListener('click', function() {
+            const fechaInput = document.getElementById('fechaJornada');
+            const fecha = fechaInput.value;
+            
+            if (!fecha) {
+                toastr.error('Por favor seleccione una fecha');
+                return;
+            }
+
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Creando...';
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch('@Url.Action("CrearJornada", "Colaboracion")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify({ fecha: fecha })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    toastr.success(data.message);
+                    // Cerrar modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalCrearJornada'));
+                    modal.hide();
+                    // Recargar la página para mostrar la nueva jornada
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    toastr.error(data.message || 'Error al crear la jornada');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                toastr.error('Error al crear la jornada: ' + error.message);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+        });
+
+        // Resetear formulario cuando se cierra el modal
+        document.getElementById('modalCrearJornada').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('fechaJornada').value = '@DateTime.Now.ToString("yyyy-MM-dd")';
+        });
     </script>
 }

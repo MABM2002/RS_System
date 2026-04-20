@@ -1,4 +1,7 @@
+using System.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Npgsql;
 using Rs_system.Data;
 using Rs_system.Models;
 
@@ -7,10 +10,12 @@ namespace Rs_system.Services;
 public class ContabilidadGeneralService : IContabilidadGeneralService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IPostgresDirectExecutor _postgresExecutor;
 
-    public ContabilidadGeneralService(ApplicationDbContext context)
+    public ContabilidadGeneralService(ApplicationDbContext context, IPostgresDirectExecutor postgresExecutor)
     {
         _context = context;
+        _postgresExecutor = postgresExecutor;
     }
 
     // ==================== Categorías de Ingreso ====================
@@ -187,7 +192,11 @@ public class ContabilidadGeneralService : IContabilidadGeneralService
         {
             var reporte = await _context.ReportesMensualesGenerales.FindAsync(reporteId);
             if (reporte == null) return false;
-
+            
+            // Ejecutar el procedimiento
+            await _context.Database.ExecuteSqlInterpolatedAsync(
+                $"CALL recalcular_saldos_mensuales({reporte.Anio})"
+            );
             _context.Entry(reporte).Property(x => x.Cerrado).CurrentValue = true;
             _context.Entry(reporte).Property(x => x.Cerrado).IsModified = true;
 
@@ -202,67 +211,124 @@ public class ContabilidadGeneralService : IContabilidadGeneralService
 
     // ==================== Movimientos ====================
 
-    public async Task<bool> GuardarMovimientosBulkAsync(long reporteId, List<MovimientoGeneral> movimientos)
+public async Task<bool> GuardarMovimientosBulkAsync(long reporteId, List<MovimientoGeneral> movimientos)
+{
+    try
     {
-        try
+        // 1. VALIDAR PRIMERO (antes de cualquier cambio)
+        if (movimientos == null || !movimientos.Any())
+            return false;
+
+        var reporte = await _context.ReportesMensualesGenerales.FindAsync(reporteId);
+        if (reporte == null || reporte.Cerrado)
+            return false;
+
+        // 2. OBTENER Y ELIMINAR EN UNA SOLA CONSULTA (materializar antes)
+        var movimientosExistentes = await _context.MovimientosGenerales
+            .Where(e => e.ReporteMensualGeneralId == reporteId)
+            .ToListAsync();
+
+        if (movimientosExistentes.Any())
         {
-            var reporte = await _context.ReportesMensualesGenerales.FindAsync(reporteId);
-            if (reporte == null || reporte.Cerrado)
+            _context.MovimientosGenerales.RemoveRange(movimientosExistentes);
+            await _context.SaveChangesAsync();
+        }
+
+        // 3. PROCESAR NUEVOS MOVIMIENTOS
+        foreach (var movimiento in movimientos)
+        {
+            movimiento.ReporteMensualGeneralId = reporteId;
+            movimiento.Fecha = DateTime.SpecifyKind(movimiento.Fecha, DateTimeKind.Utc);
+
+            // Validaciones básicas
+            if (string.IsNullOrWhiteSpace(movimiento.Descripcion) || movimiento.Monto <= 0)
                 return false;
 
-            foreach (var movimiento in movimientos)
+            if (movimiento.Id > 0)
             {
-                movimiento.ReporteMensualGeneralId = reporteId;
-                movimiento.Fecha = DateTime.SpecifyKind(movimiento.Fecha, DateTimeKind.Utc);
-
-                if (movimiento.Id > 0)
+                // Update existing
+                var existente = await _context.MovimientosGenerales.FindAsync(movimiento.Id);
+                if (existente != null)
                 {
-                    // Update existing
-                    var existente = await _context.MovimientosGenerales.FindAsync(movimiento.Id);
-                    if (existente != null)
-                    {
-                        existente.Tipo = movimiento.Tipo;
-                        existente.CategoriaIngresoId = movimiento.CategoriaIngresoId;
-                        existente.CategoriaEgresoId = movimiento.CategoriaEgresoId;
-                        existente.Monto = movimiento.Monto;
-                        existente.Fecha = movimiento.Fecha;
-                        existente.Descripcion = movimiento.Descripcion;
-                        existente.NumeroComprobante = movimiento.NumeroComprobante;
-                    }
+                    existente.Tipo = movimiento.Tipo;
+                    existente.CategoriaIngresoId = movimiento.CategoriaIngresoId;
+                    existente.CategoriaEgresoId = movimiento.CategoriaEgresoId;
+                    existente.Monto = movimiento.Monto;
+                    existente.Fecha = movimiento.Fecha;
+                    existente.Descripcion = movimiento.Descripcion;
+                    existente.NumeroComprobante = movimiento.NumeroComprobante;
+                    _context.Entry(existente).State = EntityState.Modified;
                 }
                 else
                 {
-                    // Insert new
+                    // Insert new si no existe
+                    _context.Entry(movimiento).State = EntityState.Added;
                     _context.MovimientosGenerales.Add(movimiento);
                 }
             }
+            else
+            {
+                // Insert new
+                _context.Entry(movimiento).State = EntityState.Added;
+                _context.MovimientosGenerales.Add(movimiento);
+            }
+        }
 
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        catch(Exception ex)
-        {
-            return false;
-        }
+        await _context.SaveChangesAsync();
+        return true;
     }
-
+    catch (Exception ex)
+    {
+        return false;
+    }
+}
     public async Task<decimal> CalcularSaldoActualAsync(long reporteId)
     {
-        var reporte = await _context.ReportesMensualesGenerales
-            .Include(r => r.Movimientos)
-            .FirstOrDefaultAsync(r => r.Id == reporteId);
+        try
+        {
+            // Crear parámetros para el procedimiento almacenado
+            var parameters = new[]
+            {
+                new NpgsqlParameter("p_reporte_id", reporteId),
+                new NpgsqlParameter("p_saldo_anterior", NpgsqlTypes.NpgsqlDbType.Numeric)
+                {
+                    Direction = ParameterDirection.Output
+                },
+                new NpgsqlParameter("p_saldo_nuevo", NpgsqlTypes.NpgsqlDbType.Numeric)
+                {
+                    Direction = ParameterDirection.Output
+                },
+                new NpgsqlParameter("p_mes", NpgsqlTypes.NpgsqlDbType.Integer)
+                {
+                    Direction = ParameterDirection.Output
+                },
+                new NpgsqlParameter("p_anio", NpgsqlTypes.NpgsqlDbType.Integer)
+                {
+                    Direction = ParameterDirection.Output
+                },
+                new NpgsqlParameter("p_movimientos_count", NpgsqlTypes.NpgsqlDbType.Integer)
+                {
+                    Direction = ParameterDirection.Output
+                }
+            };
 
-        if (reporte == null) return 0;
+            // Ejecutar el procedimiento almacenado usando el servicio
+            var updatedParameters = await _postgresExecutor.ExecuteStoredProcedureWithOutputAsync("recalcular_saldo_por_id", parameters);
 
-        var totalIngresos = reporte.Movimientos
-            .Where(m => m.Tipo == (int) TipoMovimientoGeneral.Ingreso)
-            .Sum(m => m.Monto);
+            // Obtener el valor del parámetro de salida p_saldo_nuevo
+            var pSaldoNuevo = updatedParameters[2]; // índice 2 es p_saldo_nuevo
+            if (pSaldoNuevo.Value != null && pSaldoNuevo.Value != DBNull.Value)
+            {
+                return Convert.ToDecimal(pSaldoNuevo.Value);
+            }
 
-        var totalEgresos = reporte.Movimientos
-            .Where(m => m.Tipo == (int)TipoMovimientoGeneral.Egreso)
-            .Sum(m => m.Monto);
-
-        return reporte.SaldoInicial + totalIngresos - totalEgresos;
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            // Log the error if needed
+            return 0;
+        }
     }
 
     // ==================== Consolidados ====================

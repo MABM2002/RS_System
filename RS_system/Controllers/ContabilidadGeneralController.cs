@@ -194,6 +194,7 @@ public class ContabilidadGeneralController : Controller
     public async Task<IActionResult> CerrarMes(long id)
     {
         var success = await _contabilidadService.CerrarReporteAsync(id);
+
         if (success)
         {
             TempData["Success"] = "El reporte ha sido cerrado. Ya no se pueden realizar cambios.";

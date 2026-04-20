@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Mono.TextTemplating;
 using Rs_system.Data;
 using Rs_system.Models;
 using Rs_system.Models.ViewModels;
@@ -32,56 +33,93 @@ public class ColaboracionService : IColaboracionService
     }
     
     public async Task<Colaboracion> RegistrarColaboracionAsync(
-        RegistrarColaboracionViewModel model, 
+        RegistrarColaboracionViewModel model,
         string registradoPor)
     {
-        // Validar que el rango de fechas sea válido
-        var fechaInicial = new DateTime(model.AnioInicial, model.MesInicial, 1);
-        var fechaFinal = new DateTime(model.AnioFinal, model.MesFinal, 1);
-        
-        if (fechaFinal < fechaInicial)
+
+        try
         {
-            throw new ArgumentException("La fecha final no puede ser anterior a la fecha inicial");
+            // Validar que el rango de fechas sea válido
+            var fechaInicial = new DateTime(model.AnioInicial, model.MesInicial, 1);
+            var fechaFinal = new DateTime(model.AnioFinal, model.MesFinal, 1);
+
+            if (fechaFinal < fechaInicial)
+            {
+                throw new ArgumentException("La fecha final no puede ser anterior a la fecha inicial");
+            }
+
+            // Get or create colaboracion head for today
+            //var head = await GetOrCreateColaboracionHeadForDateAsync(DateTime.UtcNow, registradoPor);
+            
+            var head = await GetOrCreateColaboracionHeadForIdAsync(model.IdJornada, registradoPor);
+
+            if (head == null)
+            {
+                throw new InvalidOperationException("No se pudo crear o obtener la jornada de colaboración.");
+            }
+
+            // Verificar que la jornada no esté cerrada
+            if (head.EsCerrado)
+            {
+                throw new InvalidOperationException($"La jornada del {head.Fecha:dd/MM/yyyy} está cerrada. No se pueden agregar más colaboraciones.");
+            }
+
+            // Obtener información de los tipos seleccionados
+            var tiposColaboracion = await _context.TiposColaboracion
+                .Where(t => model.TiposSeleccionados.Contains(t.Id))
+                .ToListAsync();
+
+            // Generar todos los meses en el rango
+            var mesesAPagar = GenerarRangoMeses(
+                model.AnioInicial, model.MesInicial,
+                model.AnioFinal, model.MesFinal);
+
+            // Crear colaboración principal
+            var colaboracion = new Colaboracion
+            {
+                MiembroId = model.MiembroId,
+                ColaboracionHeadId = head.Id,
+                FechaRegistro = DateTime.UtcNow,
+                MontoTotal = model.MontoTotal,
+                Observaciones = model.Observaciones,
+                RegistradoPor = registradoPor,
+                CreadoEn = DateTime.UtcNow,
+                ActualizadoEn = DateTime.UtcNow
+            };
+
+            // Distribuir el monto total entre los meses y tipos
+            var detalles = DistribuirMonto(
+                model.MontoTotal,
+                tiposColaboracion,
+                mesesAPagar,
+                model.TipoPrioritario);
+
+            foreach (var detalle in detalles)
+            {
+                colaboracion.Detalles.Add(detalle);
+            }
+
+            _context.Colaboraciones.Add(colaboracion);
+
+            // Guardar la colaboración primero
+            await _context.SaveChangesAsync();
+
+            // Update the head total using the entity framework to maintain consistency
+            head.Total += model.MontoTotal;
+            head.ActualizadoEn = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return colaboracion;
         }
-        
-        // Obtener información de los tipos seleccionados
-        var tiposColaboracion = await _context.TiposColaboracion
-            .Where(t => model.TiposSeleccionados.Contains(t.Id))
-            .ToListAsync();
-        
-        // Generar todos los meses en el rango
-        var mesesAPagar = GenerarRangoMeses(
-            model.AnioInicial, model.MesInicial,
-            model.AnioFinal, model.MesFinal);
-        
-        // Crear colaboración principal
-        var colaboracion = new Colaboracion
+        catch(Exception ex)
         {
-            MiembroId = model.MiembroId,
-            FechaRegistro = DateTime.UtcNow,
-            MontoTotal = model.MontoTotal,
-            Observaciones = model.Observaciones,
-            RegistradoPor = registradoPor,
-            CreadoEn = DateTime.UtcNow,
-            ActualizadoEn = DateTime.UtcNow
-        };
-        
-        // Distribuir el monto total entre los meses y tipos
-        var detalles = DistribuirMonto(
-            model.MontoTotal,
-            tiposColaboracion,
-            mesesAPagar,
-            model.TipoPrioritario);
-        
-        foreach (var detalle in detalles)
-        {
-            colaboracion.Detalles.Add(detalle);
+            // Log the inner exception for better diagnostics
+            if (ex.InnerException != null)
+            {
+                throw new Exception($"Error al registrar colaboración: {ex.InnerException.Message}", ex.InnerException);
+            }
+            throw new Exception($"Error al registrar colaboración: {ex.Message}", ex);
         }
-        
-        _context.Colaboraciones.Add(colaboracion);
-        await _context.SaveChangesAsync();
-        
-        return colaboracion;
     }
     
     private List<DetalleColaboracion> DistribuirMonto(
@@ -92,9 +130,6 @@ public class ColaboracionService : IColaboracionService
     {
         var detalles = new List<DetalleColaboracion>();
         var montoRestante = montoTotal;
-        
-        // Estrategia: Mes a Mes
-        // Para cada mes, intentamos cubrir los tipos (Prioritario primero)
         
         foreach (var (anio, mes) in meses)
         {
@@ -125,13 +160,8 @@ public class ColaboracionService : IColaboracionService
             {
                 if (montoRestante <= 0) break;
 
-                // Determinar cuánto asignar
-                // Intentamos cubrir el monto sugerido completo
                 var montoAAsignar = Math.Min(tipo.MontoSugerido, montoRestante);
                 
-                // Si es un monto muy pequeño (ej: residuo), igual lo asignamos para no perderlo,
-                // salvo que queramos reglas estrictas de "solo completos".
-                // Por ahora asignamos lo que haya.
                 
                 if (montoAAsignar > 0)
                 {
@@ -163,7 +193,7 @@ public class ColaboracionService : IColaboracionService
             
         var resultado = detalles
             .GroupBy(d => d.TipoColaboracion)
-            .Select(g => 
+            .Select(g =>
             {
                 // Encontrar el registro con el mes/año más reciente
                 var ultimo = g.OrderByDescending(d => d.Anio).ThenByDescending(d => d.Mes).FirstOrDefault();
@@ -179,6 +209,7 @@ public class ColaboracionService : IColaboracionService
                 };
             })
             .Where(x => x != null)
+            .Select(x => x!)
             .ToList();
             
         // Asegurar que retornamos todos los tipos activos, incluso si no tienen pagos
@@ -367,7 +398,232 @@ public class ColaboracionService : IColaboracionService
             .ToList();
         
         estado.HistorialPorTipos = historialPorTipo;
-        
+
         return estado;
+    }
+
+    // New methods for ColaboracionHead (Master-Detail pattern)
+    public async Task<List<ColaboracionHeadIndexViewModel>> GetColaboracionHeadsRecientesAsync(int cantidad = 50)
+    {
+        return await _context.ColaboracionHeads
+            .Include(h => h.Colaboraciones)
+            .OrderByDescending(h => h.Fecha)
+            .Take(cantidad)
+            .Select(h => new ColaboracionHeadIndexViewModel
+            {
+                Id = h.Id,
+                Fecha = h.Fecha,
+                Total = h.Total,
+                CantidadColaboraciones = h.Colaboraciones.Count,
+                CreadoPor = h.CreadoPor,
+                CreadoEn = h.CreadoEn,
+                EsCerrado = h.EsCerrado,
+                FechaCierre = h.FechaCierre,
+                CerradoPor = h.CerradoPor
+            })
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<ColaboracionHeadDetalleViewModel?> GetColaboracionHeadByIdAsync(long id)
+    {
+        var head = await _context.ColaboracionHeads
+            .Include(h => h.Colaboraciones)
+                .ThenInclude(c => c.Miembro)
+                    .ThenInclude(m => m.Persona)
+            .Include(h => h.Colaboraciones)
+                .ThenInclude(c => c.Detalles)
+                    .ThenInclude(d => d.TipoColaboracion)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(h => h.Id == id);
+
+        if (head == null)
+            return null;
+
+        return new ColaboracionHeadDetalleViewModel
+        {
+            Id = head.Id,
+            Fecha = head.Fecha,
+            Total = head.Total,
+            CreadoPor = head.CreadoPor,
+            CreadoEn = head.CreadoEn,
+            EsCerrado = head.EsCerrado,
+            FechaCierre = head.FechaCierre,
+            CerradoPor = head.CerradoPor,
+            Colaboraciones = head.Colaboraciones.Select(c => new ColaboracionDetalleViewModel
+            {
+                Id = c.Id,
+                MiembroNombre = $"{c.Miembro.Persona.Nombres} {c.Miembro.Persona.Apellidos}",
+                MontoTotal = c.MontoTotal,
+                Observaciones = c.Observaciones,
+                RegistradoPor = c.RegistradoPor,
+                FechaRegistro = c.FechaRegistro,
+                TiposColaboracion = c.Detalles
+                    .Select(d => d.TipoColaboracion.Nombre)
+                    .Distinct()
+                    .ToList()
+            }).ToList()
+        };
+    }
+
+    /// <summary>
+    /// Obtiene o Crea un colaboracionHead segun la fecha
+    /// </summary>
+    /// <param name="fecha"></param>
+    /// <param name="creadoPor"></param>
+    /// <returns></returns>
+    public async Task<ColaboracionHead?> GetOrCreateColaboracionHeadForDateAsync(DateTime fecha, string creadoPor)
+    {
+        var fechaDate = fecha.Date;
+
+        var head = await _context.ColaboracionHeads
+            .FirstOrDefaultAsync(h => h.Fecha.Date == fechaDate);
+
+        if (head == null)
+        {
+            head = new ColaboracionHead
+            {
+                Fecha = fechaDate,
+                Total = 0,
+                CreadoPor = creadoPor,
+                CreadoEn = DateTime.UtcNow,
+                ActualizadoEn = DateTime.UtcNow
+            };
+
+            _context.ColaboracionHeads.Add(head);
+            await _context.SaveChangesAsync(); // Save immediately to get the ID
+        }
+
+        return head;
+    }
+
+    /// <summary>
+    /// Obtiene o Crea un colaboracionHead segun la fecha
+    /// </summary>
+    /// <param name="fecha"></param>
+    /// <param name="creadoPor"></param>
+    /// <returns></returns>
+    public async Task<ColaboracionHead?> GetOrCreateColaboracionHeadForIdAsync(int IdJornada, string creadoPor)
+    {
+        // var fechaDate = fecha.Date;
+
+        var head = await _context.ColaboracionHeads
+            .FirstOrDefaultAsync(h => h.Id == IdJornada);
+
+        if (head == null)
+        {
+            head = new ColaboracionHead
+            {
+                Fecha = DateTime.UtcNow,
+                Total = 0,
+                CreadoPor = creadoPor,
+                CreadoEn = DateTime.UtcNow,
+                ActualizadoEn = DateTime.UtcNow
+            };
+
+            _context.ColaboracionHeads.Add(head);
+            await _context.SaveChangesAsync(); // Save immediately to get the ID
+        }
+
+        return head;
+    }
+
+    public async Task<CierreDiarioResult> RealizarCierreDiarioAsync(long colaboracionHeadId, string cerradoPor)
+    {   
+        try
+        {
+            // 1. Obtener y validar la ColaboracionHead
+            var colaboracionHead = await _context.ColaboracionHeads
+                .FirstOrDefaultAsync(h => h.Id == colaboracionHeadId);
+
+            if (colaboracionHead == null)
+            {
+                throw new ArgumentException($"ColaboracionHead con ID {colaboracionHeadId} no encontrada");
+            }
+
+            if (colaboracionHead.EsCerrado)
+            {
+                throw new InvalidOperationException($"La jornada del {colaboracionHead.Fecha:dd/MM/yyyy} ya está cerrada");
+            }
+
+            if (colaboracionHead.Total <= 0)
+            {
+                throw new InvalidOperationException($"No se puede cerrar una jornada con total 0. Total actual: {colaboracionHead.Total:N2}");
+            }
+
+            // 2. Bloquear la ColaboracionHead (marcar como cerrada)
+            colaboracionHead.EsCerrado = true;
+            colaboracionHead.FechaCierre = DateTime.UtcNow;
+            colaboracionHead.CerradoPor = cerradoPor;
+            colaboracionHead.ActualizadoEn = DateTime.UtcNow;
+
+            // 3. Verificar/Crear ReporteMensualGeneral para el mes/año
+            var mes = colaboracionHead.Fecha.Month;
+            var anio = colaboracionHead.Fecha.Year;
+
+            var reporteMensual = await _context.ReportesMensualesGenerales
+                .FirstOrDefaultAsync(r => r.Mes == mes && r.Anio == anio);
+
+            if (reporteMensual == null)
+            {
+                reporteMensual = new ReporteMensualGeneral
+                {
+                    Mes = mes,
+                    Anio = anio,
+                    SaldoInicial = 0,
+                    FechaCreacion = DateTime.UtcNow,
+                    Cerrado = false
+                };
+
+                _context.ReportesMensualesGenerales.Add(reporteMensual);
+                await _context.SaveChangesAsync(); // Guardar para obtener el ID
+            }
+
+            // 4. Crear MovimientoGeneral para el cierre diario
+            var movimientoGeneral = new MovimientoGeneral
+            {
+                ReporteMensualGeneralId = reporteMensual.Id,
+                CategoriaIngresoId = 1, // Categoría fija para colaboraciones
+                Monto = colaboracionHead.Total,
+                Fecha = colaboracionHead.Fecha,
+                Tipo = (int)TipoMovimientoGeneral.Ingreso,
+                Descripcion = $"Cierre diario de colaboraciones - {colaboracionHead.Fecha:dd/MM/yyyy}",
+                NumeroComprobante = $"CIERRE-{colaboracionHead.Fecha:yyyyMMdd}"
+            };
+
+            _context.MovimientosGenerales.Add(movimientoGeneral);
+            _context.Entry(colaboracionHead).State = EntityState.Modified;
+            // _context.Entry(movimientoGeneral).State = EntityState.Modified;
+            // 5. Guardar todos los cambios
+            await _context.SaveChangesAsync();
+
+            // 6. Retornar resultado exitoso
+            return new CierreDiarioResult
+            {
+                Success = true,
+                Message = $"Cierre diario realizado exitosamente para la jornada del {colaboracionHead.Fecha:dd/MM/yyyy}",
+                ColaboracionHeadId = colaboracionHead.Id,
+                Fecha = colaboracionHead.Fecha,
+                TotalCerrado = colaboracionHead.Total,
+                ReporteMensualGeneralId = reporteMensual.Id,
+                MovimientoGeneralId = movimientoGeneral.Id
+            };
+        }
+        catch (Exception ex)
+        {   
+            return new CierreDiarioResult
+            {
+                Success = false,
+                Message = $"Error al realizar el cierre diario: {ex.Message}",
+                Error = ex.Message,
+                StackTrace = ex.StackTrace
+            };
+        }
+    }
+
+    // This method is kept for backward compatibility
+    public Task<Colaboracion> RegistrarColabo2racionAsync(RegistrarColaboracionViewModel model, string registradoPor)
+    {
+        return RegistrarColaboracionAsync(model, registradoPor);
     }
 }

@@ -25,18 +25,18 @@ public class ColaboracionController : Controller
     {
         try
         {
-            var colaboraciones = await _colaboracionService.GetColaboracionesRecientesAsync();
-            return View(colaboraciones);
+            var colaboracionHeads = await _colaboracionService.GetColaboracionHeadsRecientesAsync();
+            return View(colaboracionHeads);
         }
         catch (Exception ex)
         {
-            TempData["Error"] = $"Error al cargar colaboraciones: {ex.Message}";
-            return View(new List<Models.Colaboracion>());
+            TempData["Error"] = $"Error al cargar jornadas de colaboración: {ex.Message}";
+            return View(new List<ColaboracionHeadIndexViewModel>());
         }
     }
     
     // GET: Colaboracion/Create
-    public async Task<IActionResult> Create()
+    public async Task<IActionResult> Create(int jornada)
     {
         try
         {
@@ -47,7 +47,8 @@ public class ColaboracionController : Controller
                 MesFinal = DateTime.Now.Month,
                 AnioFinal = DateTime.Now.Year,
                 MontoTotal = 0,
-                TiposDisponibles = await _colaboracionService.GetTiposActivosAsync()
+                TiposDisponibles = await _colaboracionService.GetTiposActivosAsync(),
+                IdJornada = jornada
             };
             
             await CargarMiembrosAsync();
@@ -87,7 +88,7 @@ public class ColaboracionController : Controller
         return View(model);
     }
     
-    // GET: Colaboracion/Details/5
+    // GET: Colaboracion/Details/5 (individual collaboration)
     public async Task<IActionResult> Details(long id)
     {
         try
@@ -98,7 +99,7 @@ public class ColaboracionController : Controller
                 TempData["Error"] = "Colaboración no encontrada";
                 return RedirectToAction(nameof(Index));
             }
-            
+
             return View(colaboracion);
         }
         catch (Exception ex)
@@ -107,7 +108,56 @@ public class ColaboracionController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
-    
+
+    // GET: Colaboracion/Jornada/5 (colaboracion head details)
+    public async Task<IActionResult> Jornada(long id)
+    {
+        try
+        {
+            var jornada = await _colaboracionService.GetColaboracionHeadByIdAsync(id);
+            if (jornada == null)
+            {
+                TempData["Error"] = "Jornada no encontrada";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(jornada);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Error al cargar jornada: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    // POST: Colaboracion/CierreDiario/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CierreDiario(long id)
+    {
+        try
+        {
+            var cerradoPor = User.Identity?.Name ?? "Sistema";
+            var resultado = await _colaboracionService.RealizarCierreDiarioAsync(id, cerradoPor);
+
+            if (resultado.Success)
+            {
+                TempData["Success"] = resultado.Message;
+            }
+            else
+            {
+                TempData["Error"] = resultado.Message;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Error al realizar cierre diario: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
     // GET: Colaboracion/Reportes
     public IActionResult Reportes()
     {
@@ -151,6 +201,38 @@ public class ColaboracionController : Controller
         {
             TempData["Error"] = $"Error al generar estado de cuenta: {ex.Message}";
             return RedirectToAction(nameof(Index));
+        }
+    }
+
+    // POST: Colaboracion/CrearJornada
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CrearJornada([FromBody] CrearJornadaRequest request)
+    {
+        try
+        {
+            if (!ModelState.IsValid || request.Fecha == default)
+            {
+                return Json(new { success = false, message = "Fecha inválida" });
+            }
+
+            var creadoPor = User.Identity?.Name ?? "Sistema";
+            var head = await _colaboracionService.GetOrCreateColaboracionHeadForDateAsync(request.Fecha, creadoPor);
+
+            if (head == null)
+            {
+                return Json(new { success = false, message = "Error al crear la jornada" });
+            }
+
+            return Json(new { 
+                success = true, 
+                message = $"Jornada creada exitosamente para la fecha {request.Fecha:dd/MM/yyyy}",
+                jornadaId = head.Id
+            });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, message = $"Error al crear jornada: {ex.Message}" });
         }
     }
     

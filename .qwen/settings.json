@@ -1,7 +1,61 @@
 {
+  "env": {
+    "OPENAI_API_KEY": "sk-5edda31c85024938ad10af61f802b797"
+  },
   "permissions": {
     "allow": [
       "Bash(dotnet *)"
     ]
+  },
+  "modelProviders": {
+    "openai": [
+      {
+        "id": "deepseek-chat",
+        "name": "DeepSeek Chat",
+        "description": "DeepSeek V3",
+        "envKey": "OPENAI_API_KEY",
+        "baseUrl": "https://api.deepseek.com/v1"
+      },
+      {
+        "id": "deepseek-reasoner",
+        "name": "DeepSeek Reasoner",
+        "description": "DeepSeek R1 (Pensamiento lógico)",
+        "envKey": "OPENAI_API_KEY",
+        "baseUrl": "https://api.deepseek.com/v1"
+      }
+    ]
+  },
+  "lsp": {
+    "enabled": true,
+    "includeDiagnostics": true,
+    "includeSymbols": true,
+    "languageSettings": {
+      "csharp": {
+        "maxContextSymbols": 50,
+        "enableNavigation": true
+      }
+    }
+  },
+  "index": {
+    "enabled": true,
+    "maxFileSize": 1048576,
+    "exclude": [
+      "**/bin/**",
+      "**/obj/**",
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/.idea/**",
+      "**/.claude/**",
+      "**/.vscode/**"
+    ]
+  },
+  "$version": 3,
+  "model": {
+    "name": "deepseek-chat"
+  },
+  "security": {
+    "auth": {
+      "selectedType": "openai"
+    }
   }
 }
