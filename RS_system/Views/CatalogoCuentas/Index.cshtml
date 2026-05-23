@@ -1,0 +1,138 @@
+@model List<Rs_system.Models.CuentaContable>
+
+@{
+    ViewData["Title"] = "Catálogo de Cuentas";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Catálogo de Cuentas Contables</h1>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nueva Cuenta
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Estructura Jerárquica</h6>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    No hay cuentas contables registradas. 
+                    <a asp-action="Create" class="alert-link">Crear primera cuenta</a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="cuentasTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th style="width:150px">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cuenta in Model)
+                            {
+                                <tr class="table-secondary fw-bold">
+                                    <td>@cuenta.CodigoFormateado</td>
+                                    <td>@cuenta.Nombre</td>
+                                    <td><span class="badge bg-info">@cuenta.AccountType?.Nombre</span></td>
+                                    <td>@(cuenta.Activa ? "Activa" : "Inactiva")</td>
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@cuenta.Id" class="btn btn-sm btn-warning" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@cuenta.Id" method="post" style="display:inline"
+                                              onsubmit="return confirm('¿Eliminar @cuenta.Nombre?')">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                        <a asp-action="Create" asp-route-padreId="@cuenta.Id" class="btn btn-sm btn-success" title="Agregar hija">
+                                            <i class="fas fa-plus-circle"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                @if (cuenta.Hijas.Any())
+                                {
+                                    RenderHijas(cuenta.Hijas, 1);
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    private async Task RenderHijas(ICollection<Rs_system.Models.CuentaContable> hijas, int nivel)
+    {
+        foreach (var hija in hijas)
+        {
+            <tr>
+                <td style="padding-left: @(20 * nivel)px">@hija.CodigoFormateado</td>
+                <td>@hija.Nombre</td>
+                <td><span class="badge bg-info">@hija.AccountType?.Nombre</span></td>
+                <td>@(hija.Activa ? "Activa" : "Inactiva")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@hija.Id" class="btn btn-sm btn-warning" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <form asp-action="Delete" asp-route-id="@hija.Id" method="post" style="display:inline"
+                          onsubmit="return confirm('¿Eliminar @hija.Nombre?')">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                    <a asp-action="Create" asp-route-padreId="@hija.Id" class="btn btn-sm btn-success" title="Agregar hija">
+                        <i class="fas fa-plus-circle"></i>
+                    </a>
+                </td>
+            </tr>
+            if (hija.Hijas.Any())
+            {
+                RenderHijas(hija.Hijas, nivel + 1);
+            }
+        }
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#cuentasTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+                },
+                "pageLength": 50,
+                "order": [[0, 'asc']]
+            });
+        });
+    </script>
+}

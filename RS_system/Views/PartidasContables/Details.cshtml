@@ -1,0 +1,116 @@
+@model Rs_system.Models.PartidaContable
+
+@{
+    ViewData["Title"] = "Detalle de Partida Contable";
+    var totalDebito = Model.Detalles?.Sum(d => d.Debito) ?? 0;
+    var totalCredito = Model.Detalles?.Sum(d => d.Credito) ?? 0;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Partida #@Model.Id</h1>
+        <a asp-action="Index" asp-route-periodoId="@Model.PeriodoContableId" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Encabezado</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-md-3 fw-bold">Fecha:</div>
+                        <div class="col-md-9">@Model.Fecha.ToString("dd/MM/yyyy")</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3 fw-bold">Referencia:</div>
+                        <div class="col-md-9">@Model.Referencia</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3 fw-bold">Descripción:</div>
+                        <div class="col-md-9">@Model.Descripcion</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3 fw-bold">Estado:</div>
+                        <div class="col-md-9">
+                            @if (Model.Cerrada)
+                            {
+                                <span class="badge bg-secondary">Cerrada</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Abierta</span>
+                            }
+                        </div>
+                    </div>
+                    @if (Model.Periodo != null)
+                    {
+                        <div class="row mb-2">
+                            <div class="col-md-3 fw-bold">Período:</div>
+                            <div class="col-md-9">@Model.Periodo.NombreMes @Model.Periodo.Anio</div>
+                        </div>
+                    }
+                    <div class="row mb-2">
+                        <div class="col-md-3 fw-bold">Creada:</div>
+                        <div class="col-md-9">@Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Detalle de la Partida</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Código</th>
+                            <th>Cuenta</th>
+                            <th>Descripción</th>
+                            <th class="text-end">Débito</th>
+                            <th class="text-end">Crédito</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var detalle in Model.Detalles.OrderByDescending(d => d.Debito))
+                        {
+                            <tr>
+                                <td>@detalle.Cuenta?.Codigo</td>
+                                <td>@detalle.Cuenta?.Nombre</td>
+                                <td>@detalle.Descripcion</td>
+                                <td class="text-end">@(detalle.Debito > 0 ? detalle.Debito.ToString("N2") : "")</td>
+                                <td class="text-end">@(detalle.Credito > 0 ? detalle.Credito.ToString("N2") : "")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="3" class="text-end">Totales</td>
+                            <td class="text-end">@totalDebito.ToString("N2")</td>
+                            <td class="text-end">@totalCredito.ToString("N2")</td>
+                        </tr>
+                        <tr class="@(Math.Abs(totalDebito - totalCredito) < 0.01m ? "table-success" : "table-danger")">
+                            <td colspan="5" class="text-center">
+                                @if (Math.Abs(totalDebito - totalCredito) < 0.01m)
+                                {
+                                    <text><i class="fas fa-check-circle"></i> Partida balanceada (Débitos = Créditos)</text>
+                                }
+                                else
+                                {
+                                    <text><i class="fas fa-exclamation-triangle"></i> Partida NO balanceada (Diferencia: @Math.Abs(totalDebito - totalCredito).ToString("N2"))</text>
+                                }
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

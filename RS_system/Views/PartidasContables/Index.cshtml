@@ -1,0 +1,123 @@
+@model List<Rs_system.Models.PartidaContable>
+
+@{
+    ViewData["Title"] = "Partidas Contables";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Partidas Contables</h1>
+        <div>
+            <form asp-action="Index" method="get" class="form-inline d-inline">
+                <select name="periodoId" class="form-control d-inline me-2" style="width:auto;" 
+                        asp-items="ViewBag.Periodos" onchange="this.form.submit()">
+                    <option value="">-- Seleccione período --</option>
+                </select>
+            </form>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nueva Partida
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                @if (ViewBag.PeriodoId != null)
+                {
+                    <span>Partidas del Período Seleccionado</span>
+                }
+                else
+                {
+                    <span>Todas las Partidas</span>
+                }
+            </h6>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    No hay partidas contables en este período.
+                    <a asp-action="Create" class="alert-link">Crear primera partida</a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="partidasTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Fecha</th>
+                                <th>Referencia</th>
+                                <th>Descripción</th>
+                                <th>Débitos</th>
+                                <th>Créditos</th>
+                                <th>Estado</th>
+                                <th style="width:100px">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var partida in Model)
+                            {
+                                var totalDebito = partida.Detalles?.Sum(d => d.Debito) ?? 0;
+                                var totalCredito = partida.Detalles?.Sum(d => d.Credito) ?? 0;
+                                <tr>
+                                    <td>@partida.Id</td>
+                                    <td>@partida.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td>@partida.Referencia</td>
+                                    <td>@partida.Descripcion</td>
+                                    <td class="text-end">@totalDebito.ToString("N2")</td>
+                                    <td class="text-end">@totalCredito.ToString("N2")</td>
+                                    <td>
+                                        @if (partida.Cerrada)
+                                        {
+                                            <span class="badge bg-secondary">Cerrada</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Abierta</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@partida.Id" class="btn btn-sm btn-info" title="Ver detalle">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#partidasTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+                },
+                "order": [[1, 'desc']]
+            });
+        });
+    </script>
+}

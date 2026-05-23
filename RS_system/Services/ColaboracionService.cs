@@ -10,10 +10,14 @@ namespace Rs_system.Services;
 public class ColaboracionService : IColaboracionService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IContabilidadPartidaDobleService _contabilidadPartidaDoble;
     
-    public ColaboracionService(ApplicationDbContext context)
+    public ColaboracionService(
+        ApplicationDbContext context,
+        IContabilidadPartidaDobleService contabilidadPartidaDoble)
     {
         _context = context;
+        _contabilidadPartidaDoble = contabilidadPartidaDoble;
     }
     
     public async Task<List<TipoColaboracion>> GetTiposActivosAsync()
@@ -581,6 +585,12 @@ public class ColaboracionService : IColaboracionService
                 await _context.SaveChangesAsync(); // Guardar para obtener el ID
             }
 
+
+                if (reporteMensual.Cerrado)
+                {
+                    throw new InvalidOperationException($"[ERROR]: El mes contable ya ha sido cerrado. Debe volver abrir para poder realizar el cierre de la colaboracion");    
+                }
+
             // 4. Crear MovimientoGeneral para el cierre diario
             var movimientoGeneral = new MovimientoGeneral
             {
@@ -589,7 +599,7 @@ public class ColaboracionService : IColaboracionService
                 Monto = colaboracionHead.Total,
                 Fecha = colaboracionHead.Fecha,
                 Tipo = (int)TipoMovimientoGeneral.Ingreso,
-                Descripcion = $"Cierre diario de colaboraciones - {colaboracionHead.Fecha:dd/MM/yyyy}",
+                Descripcion = $"Cierre de Transporte Y Limpieza - {colaboracionHead.Fecha:dd/MM/yyyy}",
                 NumeroComprobante = $"CIERRE-{colaboracionHead.Fecha:yyyyMMdd}"
             };
 
@@ -599,7 +609,22 @@ public class ColaboracionService : IColaboracionService
             // 5. Guardar todos los cambios
             await _context.SaveChangesAsync();
 
-            // 6. Retornar resultado exitoso
+            // 6. Generar partida contable (doble entrada) automáticamente
+            try
+            {
+                await _contabilidadPartidaDoble.GenerarPartidaDesdeMovimientoAsync(movimientoGeneral);
+            }
+            catch (Exception exPartida)
+            {
+                // Si falla la generación de la partida, el cierre diario ya se realizó.
+                // Se registra el error pero no se revierte la operación.
+                // El usuario puede regenerar la partida manualmente después.
+                throw new InvalidOperationException(
+                    $"El cierre diario se realizó pero no se pudo generar el asiento contable: {exPartida.Message}. " +
+                    "Configure las cuentas contables en las categorías de ingreso/egreso.");
+            }
+
+            // 7. Retornar resultado exitoso
             return new CierreDiarioResult
             {
                 Success = true,

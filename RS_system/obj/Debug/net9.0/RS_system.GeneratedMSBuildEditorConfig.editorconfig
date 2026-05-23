@@ -44,6 +44,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9SZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/AccountTypes/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudFR5cGVzL0NyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/AccountTypes/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudFR5cGVzL0VkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/AccountTypes/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudFR5cGVzL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/adalberto/RiderProjects/RS_System/RS_system/Views/Articulos/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXJ0aWN1bG9zL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -78,6 +90,18 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/home/adalberto/RiderProjects/RS_System/RS_system/Views/AsistenciaCulto/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXNpc3RlbmNpYUN1bHRvL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/CatalogoCuentas/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2F0YWxvZ29DdWVudGFzL0NyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/CatalogoCuentas/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2F0YWxvZ29DdWVudGFzL0VkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/CatalogoCuentas/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2F0YWxvZ29DdWVudGFzL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/adalberto/RiderProjects/RS_System/RS_system/Views/Categorias/Create.cshtml]
@@ -260,6 +284,22 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT2ZyZW5kYS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/PartidasContables/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGFydGlkYXNDb250YWJsZXMvQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/PartidasContables/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGFydGlkYXNDb250YWJsZXMvRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/PartidasContables/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGFydGlkYXNDb250YWJsZXMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/PeriodoContable/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGVyaW9kb0NvbnRhYmxlL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/adalberto/RiderProjects/RS_System/RS_system/Views/Permiso/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGVybWlzby9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -270,6 +310,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/home/adalberto/RiderProjects/RS_System/RS_system/Views/Permiso/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGVybWlzby9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/ReportesContables/BalanceGeneral.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmVwb3J0ZXNDb250YWJsZXMvQmFsYW5jZUdlbmVyYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/adalberto/RiderProjects/RS_System/RS_system/Views/ReportesContables/EstadoResultados.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmVwb3J0ZXNDb250YWJsZXMvRXN0YWRvUmVzdWx0YWRvcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/adalberto/RiderProjects/RS_System/RS_system/Views/Rol/Create.cshtml]

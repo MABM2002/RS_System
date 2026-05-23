@@ -1,0 +1,46 @@
+@model Rs_system.Models.AccountType
+
+@{
+    ViewData["Title"] = "Nuevo Tipo de Cuenta";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4">Nuevo Tipo de Cuenta</h1>
+    <div class="card shadow"><div class="card-body">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="Nombre" class="form-label"></label>
+                    <input asp-for="Nombre" class="form-control" />
+                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Naturaleza" class="form-label"></label>
+                    <select asp-for="Naturaleza" class="form-control" asp-items="ViewBag.Naturalezas"><option value="">-- Seleccione --</option></select>
+                    <span asp-validation-for="Naturaleza" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="CategoriaReporte" class="form-label">Categoría Reporte</label>
+                    <select asp-for="CategoriaReporte" class="form-control" asp-items="ViewBag.CategoriasReporte"><option value="">-- Seleccione --</option></select>
+                    <span asp-validation-for="CategoriaReporte" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label asp-for="Orden" class="form-label"></label>
+                    <input asp-for="Orden" class="form-control" type="number" />
+                    <span asp-validation-for="Orden" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 d-flex align-items-end"><div class="form-check"><input asp-for="Activo" class="form-check-input" /><label asp-for="Activo" class="form-check-label"></label></div></div>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+        </form>
+    </div></div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

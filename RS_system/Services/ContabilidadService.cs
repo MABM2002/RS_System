@@ -7,10 +7,14 @@ namespace Rs_system.Services;
 public class ContabilidadService : IContabilidadService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IContabilidadPartidaDobleService _contabilidadPartidaDoble;
 
-    public ContabilidadService(ApplicationDbContext context)
+    public ContabilidadService(
+        ApplicationDbContext context,
+        IContabilidadPartidaDobleService contabilidadPartidaDoble)
     {
         _context = context;
+        _contabilidadPartidaDoble = contabilidadPartidaDoble;
     }
 
     public async Task<ContabilidadRegistro> CrearRegistroAsync(ContabilidadRegistro registro)
@@ -103,6 +107,8 @@ public class ContabilidadService : IContabilidadService
             var toDelete = reporte.Registros.Where(r => !incomingIds.Contains(r.Id)).ToList();
             _context.ContabilidadRegistros.RemoveRange(toDelete);
 
+            var nuevosRegistros = new List<ContabilidadRegistro>();
+
             foreach (var registro in registros)
             {
                 if (registro.Id > 0)
@@ -124,10 +130,18 @@ public class ContabilidadService : IContabilidadService
                     registro.ReporteMensualId = reporteId;
                     registro.GrupoTrabajoId = reporte.GrupoTrabajoId;
                     _context.ContabilidadRegistros.Add(registro);
+                    nuevosRegistros.Add(registro);
                 }
             }
 
             await _context.SaveChangesAsync();
+
+            // Generar partidas contables para registros nuevos
+            foreach (var nuevo in nuevosRegistros)
+            {
+                await _contabilidadPartidaDoble.GenerarPartidaDesdeRegistroAsync(nuevo);
+            }
+
             return true;
         }
         catch

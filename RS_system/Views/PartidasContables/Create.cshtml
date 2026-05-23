@@ -1,0 +1,251 @@
+@model PartidaContableViewModel
+
+@{
+    ViewData["Title"] = "Nueva Partida Contable";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Nueva Partida Contable</h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Encabezado</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" id="partidaForm">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label asp-for="Fecha" class="form-label"></label>
+                        <input asp-for="Fecha" class="form-control" type="date" />
+                        <span asp-validation-for="Fecha" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PeriodoContableId" class="form-label">Período Contable</label>
+                        <select asp-for="PeriodoContableId" class="form-control" asp-items="ViewBag.Periodos">
+                            <option value="">-- Seleccione --</option>
+                        </select>
+                        <span asp-validation-for="PeriodoContableId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Referencia" class="form-label"></label>
+                        <input asp-for="Referencia" class="form-control" placeholder="Ej: AS-2026-0001" />
+                        <span asp-validation-for="Referencia" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label asp-for="Descripcion" class="form-label"></label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="2" placeholder="Glosa o descripción del asiento"></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <hr />
+                <h5 class="mb-3">Líneas de Detalle</h5>
+                <p class="text-muted small">Agregue al menos 2 líneas. El total de débitos debe igualar al total de créditos.</p>
+
+                <div id="detallesContainer">
+                    @for (int i = 0; i < Model.Detalles.Count; i++)
+                    {
+                        <div class="detalle-row row mb-2 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label small">Cuenta Contable</label>
+                                <select name="Detalles[@i].CuentaContableId" class="form-control form-control-sm cuenta-select">
+                                    <option value="">-- Seleccione --</option>
+                                    @foreach (var c in (SelectList)ViewBag.Cuentas)
+                                    {
+                                        <option value="@c.Value">@c.Text</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small">Débito</label>
+                                <input name="Detalles[@i].Debito" class="form-control form-control-sm debito-input" type="number" step="0.01" min="0" placeholder="0.00" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small">Crédito</label>
+                                <input name="Detalles[@i].Credito" class="form-control form-control-sm credito-input" type="number" step="0.01" min="0" placeholder="0.00" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small">Descripción</label>
+                                <input name="Detalles[@i].Descripcion" class="form-control form-control-sm" placeholder="Opcional" />
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button type="button" class="btn btn-sm btn-danger remove-detalle" onclick="removeDetalle(this)" title="Eliminar">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <button type="button" class="btn btn-sm btn-success" onclick="addDetalle()">
+                        <i class="fas fa-plus"></i> Agregar línea
+                    </button>
+                </div>
+
+                <div class="card bg-light mb-3">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <strong>Total Débitos:</strong> <span id="totalDebito" class="text-primary">0.00</span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Total Créditos:</strong> <span id="totalCredito" class="text-primary">0.00</span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Diferencia:</strong> <span id="diferencia" class="text-danger">0.00</span>
+                            </div>
+                        </div>
+                        <div id="balanceStatus" class="text-center mt-2 fw-bold text-success">
+                            ✓ Balanceado
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                        <i class="fas fa-save"></i> Registrar Partida
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        let detalleCount = @Model.Detalles.Count;
+
+        function addDetalle() {
+            const container = document.getElementById('detallesContainer');
+            const row = document.createElement('div');
+            row.className = 'detalle-row row mb-2 align-items-end';
+            row.innerHTML = `
+                <div class="col-md-5">
+                    <label class="form-label small">Cuenta Contable</label>
+                    <select name="Detalles[${detalleCount}].CuentaContableId" class="form-control form-control-sm cuenta-select">
+                        <option value="">-- Seleccione --</option>
+                        ${document.querySelector('.cuenta-select')?.innerHTML?.split('</option>').slice(1).join('</option>') || ''}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Débito</label>
+                    <input name="Detalles[${detalleCount}].Debito" class="form-control form-control-sm debito-input" type="number" step="0.01" min="0" placeholder="0.00" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Crédito</label>
+                    <input name="Detalles[${detalleCount}].Credito" class="form-control form-control-sm credito-input" type="number" step="0.01" min="0" placeholder="0.00" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Descripción</label>
+                    <input name="Detalles[${detalleCount}].Descripcion" class="form-control form-control-sm" placeholder="Opcional" />
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-sm btn-danger remove-detalle" onclick="removeDetalle(this)" title="Eliminar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+            detalleCount++;
+            attachInputListeners(row);
+            recalcular();
+        }
+
+        function removeDetalle(btn) {
+            const row = btn.closest('.detalle-row');
+            if (document.querySelectorAll('.detalle-row').length <= 2) {
+                alert('Debe haber al menos 2 líneas de detalle.');
+                return;
+            }
+            row.remove();
+            renombrar();
+            recalcular();
+        }
+
+        function renombrar() {
+            const rows = document.querySelectorAll('.detalle-row');
+            rows.forEach((row, index) => {
+                row.querySelectorAll('input, select').forEach(el => {
+                    const name = el.getAttribute('name');
+                    if (name) {
+                        el.setAttribute('name', name.replace(/\[\d+\]/, `[${index}]`));
+                    }
+                });
+            });
+            detalleCount = rows.length;
+        }
+
+        function attachInputListeners(row) {
+            row.querySelectorAll('.debito-input, .credito-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const parentRow = this.closest('.detalle-row');
+                    const debInput = parentRow.querySelector('.debito-input');
+                    const credInput = parentRow.querySelector('.credito-input');
+                    if (this.classList.contains('debito-input') && parseFloat(this.value || 0) > 0) {
+                        credInput.value = '';
+                        credInput.disabled = true;
+                    } else if (this.classList.contains('credito-input') && parseFloat(this.value || 0) > 0) {
+                        debInput.value = '';
+                        debInput.disabled = true;
+                    } else {
+                        debInput.disabled = false;
+                        credInput.disabled = false;
+                    }
+                    recalcular();
+                });
+            });
+        }
+
+        function recalcular() {
+            let totalDeb = 0, totalCred = 0;
+            document.querySelectorAll('.detalle-row').forEach(row => {
+                const deb = parseFloat(row.querySelector('.debito-input')?.value || 0) || 0;
+                const cred = parseFloat(row.querySelector('.credito-input')?.value || 0) || 0;
+                totalDeb += deb;
+                totalCred += cred;
+            });
+
+            document.getElementById('totalDebito').textContent = totalDeb.toFixed(2);
+            document.getElementById('totalCredito').textContent = totalCred.toFixed(2);
+
+            const diff = Math.abs(totalDeb - totalCred);
+            document.getElementById('diferencia').textContent = diff.toFixed(2);
+
+            const status = document.getElementById('balanceStatus');
+            const submitBtn = document.getElementById('submitBtn');
+
+            const hasLines = document.querySelectorAll('.detalle-row').length >= 2;
+            const hasCuentas = Array.from(document.querySelectorAll('.cuenta-select')).some(s => s.value !== '');
+            const balanceOk = diff < 0.01 && (totalDeb > 0 || totalCred > 0);
+
+            if (balanceOk && hasLines && hasCuentas) {
+                status.textContent = '✓ Balanceado';
+                status.className = 'text-center mt-2 fw-bold text-success';
+                submitBtn.disabled = false;
+            } else {
+                status.textContent = diff < 0.01 ? '⚠ Agregue líneas de detalle' : '✗ NO Balanceado';
+                status.className = 'text-center mt-2 fw-bold text-danger';
+                submitBtn.disabled = true;
+            }
+        }
+
+        // Attach listeners to existing rows
+        document.querySelectorAll('.detalle-row').forEach(row => attachInputListeners(row));
+        recalcular();
+    </script>
+}

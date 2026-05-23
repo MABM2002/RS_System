@@ -1,0 +1,84 @@
+@model BalanceGeneralResult
+
+@{
+    ViewData["Title"] = "Balance General";
+    var fechaCorte = ViewBag.FechaCorte;
+    var ecCardClass = Model.EstaBalanceado ? "border-success" : "border-danger";
+    var ecTextClass = Model.EstaBalanceado ? "text-success" : "text-danger";
+    var diff = Math.Abs(Model.TotalDeudoras - Model.TotalAcreedoras);
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Balance General</h1>
+        <form asp-action="BalanceGeneral" method="get" class="form-inline">
+            <label class="me-2">Fecha de Corte:</label>
+            <input type="date" name="fechaCorte" class="form-control me-2" value="@fechaCorte.ToString("yyyy-MM-dd")" onchange="this.form.submit()" />
+            <noscript><button type="submit" class="btn btn-primary">Actualizar</button></noscript>
+        </form>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row">
+        @foreach (var seccion in Model.Secciones.OrderBy(s => s.Orden))
+        {
+            var border = seccion.Naturaleza == NaturalezaCuenta.Deudora ? "primary" : "success";
+            <div class="col-md-4 mb-4">
+                <div class="card shadow h-100 border-start border-@border border-4">
+                    <div class="card-header bg-@border text-white">
+                        <h5 class="mb-0">@seccion.Nombre</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped mb-0">
+                            <thead><tr><th>Cuenta</th><th class="text-end">Saldo</th></tr></thead>
+                            <tbody>
+                                @foreach (var item in seccion.Cuentas.OrderBy(c => c.Codigo))
+                                {
+                                    <tr><td>@item.Codigo - @item.Nombre</td><td class="text-end">@item.Saldo.ToString("N2")</td></tr>
+                                }
+                                @if (!seccion.Cuentas.Any())
+                                {
+                                    <tr><td colspan="2" class="text-muted text-center">Sin movimientos</td></tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold bg-light"><td>TOTAL @seccion.Nombre.ToUpper()</td><td class="text-end">@seccion.Total.ToString("N2")</td></tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- ECUACIÓN CONTABLE -->
+    <div class="card shadow mb-4 @ecCardClass">
+        <div class="card-body text-center">
+            <h5 class="mb-3">Ecuación Contable</h5>
+            <div class="row">
+                <div class="col-md-4"><strong>Total Deudoras</strong><br/><span class="h4 text-primary">@Model.TotalDeudoras.ToString("N2")</span></div>
+                <div class="col-md-1 align-self-center"><span class="h4">=</span></div>
+                <div class="col-md-4"><strong>Total Acreedoras</strong><br/><span class="h4 text-success">@Model.TotalAcreedoras.ToString("N2")</span></div>
+            </div>
+            <hr />
+            <div class="h5 @ecTextClass">
+                @if (Model.EstaBalanceado)
+                {
+                    <text><i class="fas fa-check-circle"></i> Balance General BALANCEADO</text>
+                }
+                else
+                {
+                    <text>
+                    <i class="fas fa-exclamation-triangle"></i> Balance General NO BALANCEADO
+                    <br />
+                    <small>Diferencia: @diff.ToString("N2")</small>
+                    </text>
+                }
+            </div>
+        </div>
+    </div>
+</div>

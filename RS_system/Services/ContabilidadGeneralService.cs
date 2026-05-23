@@ -1,6 +1,5 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Npgsql;
 using Rs_system.Data;
 using Rs_system.Models;
@@ -11,11 +10,16 @@ public class ContabilidadGeneralService : IContabilidadGeneralService
 {
     private readonly ApplicationDbContext _context;
     private readonly IPostgresDirectExecutor _postgresExecutor;
+    private readonly IContabilidadPartidaDobleService _contabilidadPartidaDoble;
 
-    public ContabilidadGeneralService(ApplicationDbContext context, IPostgresDirectExecutor postgresExecutor)
+    public ContabilidadGeneralService(
+        ApplicationDbContext context,
+        IPostgresDirectExecutor postgresExecutor,
+        IContabilidadPartidaDobleService contabilidadPartidaDoble)
     {
         _context = context;
         _postgresExecutor = postgresExecutor;
+        _contabilidadPartidaDoble = contabilidadPartidaDoble;
     }
 
     // ==================== Categorías de Ingreso ====================
@@ -192,11 +196,19 @@ public class ContabilidadGeneralService : IContabilidadGeneralService
         {
             var reporte = await _context.ReportesMensualesGenerales.FindAsync(reporteId);
             if (reporte == null) return false;
-            
-            // Ejecutar el procedimiento
-            await _context.Database.ExecuteSqlInterpolatedAsync(
-                $"CALL recalcular_saldos_mensuales({reporte.Anio})"
-            );
+
+            var parameters = new[]
+            {
+                new NpgsqlParameter("p_anio", NpgsqlTypes.NpgsqlDbType.Integer)
+                {
+                    Value = reporte.Anio
+                }
+            };
+
+            await _postgresExecutor.ExecuteStoredProcedureAsync("recalcular_saldos_mensuales", parameters);
+
+            // ExecuteStoredProcedureAsync
+            //dsads
             _context.Entry(reporte).Property(x => x.Cerrado).CurrentValue = true;
             _context.Entry(reporte).Property(x => x.Cerrado).IsModified = true;
 
@@ -223,13 +235,27 @@ public async Task<bool> GuardarMovimientosBulkAsync(long reporteId, List<Movimie
         if (reporte == null || reporte.Cerrado)
             return false;
 
-        // 2. OBTENER Y ELIMINAR EN UNA SOLA CONSULTA (materializar antes)
-        var movimientosExistentes = await _context.MovimientosGenerales
+        // 2. OBTENER IDs de movimientos existentes (para limpiar partidas contables previas)
+        var idsExistentes = await _context.MovimientosGenerales
             .Where(e => e.ReporteMensualGeneralId == reporteId)
+            .Select(e => e.Id)
             .ToListAsync();
 
-        if (movimientosExistentes.Any())
+        // Eliminar partidas contables asociadas a movimientos antiguos
+        if (idsExistentes.Any())
         {
+            var partidasAsociadas = await _context.PartidasContables
+                .Where(p => p.MovimientoGeneralId != null && idsExistentes.Contains(p.MovimientoGeneralId.Value))
+                .ToListAsync();
+            if (partidasAsociadas.Any())
+            {
+                _context.PartidasContables.RemoveRange(partidasAsociadas);
+            }
+
+            // Eliminar los movimientos antiguos
+            var movimientosExistentes = await _context.MovimientosGenerales
+                .Where(e => e.ReporteMensualGeneralId == reporteId)
+                .ToListAsync();
             _context.MovimientosGenerales.RemoveRange(movimientosExistentes);
             await _context.SaveChangesAsync();
         }
@@ -261,20 +287,37 @@ public async Task<bool> GuardarMovimientosBulkAsync(long reporteId, List<Movimie
                 }
                 else
                 {
-                    // Insert new si no existe
                     _context.Entry(movimiento).State = EntityState.Added;
                     _context.MovimientosGenerales.Add(movimiento);
                 }
             }
             else
             {
-                // Insert new
                 _context.Entry(movimiento).State = EntityState.Added;
                 _context.MovimientosGenerales.Add(movimiento);
             }
         }
 
         await _context.SaveChangesAsync();
+
+        // 4. GENERAR PARTIDAS CONTABLES (doble entrada) para cada movimiento nuevo
+        foreach (var movimiento in movimientos)
+        {
+            // Si el movimiento tenía Id = 0, ahora tiene el Id generado por la DB
+            var movimientoGuardado = await _context.MovimientosGenerales
+                .Where(m => m.ReporteMensualGeneralId == reporteId
+                    && m.Tipo == movimiento.Tipo
+                    && m.Monto == movimiento.Monto
+                    && m.Descripcion == movimiento.Descripcion)
+                .OrderByDescending(m => m.Id)
+                .FirstOrDefaultAsync();
+
+            if (movimientoGuardado != null)
+            {
+                await _contabilidadPartidaDoble.GenerarPartidaDesdeMovimientoAsync(movimientoGuardado);
+            }
+        }
+
         return true;
     }
     catch (Exception ex)

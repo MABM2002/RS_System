@@ -1,0 +1,59 @@
+@model List<Rs_system.Models.AccountType>
+
+@{
+    ViewData["Title"] = "Tipos de Cuenta";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Tipos de Cuenta Contable</h1>
+        <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Nuevo Tipo</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Listado de Tipos</h6></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="tiposTable">
+                    <thead class="table-light">
+                        <tr><th>Nombre</th><th>Naturaleza</th><th>Reporte</th><th>Orden</th><th>Estado</th><th style="width:150px">Acciones</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model)
+                        {
+                            <tr>
+                                <td>@t.Nombre</td>
+                                <td>@t.Naturaleza</td>
+                                <td>@(t.CategoriaReporte == CategoriaReporte.Balance ? "Balance General" : "Estado de Resultados")</td>
+                                <td>@t.Orden</td>
+                                <td>@(t.Activo ? "Activo" : "Inactivo")</td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@t.Id" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                                    <form asp-action="Delete" asp-route-id="@t.Id" method="post" style="display:inline" onsubmit="return confirm('¿Eliminar @t.Nombre?')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function(){ $('#tiposTable').DataTable({"language":{"url":"//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"}}); });
+    </script>
+}

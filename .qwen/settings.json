@@ -11,16 +11,16 @@
   "modelProviders": {
     "openai": [
       {
-        "id": "deepseek-chat",
+        "id": "deepseek-v4-flash",
         "name": "DeepSeek Chat",
         "description": "DeepSeek V3",
         "envKey": "OPENAI_API_KEY",
         "baseUrl": "https://api.deepseek.com/v1"
       },
       {
-        "id": "deepseek-reasoner",
+        "id": "deepseek-v4-pro",
         "name": "DeepSeek Reasoner",
-        "description": "DeepSeek R1 (Pensamiento lógico)",
+        "description": "DeepSeek V4 (Pensamiento lógico)",
         "envKey": "OPENAI_API_KEY",
         "baseUrl": "https://api.deepseek.com/v1"
       },

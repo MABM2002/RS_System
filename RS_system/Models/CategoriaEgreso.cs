@@ -25,6 +25,13 @@ public class CategoriaEgreso
     [Column("fecha_creacion")]
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
+    /// <summary>FK al catálogo de cuentas — cuenta contable a la que se imputan los egresos de esta categoría.</summary>
+    [Column("cuenta_contable_id")]
+    public long? CuentaContableId { get; set; }
+
+    [ForeignKey("CuentaContableId")]
+    public virtual CuentaContable? CuentaContable { get; set; }
+
     // Navigation property
     public virtual ICollection<MovimientoGeneral> Movimientos { get; set; } = new List<MovimientoGeneral>();
 }

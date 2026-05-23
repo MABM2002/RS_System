@@ -40,6 +40,13 @@ public class ApplicationDbContext : DbContext
     public DbSet<MovimientoGeneral> MovimientosGenerales { get; set; }
     public DbSet<MovimientoGeneralAdjunto> MovimientosGeneralesAdjuntos { get; set; }
     public DbSet<ReporteMensualGeneral> ReportesMensualesGenerales { get; set; }
+
+    // Double-entry accounting module (Partida Doble)
+    public DbSet<AccountType> AccountTypes { get; set; }
+    public DbSet<CuentaContable> CuentasContables { get; set; }
+    public DbSet<PartidaContable> PartidasContables { get; set; }
+    public DbSet<DetallePartidaContable> DetallesPartidaContable { get; set; }
+    public DbSet<PeriodoContable> PeriodosContables { get; set; }
     
     // Inventory module
     public DbSet<Categoria> Categorias { get; set; }
@@ -184,6 +191,87 @@ public class ApplicationDbContext : DbContext
             .WithOne(a => a.MovimientoGeneral)
             .HasForeignKey(a => a.MovimientoGeneralId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // ================== Double-Entry Accounting (Partida Doble) ==================
+
+        // Catálogo de Cuentas — self-referencing hierarchy
+        modelBuilder.Entity<CuentaContable>()
+            .HasOne(c => c.Padre)
+            .WithMany(c => c.Hijas)
+            .HasForeignKey(c => c.PadreId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<CuentaContable>()
+            .HasIndex(c => c.Codigo)
+            .IsUnique();
+
+        // CuentaContable → AccountType (tipo de cuenta dinámico)
+        modelBuilder.Entity<CuentaContable>()
+            .HasOne(c => c.AccountType)
+            .WithMany(at => at.Cuentas)
+            .HasForeignKey(c => c.AccountTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // AccountType → unique index on nombre
+        modelBuilder.Entity<AccountType>()
+            .HasIndex(at => at.Nombre)
+            .IsUnique();
+
+        // PeriodoContable — unique composite index
+        modelBuilder.Entity<PeriodoContable>()
+            .HasIndex(p => new { p.Mes, p.Anio })
+            .IsUnique();
+
+        // PartidaContable → DetallePartidaContable (cascade delete)
+        modelBuilder.Entity<PartidaContable>()
+            .HasMany(p => p.Detalles)
+            .WithOne(d => d.Partida)
+            .HasForeignKey(d => d.PartidaContableId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // PartidaContable → PeriodoContable (optional)
+        modelBuilder.Entity<PartidaContable>()
+            .HasOne(p => p.Periodo)
+            .WithMany(pe => pe.Partidas)
+            .HasForeignKey(p => p.PeriodoContableId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // PartidaContable → MovimientoGeneral (trazabilidad, optional)
+        modelBuilder.Entity<PartidaContable>()
+            .HasOne(p => p.MovimientoGeneral)
+            .WithMany()
+            .HasForeignKey(p => p.MovimientoGeneralId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // PartidaContable → ContabilidadRegistro (trazabilidad, optional)
+        modelBuilder.Entity<PartidaContable>()
+            .HasOne(p => p.ContabilidadRegistro)
+            .WithMany()
+            .HasForeignKey(p => p.ContabilidadRegistroId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // DetallePartidaContable → CuentaContable
+        modelBuilder.Entity<DetallePartidaContable>()
+            .HasOne(d => d.Cuenta)
+            .WithMany(c => c.DetallesPartida)
+            .HasForeignKey(d => d.CuentaContableId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // CategoriaIngreso → CuentaContable (mapeo de categoría a cuenta)
+        modelBuilder.Entity<CategoriaIngreso>()
+            .HasOne(c => c.CuentaContable)
+            .WithMany(cc => cc.CategoriasIngreso)
+            .HasForeignKey(c => c.CuentaContableId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // CategoriaEgreso → CuentaContable (mapeo de categoría a cuenta)
+        modelBuilder.Entity<CategoriaEgreso>()
+            .HasOne(c => c.CuentaContable)
+            .WithMany(cc => cc.CategoriasEgreso)
+            .HasForeignKey(c => c.CuentaContableId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // ================== Fin Partida Doble ==================
 
         modelBuilder.HasPostgresEnum<TipoMovimiento>("tipo_movimiento");
 

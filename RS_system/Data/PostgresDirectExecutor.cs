@@ -15,42 +15,42 @@ public interface IPostgresDirectExecutor
     /// Ejecuta un procedimiento almacenado con parámetros de entrada y salida
     /// </summary>
     Task ExecuteStoredProcedureAsync(string procedureName, params NpgsqlParameter[] parameters);
-    
+
     /// <summary>
     /// Ejecuta un procedimiento almacenado con parámetros de entrada y salida, y devuelve los parámetros actualizados
     /// </summary>
     Task<NpgsqlParameter[]> ExecuteStoredProcedureWithOutputAsync(string procedureName, params NpgsqlParameter[] parameters);
-    
+
     /// <summary>
     /// Ejecuta un procedimiento almacenado y devuelve un valor escalar
     /// </summary>
     Task<T> ExecuteStoredProcedureScalarAsync<T>(string procedureName, params NpgsqlParameter[] parameters);
-    
+
     /// <summary>
     /// Ejecuta un procedimiento almacenado y devuelve un DataTable con los resultados
     /// </summary>
     Task<DataTable> ExecuteStoredProcedureDataTableAsync(string procedureName, params NpgsqlParameter[] parameters);
-    
+
     /// <summary>
     /// Ejecuta un procedimiento almacenado y devuelve una lista de objetos mapeados
     /// </summary>
     Task<List<T>> ExecuteStoredProcedureListAsync<T>(string procedureName, Func<NpgsqlDataReader, T> map, params NpgsqlParameter[] parameters);
-    
+
     /// <summary>
     /// Ejecuta una consulta SQL y devuelve un DataTable
     /// </summary>
     Task<DataTable> ExecuteQueryDataTableAsync(string sql, params NpgsqlParameter[] parameters);
-    
+
     /// <summary>
     /// Ejecuta una consulta SQL y devuelve un valor escalar
     /// </summary>
     Task<T> ExecuteQueryScalarAsync<T>(string sql, params NpgsqlParameter[] parameters);
-    
+
     /// <summary>
     /// Ejecuta una consulta SQL y devuelve una lista de objetos mapeados
     /// </summary>
     Task<List<T>> ExecuteQueryListAsync<T>(string sql, Func<NpgsqlDataReader, T> map, params NpgsqlParameter[] parameters);
-    
+
     /// <summary>
     /// Ejecuta una consulta SQL que no devuelve resultados (INSERT, UPDATE, DELETE)
     /// </summary>
@@ -63,7 +63,7 @@ public class PostgresDirectExecutor : IPostgresDirectExecutor
 
     public PostgresDirectExecutor(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("PostgreSQL") 
+        _connectionString = configuration.GetConnectionString("PostgreSQL")
             ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'PostgreSQL' en la configuración.");
     }
 
@@ -109,7 +109,7 @@ public class PostgresDirectExecutor : IPostgresDirectExecutor
         }
 
         await command.ExecuteNonQueryAsync();
-        
+
         // Los parámetros de salida ya están actualizados en el array original
         return parameters;
     }
@@ -130,7 +130,7 @@ public class PostgresDirectExecutor : IPostgresDirectExecutor
         }
 
         var result = await command.ExecuteScalarAsync();
-        
+
         if (result == null || result == DBNull.Value)
         {
             return default!;
@@ -157,7 +157,7 @@ public class PostgresDirectExecutor : IPostgresDirectExecutor
         await using var reader = await command.ExecuteReaderAsync();
         var dataTable = new DataTable();
         dataTable.Load(reader);
-        
+
         return dataTable;
     }
 
@@ -178,12 +178,12 @@ public class PostgresDirectExecutor : IPostgresDirectExecutor
 
         var results = new List<T>();
         await using var reader = await command.ExecuteReaderAsync();
-        
+
         while (await reader.ReadAsync())
         {
             results.Add(map(reader));
         }
-        
+
         return results;
     }
 
@@ -202,7 +202,7 @@ public class PostgresDirectExecutor : IPostgresDirectExecutor
         await using var reader = await command.ExecuteReaderAsync();
         var dataTable = new DataTable();
         dataTable.Load(reader);
-        
+
         return dataTable;
     }
 
@@ -219,7 +219,7 @@ public class PostgresDirectExecutor : IPostgresDirectExecutor
         }
 
         var result = await command.ExecuteScalarAsync();
-        
+
         if (result == null || result == DBNull.Value)
         {
             return default!;
@@ -242,12 +242,12 @@ public class PostgresDirectExecutor : IPostgresDirectExecutor
 
         var results = new List<T>();
         await using var reader = await command.ExecuteReaderAsync();
-        
+
         while (await reader.ReadAsync())
         {
             results.Add(map(reader));
         }
-        
+
         return results;
     }
 

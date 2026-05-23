@@ -46,6 +46,7 @@ builder.Services.AddScoped<IMovimientoService, MovimientoService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IContabilidadService, ContabilidadService>();
 builder.Services.AddScoped<IContabilidadGeneralService, ContabilidadGeneralService>();
+builder.Services.AddScoped<IContabilidadPartidaDobleService, ContabilidadPartidaDobleService>();
 builder.Services.AddScoped<IPrestamoService, PrestamoService>();
 builder.Services.AddScoped<IColaboracionService, ColaboracionService>();
 builder.Services.AddSingleton<IQueryCacheService, QueryCacheService>();

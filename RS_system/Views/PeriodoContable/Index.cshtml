@@ -1,0 +1,118 @@
+@model List<Rs_system.Models.PeriodoContable>
+
+@{
+    ViewData["Title"] = "Períodos Contables";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Períodos Contables</h1>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Gestión de Períodos</h6>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    No hay períodos contables registrados. Los períodos se crean automáticamente al registrar la primera partida contable.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="periodosTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Período</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Saldo Inicial</th>
+                                <th>Estado</th>
+                                <th>Cerrado Por</th>
+                                <th>Fecha Cierre</th>
+                                <th style="width:200px">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var periodo in Model)
+                            {
+                                <tr class="@(periodo.Cerrado ? "table-secondary" : "")">
+                                    <td class="fw-bold">@periodo.NombreMes @periodo.Anio</td>
+                                    <td>@periodo.FechaInicio.ToString("dd/MM/yyyy")</td>
+                                    <td>@periodo.FechaFin.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">@periodo.SaldoInicial.ToString("N2")</td>
+                                    <td>
+                                        @if (periodo.Cerrado)
+                                        {
+                                            <span class="badge bg-danger"><i class="fas fa-lock"></i> Cerrado</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success"><i class="fas fa-lock-open"></i> Abierto</span>
+                                        }
+                                    </td>
+                                    <td>@periodo.CerradoPor</td>
+                                    <td>@(periodo.FechaCierre?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                    <td>
+                                        @if (!periodo.Cerrado)
+                                        {
+                                            <form asp-action="CerrarPeriodo" asp-route-id="@periodo.Id" method="post" style="display:inline"
+                                                  onsubmit="return confirm('¿Cerrar el período @periodo.NombreMes @periodo.Anio?\\n\\nEsta acción bloqueará la creación de nuevas partidas en este período.')">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Cerrar período">
+                                                    <i class="fas fa-lock"></i> Cerrar
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="ReabrirPeriodo" asp-route-id="@periodo.Id" method="post" style="display:inline"
+                                                  onsubmit="return confirm('¿Reabrir el período @periodo.NombreMes @periodo.Anio?\\n\\nSolo realice esta acción si está seguro.')">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-warning" title="Reabrir período">
+                                                    <i class="fas fa-lock-open"></i> Reabrir
+                                                </button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#periodosTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+                },
+                "order": [[0, 'desc']],
+                "pageLength": 25
+            });
+        });
+    </script>
+}

@@ -1,0 +1,81 @@
+@model EstadoResultadosResult
+
+@{
+    ViewData["Title"] = "Estado de Resultados";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Estado de Resultados</h1>
+        <form asp-action="EstadoResultados" method="get" class="form-inline">
+            <label class="me-2">Mes:</label>
+            <select name="mes" class="form-control me-2" asp-items="ViewBag.Meses" onchange="this.form.submit()"></select>
+            <label class="me-2">Año:</label>
+            <select name="anio" class="form-control me-2" asp-items="ViewBag.Anios" onchange="this.form.submit()"></select>
+            <noscript><button type="submit" class="btn btn-primary">Actualizar</button></noscript>
+        </form>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row">
+        @foreach (var seccion in Model.Secciones.OrderBy(s => s.Orden))
+        {
+            var isAcreedora = seccion.Naturaleza == NaturalezaCuenta.Acreedora;
+            var border = isAcreedora ? "success" : "danger";
+            <div class="col-md-6 mb-4">
+                <div class="card shadow h-100 border-start border-@border border-4">
+                    <div class="card-header bg-@border text-white"><h5 class="mb-0">@seccion.Nombre</h5></div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped mb-0">
+                            <thead><tr><th>Cuenta</th><th class="text-end">Monto</th></tr></thead>
+                            <tbody>
+                                @foreach (var item in seccion.Cuentas.OrderBy(c => c.Codigo))
+                                {
+                                    <tr><td>@item.Codigo - @item.Nombre</td><td class="text-end">@item.Saldo.ToString("N2")</td></tr>
+                                }
+                                @if (!seccion.Cuentas.Any())
+                                {
+                                    <tr><td colspan="2" class="text-muted text-center">Sin movimientos</td></tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold bg-light"><td>TOTAL @seccion.Nombre.ToUpper()</td><td class="text-end">@seccion.Total.ToString("N2")</td></tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- RESULTADO NETO -->
+    @{
+        var resultCardClass = Model.EsUtilidad ? "border-success" : "border-danger";
+    }
+    <div class="card shadow mb-4 @resultCardClass">
+        <div class="card-body text-center">
+            <h5>Resultado Neto del Período</h5>
+            <div class="row mt-3">
+                <div class="col-md-5"><strong>Total Acreedoras</strong><br/><span class="h3 text-success">@Model.Secciones.Where(s => s.Naturaleza == NaturalezaCuenta.Acreedora).Sum(s => s.Total).ToString("N2")</span></div>
+                <div class="col-md-1 align-self-center"><span class="h3">-</span></div>
+                <div class="col-md-5"><strong>Total Deudoras</strong><br/><span class="h3 text-danger">@Model.Secciones.Where(s => s.Naturaleza == NaturalezaCuenta.Deudora).Sum(s => s.Total).ToString("N2")</span></div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <strong>Resultado Neto</strong><br/>
+                    <span class="h3 @(Model.EsUtilidad ? "text-success" : "text-danger")">@Model.ResultadoNeto.ToString("N2")</span>
+                    <br/>
+                    <span class="badge @(Model.EsUtilidad ? "bg-success" : "bg-danger") mt-1">@(Model.EsUtilidad ? "UTILIDAD" : "PÉRDIDA")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+    </div>
+</div>
