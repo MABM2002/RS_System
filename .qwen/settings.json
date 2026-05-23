@@ -1,6 +1,7 @@
 {
   "env": {
-    "OPENAI_API_KEY": "sk-5edda31c85024938ad10af61f802b797"
+    "OPENAI_API_KEY": "sk-5edda31c85024938ad10af61f802b797",
+    "KIMI_API_KEY": "sk-WYqlBjuDYQ3iEoTEMnFW2SbxBMrPObe6HUxdToMtsFYIYvRb"
   },
   "permissions": {
     "allow": [
@@ -22,6 +23,20 @@
         "description": "DeepSeek R1 (Pensamiento lógico)",
         "envKey": "OPENAI_API_KEY",
         "baseUrl": "https://api.deepseek.com/v1"
+      },
+      {
+        "id": "kimi-k2.5",
+        "name": "kimi-k2.5",
+        "description": "Kimi Model LLM",
+        "envKey": "KIMI_API_KEY",
+        "baseUrl": "https://api.moonshot.ai/v1"
+      },
+      {
+        "id": "kimi-k2.6",
+        "name": "kimi-k2.6",
+        "description": "Kimi Model LLM",
+        "envKey": "KIMI_API_KEY",
+        "baseUrl": "https://api.moonshot.ai/v1"
       }
     ]
   },
