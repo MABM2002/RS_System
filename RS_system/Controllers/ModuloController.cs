@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Rs_system.Data;
 using Rs_system.Models;
+using Rs_system.Services;
 
 namespace Rs_system.Controllers;
 
@@ -10,10 +11,12 @@ namespace Rs_system.Controllers;
 public class ModuloController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IQueryCacheService _cache;
 
-    public ModuloController(ApplicationDbContext context)
+    public ModuloController(ApplicationDbContext context, IQueryCacheService cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     // GET: Modulo
@@ -46,6 +49,7 @@ public class ModuloController : Controller
             modulo.CreadoEn = DateTime.UtcNow;
             _context.Add(modulo);
             await _context.SaveChangesAsync();
+            _cache.Clear();
             return RedirectToAction(nameof(Index));
         }
         ViewBag.ModulosPadre = await _context.Modulos
@@ -84,6 +88,7 @@ public class ModuloController : Controller
             {
                 _context.Update(modulo);
                 await _context.SaveChangesAsync();
+                _cache.Clear();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -116,6 +121,7 @@ public class ModuloController : Controller
 
             _context.Modulos.Remove(modulo);
             await _context.SaveChangesAsync();
+            _cache.Clear();
         }
         return RedirectToAction(nameof(Index));
     }

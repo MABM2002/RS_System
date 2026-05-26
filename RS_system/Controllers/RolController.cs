@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Rs_system.Data;
 using Rs_system.Models;
+using Rs_system.Services;
 
 namespace Rs_system.Controllers;
 
@@ -10,10 +11,12 @@ namespace Rs_system.Controllers;
 public class RolController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IQueryCacheService _cache;
 
-    public RolController(ApplicationDbContext context)
+    public RolController(ApplicationDbContext context, IQueryCacheService cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     // GET: Rol
@@ -47,6 +50,7 @@ public class RolController : Controller
             rol.CreadoEn = DateTime.UtcNow;
             _context.Add(rol);
             await _context.SaveChangesAsync();
+            _cache.Clear();
             return RedirectToAction(nameof(Index));
         }
         return View(rol);
@@ -75,6 +79,7 @@ public class RolController : Controller
             {
                 _context.Update(rol);
                 await _context.SaveChangesAsync();
+                _cache.Clear();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -155,8 +160,8 @@ public class RolController : Controller
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
             });
-            
             TempData["SuccessMessage"] = "Permisos actualizados correctamente.";
+            _cache.Clear();
         }
         catch (Exception ex)
         {
@@ -188,6 +193,7 @@ public class RolController : Controller
 
             _context.RolesSistema.Remove(rol);
             await _context.SaveChangesAsync();
+            _cache.Clear();
         }
         return RedirectToAction(nameof(Index));
     }

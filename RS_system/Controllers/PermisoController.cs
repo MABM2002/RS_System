@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Rs_system.Data;
 using Rs_system.Models;
+using Rs_system.Services;
 
 namespace Rs_system.Controllers;
 
@@ -10,10 +11,12 @@ namespace Rs_system.Controllers;
 public class PermisoController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IQueryCacheService _cache;
 
-    public PermisoController(ApplicationDbContext context)
+    public PermisoController(ApplicationDbContext context, IQueryCacheService cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     // GET: Permiso
@@ -51,6 +54,7 @@ public class PermisoController : Controller
             permiso.CreadoEn = DateTime.UtcNow;
             _context.Add(permiso);
             await _context.SaveChangesAsync();
+            _cache.Clear();
             return RedirectToAction(nameof(Index));
         }
         ViewBag.Modulos = await _context.Modulos.OrderBy(m => m.Orden).ToListAsync();
@@ -82,6 +86,7 @@ public class PermisoController : Controller
             {
                 _context.Update(permiso);
                 await _context.SaveChangesAsync();
+                _cache.Clear();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -111,6 +116,7 @@ public class PermisoController : Controller
 
             _context.Permisos.Remove(permiso);
             await _context.SaveChangesAsync();
+            _cache.Clear();
         }
         return RedirectToAction(nameof(Index));
     }

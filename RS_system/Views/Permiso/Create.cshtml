@@ -56,7 +56,10 @@
 
                             <div class="col-md-4">
                                 <label asp-for="Icono" class="form-label">Icono (Bootstrap Icons)</label>
-                                <input asp-for="Icono" class="form-control" placeholder="Ej: bi-folder" />
+                                <div class="input-group">
+                                    <span class="input-group-text"><i id="iconPreview" class="bi bi-question-circle"></i></span>
+                                    <input asp-for="Icono" class="form-control" placeholder="Ej: bi-folder" oninput="updateIconPreview(this.value)" />
+                                </div>
                                 <span asp-validation-for="Icono" class="text-danger small"></span>
                             </div>
 
@@ -87,4 +90,10 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function updateIconPreview(iconName) {
+            const preview = document.getElementById('iconPreview');
+            preview.className = 'bi ' + (iconName || 'bi-question-circle');
+        }
+    </script>
 }
