@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Rs_system.Data;
 using Rs_system.Models;
+using Rs_system.Models.ViewModels;
 
 namespace Rs_system.Services;
 
@@ -256,7 +257,6 @@ public class ContabilidadPartidaDobleService : IContabilidadPartidaDobleService
         partida.FechaCreacion = DateTime.UtcNow;
         partida.Cerrada = false;
 
-        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
             _context.PartidasContables.Add(partida);
@@ -269,11 +269,9 @@ public class ContabilidadPartidaDobleService : IContabilidadPartidaDobleService
             }
 
             await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
         }
         catch
         {
-            await transaction.RollbackAsync();
             throw;
         }
 
@@ -306,7 +304,6 @@ public class ContabilidadPartidaDobleService : IContabilidadPartidaDobleService
 
     public async Task<BalanceGeneralResult> GetBalanceGeneralAsync(DateTime fechaCorte)
     {
-        // 1. Cargar todos los tipos de cuenta que pertenecen al Balance General
         var tiposBalance = await _context.AccountTypes
             .Where(at => at.Activo && at.CategoriaReporte == CategoriaReporte.Balance)
             .OrderBy(at => at.Orden)
@@ -315,7 +312,6 @@ public class ContabilidadPartidaDobleService : IContabilidadPartidaDobleService
 
         var tipoIds = tiposBalance.Select(t => t.Id).ToHashSet();
 
-        // 2. Obtener saldos acumulados por cuenta hasta la fecha de corte
         var saldos = await _context.DetallesPartidaContable
             .Where(d => d.Partida.Fecha.Date <= fechaCorte.Date
                         && tipoIds.Contains(d.Cuenta.AccountTypeId))
@@ -326,21 +322,12 @@ public class ContabilidadPartidaDobleService : IContabilidadPartidaDobleService
                 g.Key.Codigo,
                 g.Key.Nombre,
                 g.Key.AccountTypeId,
-                SaldoDebito = g.Sum(d => d.Debito),
-                SaldoCredito = g.Sum(d => d.Credito)
+                Saldo = g.Sum(d => d.Debito - d.Credito)
             })
             .ToListAsync();
 
-        // 3. Obtener cuentas sin movimiento (saldo cero) para tipos Balance
-        var idsConMovimiento = saldos.Select(s => s.CuentaContableId).ToHashSet();
-        var cuentasSinMovimiento = await _context.CuentasContables
-            .Where(c => c.Activa && tipoIds.Contains(c.AccountTypeId) && !idsConMovimiento.Contains(c.Id))
-            .Select(c => new { CuentaContableId = c.Id, c.Codigo, c.Nombre, c.AccountTypeId })
-            .ToListAsync();
+        var result = new BalanceGeneralResult { FechaCorte = fechaCorte };
 
-        var resultado = new BalanceGeneralResult { FechaCorte = fechaCorte };
-
-        // 4. Agrupar dinámicamente por AccountType
         foreach (var tipo in tiposBalance)
         {
             var seccion = new SeccionReporte
@@ -351,31 +338,133 @@ public class ContabilidadPartidaDobleService : IContabilidadPartidaDobleService
             };
 
             var cuentasTipo = saldos.Where(s => s.AccountTypeId == tipo.Id).ToList();
-            foreach (var csm in cuentasSinMovimiento.Where(c => c.AccountTypeId == tipo.Id))
-            {
-                cuentasTipo.Add(new { csm.CuentaContableId, csm.Codigo, csm.Nombre, csm.AccountTypeId, SaldoDebito = 0m, SaldoCredito = 0m });
-            }
 
             foreach (var cuenta in cuentasTipo.OrderBy(c => c.Codigo))
             {
-                var saldoNeto = cuenta.SaldoDebito - cuenta.SaldoCredito;
-                if (Math.Abs(saldoNeto) < 0.001m && saldoNeto == 0) continue;
+                var saldoNeto = cuenta.Saldo;
+                if (tipo.Naturaleza == NaturalezaCuenta.Acreedora)
+                    saldoNeto = -saldoNeto;
 
-                var item = new CuentaSaldo
+                if (Math.Abs(saldoNeto) < 0.001m) continue;
+
+                seccion.Cuentas.Add(new CuentaSaldo
                 {
                     CuentaId = cuenta.CuentaContableId,
                     Codigo = cuenta.Codigo,
                     Nombre = cuenta.Nombre,
-                    Saldo = tipo.Naturaleza == NaturalezaCuenta.Acreedora ? -saldoNeto : saldoNeto
-                };
-                seccion.Cuentas.Add(item);
-                seccion.Total += item.Saldo;
+                    Saldo = saldoNeto
+                });
+                seccion.Total += saldoNeto;
             }
 
-            resultado.Secciones.Add(seccion);
+            result.Secciones.Add(seccion);
         }
 
-        return resultado;
+        return result;
+    }
+
+    public async Task<FinancialReportViewModel> GetBalanceGeneralRecursivoAsync(DateTime fechaCorte)
+    {
+        var tiposBalance = await _context.AccountTypes
+            .Where(at => at.Activo && at.CategoriaReporte == CategoriaReporte.Balance)
+            .OrderBy(at => at.Orden)
+            .AsNoTracking()
+            .ToListAsync();
+
+        var report = new FinancialReportViewModel
+        {
+            Titulo = "Balance General",
+            FechaFin = fechaCorte
+        };
+
+        foreach (var tipo in tiposBalance)
+        {
+            var seccion = new ReportSectionViewModel
+            {
+                Nombre = tipo.Nombre,
+                Naturaleza = tipo.Naturaleza,
+                Orden = tipo.Orden
+            };
+
+            // 1. Obtener todas las cuentas de este tipo
+            var todasCuentas = await _context.CuentasContables
+                .Where(c => c.AccountTypeId == tipo.Id && c.Activa)
+                .AsNoTracking()
+                .ToListAsync();
+
+            // 2. Obtener saldos brutos (solo para cuentas con movimientos)
+            var saldosBase = await _context.DetallesPartidaContable
+                .Where(d => d.Partida.Fecha.Date <= fechaCorte.Date && d.Cuenta.AccountTypeId == tipo.Id)
+                .GroupBy(d => d.CuentaContableId)
+                .Select(g => new { CuentaId = g.Key, Saldo = g.Sum(d => d.Debito - d.Credito) })
+                .ToDictionaryAsync(x => x.CuentaId, x => x.Saldo);
+
+            // 3. Mapear a ViewModels
+            var vms = todasCuentas.Select(c => new AccountReportItemViewModel
+            {
+                Id = c.Id,
+                Codigo = c.Codigo,
+                Nombre = c.Nombre,
+                Saldo = saldosBase.GetValueOrDefault(c.Id, 0),
+                CodigoFormateado = c.Codigo // Ajustaremos puntos después o en UI
+            }).ToDictionary(x => x.Id);
+
+            // 4. Propagación Recursiva (de abajo hacia arriba)
+            var cuentasOrdenadasProfundidad = todasCuentas
+                .Select(c => new { c.Id, c.PadreId, Nivel = GetNivel(c, todasCuentas) })
+                .OrderByDescending(x => x.Nivel)
+                .ToList();
+
+            foreach (var c in cuentasOrdenadasProfundidad)
+            {
+                if (c.PadreId.HasValue && vms.ContainsKey(c.PadreId.Value))
+                {
+                    vms[c.PadreId.Value].Saldo += vms[c.Id].Saldo;
+                    vms[c.PadreId.Value].SubCuentas.Add(vms[c.Id]);
+                }
+            }
+
+            // 5. Ajustar Naturaleza y filtrar raíces
+            var raices = vms.Values.Where(v => !todasCuentas.First(tc => tc.Id == v.Id).PadreId.HasValue).ToList();
+            foreach (var raiz in raices)
+            {
+                AjustarNaturalezaRecursivo(raiz, tipo.Naturaleza);
+                seccion.Total += raiz.Saldo;
+                seccion.CuentasRaiz.Add(raiz);
+            }
+
+            report.Secciones.Add(seccion);
+        }
+
+        // Calcular Diferencia (Activo - Pasivo - Patrimonio)
+        var totalActivo = report.Secciones.FirstOrDefault(s => s.Naturaleza == NaturalezaCuenta.Deudora)?.Total ?? 0;
+        var totalAcreedor = report.Secciones.Where(s => s.Naturaleza == NaturalezaCuenta.Acreedora).Sum(s => s.Total);
+        report.DiferenciaBalance = totalActivo - totalAcreedor;
+
+        return report;
+    }
+
+    private int GetNivel(CuentaContable c, List<CuentaContable> todas)
+    {
+        int nivel = 0;
+        var pId = c.PadreId;
+        while (pId.HasValue)
+        {
+            nivel++;
+            pId = todas.FirstOrDefault(x => x.Id == pId)?.PadreId;
+        }
+        return nivel;
+    }
+
+    private void AjustarNaturalezaRecursivo(AccountReportItemViewModel item, NaturalezaCuenta nat)
+    {
+        if (nat == NaturalezaCuenta.Acreedora)
+            item.Saldo = -item.Saldo;
+
+        foreach (var sub in item.SubCuentas)
+            AjustarNaturalezaRecursivo(sub, nat);
+        
+        item.SubCuentas = item.SubCuentas.OrderBy(x => x.Codigo).ToList();
     }
 
     public async Task<EstadoResultadosResult> GetEstadoResultadosAsync(int mes, int anio)
@@ -521,11 +610,13 @@ public class ContabilidadPartidaDobleService : IContabilidadPartidaDobleService
         foreach (var partida in periodo.Partidas)
         {
             partida.Cerrada = true;
+            _context.PartidasContables.Entry(partida).State = EntityState.Modified;
         }
 
         periodo.Cerrado = true;
         periodo.FechaCierre = DateTime.UtcNow;
         periodo.CerradoPor = cerradoPor;
+        _context.PeriodosContables.Entry(periodo).State = EntityState.Modified;
 
         await _context.SaveChangesAsync();
         return periodo;
@@ -555,6 +646,7 @@ public class ContabilidadPartidaDobleService : IContabilidadPartidaDobleService
         periodo.Cerrado = false;
         periodo.FechaCierre = null;
         periodo.CerradoPor = null;
+        _context.PeriodosContables.Entry(periodo).State = EntityState.Modified;
 
         await _context.SaveChangesAsync();
         return periodo;

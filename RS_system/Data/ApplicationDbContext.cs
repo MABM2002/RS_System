@@ -75,6 +75,12 @@ public class ApplicationDbContext : DbContext
     // Dynamic Documents module
     public DbSet<Documento> Documentos { get; set; }
     public DbSet<DocumentoDetalle> DocumentoDetalles { get; set; }
+
+    // Diario Financiero module
+    public DbSet<DiarioFinancieroCabecera> DiarioFinancieroCabeceras { get; set; }
+    public DbSet<DiarioFinancieroDetalle> DiarioFinancieroDetalles { get; set; }
+    public DbSet<DiarioFinancieroAdjunto> DiarioFinancieroAdjuntos { get; set; }
+    public DbSet<MetodoPago> MetodosPago { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -272,6 +278,72 @@ public class ApplicationDbContext : DbContext
             .OnDelete(DeleteBehavior.SetNull);
 
         // ================== Fin Partida Doble ==================
+
+        // ================== Diario Financiero ==================
+
+        modelBuilder.Entity<DiarioFinancieroCabecera>(entity =>
+        {
+            entity.ToTable("diario_financiero_cabeceras", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.TotalIngresos).HasColumnType("numeric(18,2)");
+            entity.Property(e => e.TotalEgresos).HasColumnType("numeric(18,2)");
+            entity.Property(e => e.SaldoDia).HasColumnType("numeric(18,2)");
+
+            entity.HasIndex(e => e.Fecha).IsUnique();
+            entity.HasIndex(e => e.Estado);
+
+            entity.HasMany(e => e.Detalles)
+                .WithOne(d => d.Cabecera)
+                .HasForeignKey(d => d.CabeceraId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<DiarioFinancieroDetalle>(entity =>
+        {
+            entity.ToTable("diario_financiero_detalles", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Monto).HasColumnType("numeric(18,2)");
+
+            entity.HasIndex(e => e.CabeceraId);
+            entity.HasIndex(e => e.FechaMovimiento);
+            entity.HasIndex(e => e.Tipo);
+
+            entity.HasOne(e => e.CategoriaIngreso)
+                .WithMany()
+                .HasForeignKey(e => e.CategoriaIngresoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.CategoriaEgreso)
+                .WithMany()
+                .HasForeignKey(e => e.CategoriaEgresoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.MetodoPago)
+                .WithMany()
+                .HasForeignKey(e => e.MetodoPagoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.Adjuntos)
+                .WithOne(a => a.Detalle)
+                .HasForeignKey(a => a.DetalleId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<DiarioFinancieroAdjunto>(entity =>
+        {
+            entity.ToTable("diario_financiero_adjuntos", "public");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.DetalleId);
+        });
+
+        modelBuilder.Entity<MetodoPago>(entity =>
+        {
+            entity.ToTable("metodos_pago", "public");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Nombre).HasMaxLength(100).IsRequired();
+        });
+
+        // ================== Fin Diario Financiero ==================
 
         modelBuilder.HasPostgresEnum<TipoMovimiento>("tipo_movimiento");
 

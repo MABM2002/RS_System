@@ -1,0 +1,670 @@
+@model Rs_system.Models.ViewModels.DiarioFinancieroDetalleViewModel
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = $"D. Financiero - {Model.Cabecera.Fecha:dd/MM/yyyy}";
+    var cerrado = Model.Cabecera.EstaCerrado;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-gray-800 mb-1">
+                <i class="fas fa-book-open text-primary me-2"></i> Diario Financiero
+            </h1>
+            <p class="text-muted small mb-0">
+                Fecha: <strong>@Model.Cabecera.Fecha.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("es-ES"))</strong> |
+                Estado: 
+                @if (cerrado)
+                {
+                    <span class="badge bg-secondary"><i class="fas fa-lock me-1"></i> Cerrado</span>
+                }
+                else
+                {
+                    <span class="badge bg-success"><i class="fas fa-lock-open me-1"></i> Abierto</span>
+                }
+            </p>
+        </div>
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left me-1"></i> Volver a la lista
+            </a>
+            @if (cerrado)
+            {
+                <form asp-action="ReabrirDiario" method="post" class="d-inline" onsubmit="return confirm('¿Está seguro de reabrir este diario? Se permitirán nuevas modificaciones.');">
+                    <input type="hidden" name="id" value="@Model.Cabecera.Id" />
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-unlock me-1"></i> Reabrir Diario
+                    </button>
+                </form>
+            }
+            else
+            {
+                <form asp-action="CerrarDiario" method="post" class="d-inline" onsubmit="return confirm('¿Está seguro de cerrar este diario? Ya no se permitirán agregar o editar movimientos.');">
+                    <input type="hidden" name="id" value="@Model.Cabecera.Id" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-lock me-1"></i> Cerrar Diario
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Totals area -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-start border-success border-4 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-uppercase text-success fw-bold text-xs mb-1">Total Ingresos</div>
+                    <div class="h3 mb-0 fw-bold" id="lblTotalIngresos">@Model.Cabecera.TotalIngresos.ToString("C")</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-start border-danger border-4 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-uppercase text-danger fw-bold text-xs mb-1">Total Egresos</div>
+                    <div class="h3 mb-0 fw-bold" id="lblTotalEgresos">@Model.Cabecera.TotalEgresos.ToString("C")</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-start border-primary border-4 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-uppercase text-primary fw-bold text-xs mb-1">Saldo del Día</div>
+                    <div class="h3 mb-0 fw-bold @(Model.Cabecera.SaldoDia >= 0 ? "text-primary" : "text-danger")" id="lblSaldoDia">
+                        @Model.Cabecera.SaldoDia.ToString("C")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Observation section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <h6 class="fw-bold"><i class="fas fa-comment-alt me-2 text-primary"></i>Observaciones</h6>
+                @if (!cerrado)
+                {
+                    <button class="btn btn-sm btn-outline-primary" id="btnEditarOb">
+                        <i class="fas fa-pen"></i> Editar
+                    </button>
+                    <button class="btn btn-sm btn-primary d-none" id="btnGuardarOb">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                }
+            </div>
+            <div id="viewOb" class="mt-2 text-muted">
+                @(string.IsNullOrWhiteSpace(Model.Cabecera.Observaciones) ? "Sin observaciones registradas." : Model.Cabecera.Observaciones)
+            </div>
+            @if (!cerrado)
+            {
+                <textarea id="editOb" class="form-control mt-2 d-none" rows="2">@Model.Cabecera.Observaciones</textarea>
+            }
+        </div>
+    </div>
+
+    <!-- Movements List -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-list me-2"></i>Movimientos del Día
+            </h6>
+            @if (!cerrado)
+            {
+                <div>
+                    <button class="btn btn-success btn-sm" onclick="abrirModalMovimiento(1)">
+                        <i class="fas fa-plus"></i> Ingreso
+                    </button>
+                    <button class="btn btn-danger btn-sm ms-2" onclick="abrirModalMovimiento(2)">
+                        <i class="fas fa-minus"></i> Egreso
+                    </button>
+                </div>
+            }
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 15%">Tipo / Categoría</th>
+                            <th style="width: 25%">Descripción</th>
+                            <th style="width: 15%">Referencia</th>
+                            <th class="text-end" style="width: 15%">Monto</th>
+                            <th class="text-center" style="width: 15%">Adjuntos</th>
+                            <th class="text-center" style="width: 15%">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaMovimientos">
+                        @if (!Model.Cabecera.Detalles.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    No hay movimientos registrados en este día.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var mov in Model.Cabecera.Detalles.OrderBy(m => m.FechaCreacion))
+                            {
+                                var jsonMov = JsonSerializer.Serialize(new {
+                                    id = mov.Id,
+                                    tipo = mov.Tipo,
+                                    categoriaIngresoId = mov.CategoriaIngresoId,
+                                    categoriaEgresoId = mov.CategoriaEgresoId,
+                                    monto = mov.Monto,
+                                    fechaMovimiento = mov.FechaMovimiento.ToString("yyyy-MM-ddTHH:mm"),
+                                    descripcion = mov.Descripcion,
+                                    numeroComprobante = mov.NumeroComprobante,
+                                    metodoPagoId = mov.MetodoPagoId,
+                                    tercero = mov.Tercero,
+                                    observaciones = mov.Observaciones
+                                });
+
+                                <tr>
+                                    <td>
+                                        @if (mov.EsIngreso)
+                                        {
+                                            <span class="badge bg-success mb-1">Ingreso</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger mb-1">Egreso</span>
+                                        }
+                                        <br/><small class="text-muted fw-bold">@mov.NombreCategoria</small>
+                                    </td>
+                                    <td>
+                                        <div>@mov.Descripcion</div>
+                                        @if (!string.IsNullOrEmpty(mov.Tercero))
+                                        {
+                                            <small class="text-muted d-block"><i class="fas fa-user-tag me-1"></i> @mov.Tercero</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(mov.NumeroComprobante))
+                                        {
+                                            <div class="fw-bold">@mov.NumeroComprobante</div>
+                                        }
+                                        <small class="text-muted d-block"><i class="fas fa-wallet me-1"></i>@(mov.MetodoPago?.Nombre ?? "N/A")</small>
+                                    </td>
+                                    <td class="text-end fw-bold">
+                                        <span class="@(mov.EsIngreso ? "text-success" : "text-danger")">
+                                            @mov.Monto.ToString("C")
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-outline-info btn-sm position-relative" onclick="abrirModalAdjuntos(@mov.Id)">
+                                            <i class="fas fa-paperclip"></i>
+                                            @if (mov.Adjuntos.Count > 0)
+                                            {
+                                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
+                                                    @mov.Adjuntos.Count
+                                                </span>
+                                            }
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            @if (!cerrado)
+                                            {
+                                                <button class="btn btn-primary" title="Editar" onclick="editarMovimiento(@mov.Id, this)" data-json="@jsonMov">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-danger" title="Eliminar" onclick="eliminarMovimiento(@mov.Id)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-outline-secondary" onclick="editarMovimiento(@mov.Id, this)" data-json="@jsonMov" title="Ver Detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Movimiento -->
+<div class="modal fade" id="modalMovimiento" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="movTitle"><i class="fas fa-exchange-alt me-2"></i>Movimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="movId" value="0" />
+                <input type="hidden" id="movTipo" value="1" />
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Fecha / Hora Reales <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control" id="movFecha" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Monto <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="movMonto" min="0.01" step="0.01" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6" id="divCatIngreso">
+                        <label class="form-label fw-bold text-success">Categoría de Ingreso <span class="text-danger">*</span></label>
+                        <select class="form-select" id="movCatIngreso">
+                            <option value="">Seleccione...</option>
+                            @foreach (var c in Model.CategoriasIngreso)
+                            {
+                                <option value="@c.Id">@c.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6 d-none" id="divCatEgreso">
+                        <label class="form-label fw-bold text-danger">Categoría de Egreso <span class="text-danger">*</span></label>
+                        <select class="form-select" id="movCatEgreso">
+                            <option value="">Seleccione...</option>
+                            @foreach (var c in Model.CategoriasEgreso)
+                            {
+                                <option value="@c.Id">@c.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Método de Pago</label>
+                        <select class="form-select" id="movMetodoPago">
+                            <option value="">N/A</option>
+                            @foreach (var m in Model.MetodosPago)
+                            {
+                                <option value="@m.Id">@m.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Concepto / Descripción <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="movDescripcion" placeholder="Motivo del ingreso/egreso" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">N° Comprobante/Factura</label>
+                        <input type="text" class="form-control" id="movComprobante" placeholder="Opcional" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Tercero Relacionado</label>
+                        <input type="text" class="form-control" id="movTercero" placeholder="Proveedor / donante (opcional)" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Notas Adicionales</label>
+                        <textarea class="form-control" id="movObservaciones" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                @if (!cerrado)
+                {
+                    <button type="button" class="btn btn-primary" id="btnGuardarMov"><i class="fas fa-save me-1"></i> Guardar Movimiento</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Adjuntos -->
+<div class="modal fade" id="modalAdjuntos" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-paperclip text-info me-2"></i>Archivos Adjuntos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="adjuntoMovId" value="0" />
+                
+                @if (!cerrado)
+                {
+                    <div class="mb-4 bg-light p-3 border rounded">
+                        <h6 class="fw-bold mb-3">Subir Archivos</h6>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="fileAdjuntos" multiple>
+                            <button class="btn btn-success" type="button" id="btnSubirAdjunto">
+                                <i class="fas fa-upload me-1"></i> Subir
+                            </button>
+                        </div>
+                        <small class="text-muted mt-1 d-block">Tipos permitidos: Imágenes (jpg, png), PDF, Excel, Word.</small>
+                    </div>
+                }
+
+                <h6 class="fw-bold border-bottom pb-2 mb-3">Archivos Actuales</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre del Archivo</th>
+                                <th>Fecha</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaArchivosBody">
+                            <!-- JS fill -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const CABECERA_ID = @Model.Cabecera.Id;
+        const ES_CERRADO = @(cerrado.ToString().ToLower());
+
+        // --- Observaciones Cabecera ---
+        $('#btnEditarOb').click(function() {
+            $('#viewOb').addClass('d-none');
+            $('#editOb').removeClass('d-none').focus();
+            $(this).addClass('d-none');
+            $('#btnGuardarOb').removeClass('d-none');
+        });
+
+        $('#btnGuardarOb').click(function() {
+            const ob = $('#editOb').val();
+            $.ajax({
+                url: '/DiarioFinanciero/ActualizarObservaciones',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ Id: CABECERA_ID, Observaciones: ob }),
+                success: function(res) {
+                    if (res.success) {
+                        $('#viewOb').text(ob || 'Sin observaciones registradas.');
+                        toastr.success('Observaciones actualizadas.');
+                    } else {
+                        toastr.error('Error al actualizar.');
+                    }
+                }
+            }).always(function() {
+                $('#editOb').addClass('d-none');
+                $('#viewOb').removeClass('d-none');
+                $('#btnGuardarOb').addClass('d-none');
+                $('#btnEditarOb').removeClass('d-none');
+            });
+        });
+
+        // --- Operaciones de Movimientos ---
+        function abrirModalMovimiento(tipo) {
+            limpiarModalMovimiento();
+            $('#movTipo').val(tipo);
+            if (tipo === 1) {
+                $('#movTitle').html('<i class="fas fa-plus-circle text-success me-2"></i>Registrar Ingreso');
+                $('#divCatIngreso').removeClass('d-none');
+                $('#divCatEgreso').addClass('d-none');
+            } else {
+                $('#movTitle').html('<i class="fas fa-minus-circle text-danger me-2"></i>Registrar Egreso');
+                $('#divCatIngreso').addClass('d-none');
+                $('#divCatEgreso').removeClass('d-none');
+            }
+            $('#btnGuardarMov').show();
+            $('#modalMovimiento').modal('show');
+        }
+
+        function limpiarModalMovimiento() {
+            $('#movId').val(0);
+            $('#movMonto').val('');
+            $('#movCatIngreso').val('');
+            $('#movCatEgreso').val('');
+            $('#movMetodoPago').val('');
+            $('#movDescripcion').val('');
+            $('#movComprobante').val('');
+            $('#movTercero').val('');
+            $('#movObservaciones').val('');
+            // leave date as is for convenience
+        }
+
+        function editarMovimiento(id, btn) {
+            limpiarModalMovimiento();
+            const data = JSON.parse($(btn).attr('data-json'));
+            
+            $('#movId').val(data.id);
+            $('#movTipo').val(data.tipo);
+            if (data.tipo === 1) {
+                $('#movTitle').html('<i class="fas fa-eye text-primary me-2"></i>Detalles Ingreso');
+                $('#divCatIngreso').removeClass('d-none');
+                $('#divCatEgreso').addClass('d-none');
+                $('#movCatIngreso').val(data.categoriaIngresoId);
+            } else {
+                $('#movTitle').html('<i class="fas fa-eye text-primary me-2"></i>Detalles Egreso');
+                $('#divCatIngreso').addClass('d-none');
+                $('#divCatEgreso').removeClass('d-none');
+                $('#movCatEgreso').val(data.categoriaEgresoId);
+            }
+            
+            $('#movMonto').val(data.monto);
+            $('#movFecha').val(data.fechaMovimiento);
+            $('#movMetodoPago').val(data.metodoPagoId);
+            $('#movDescripcion').val(data.descripcion);
+            $('#movComprobante').val(data.numeroComprobante);
+            $('#movTercero').val(data.tercero);
+            $('#movObservaciones').val(data.observaciones);
+
+            if (ES_CERRADO) {
+                $('#btnGuardarMov').hide();
+            } else {
+                $('#btnGuardarMov').show();
+            }
+
+            $('#modalMovimiento').modal('show');
+        }
+
+        $('#btnGuardarMov').click(function() {
+            const data = {
+                Id: parseInt($('#movId').val()),
+                CabeceraId: CABECERA_ID,
+                FechaMovimiento: $('#movFecha').val(),
+                Tipo: parseInt($('#movTipo').val()),
+                CategoriaIngresoId: $('#movCatIngreso').val() ? parseInt($('#movCatIngreso').val()) : null,
+                CategoriaEgresoId: $('#movCatEgreso').val() ? parseInt($('#movCatEgreso').val()) : null,
+                Monto: parseFloat($('#movMonto').val()),
+                MetodoPagoId: $('#movMetodoPago').val() ? parseInt($('#movMetodoPago').val()) : null,
+                Descripcion: $('#movDescripcion').val(),
+                NumeroComprobante: $('#movComprobante').val(),
+                Tercero: $('#movTercero').val(),
+                Observaciones: $('#movObservaciones').val()
+            };
+
+            if (!data.Descripcion || isNaN(data.Monto) || data.Monto <= 0) {
+                toastr.warning('La descripción y el monto mayor a cero son obligatorios.');
+                return;
+            }
+            if (data.Tipo === 1 && !data.CategoriaIngresoId) {
+                toastr.warning('Seleccione la categoría de ingreso.');
+                return;
+            }
+            if (data.Tipo === 2 && !data.CategoriaEgresoId) {
+                toastr.warning('Seleccione la categoría de egreso.');
+                return;
+            }
+
+            $(this).prop('disabled', true);
+            
+            $.ajax({
+                url: '/DiarioFinanciero/GuardarMovimiento',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(res) {
+                    if (res.success) {
+                        toastr.success(res.message);
+                        setTimeout(() => location.reload(), 1000); // recarga para mostrar vista correcta
+                    } else {
+                        toastr.error(res.message);
+                        $('#btnGuardarMov').prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    toastr.error('Error de servidor.');
+                    $('#btnGuardarMov').prop('disabled', false);
+                }
+            });
+        });
+
+        function eliminarMovimiento(id) {
+            Swal.fire({
+                title: '¿Eliminar movimiento?',
+                text: "Esta acción no se puede deshacer",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/DiarioFinanciero/EliminarMovimiento',
+                        type: 'POST',
+                        data: { id: id, cabeceraId: CABECERA_ID },
+                        success: function(res) {
+                            if (res.success) {
+                                toastr.success(res.message);
+                                setTimeout(() => location.reload(), 1000);
+                            } else {
+                                toastr.error(res.message);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // --- Operaciones Adjuntos ---
+        function abrirModalAdjuntos(detalleId) {
+            $('#adjuntoMovId').val(detalleId);
+            $('#fileAdjuntos').val('');
+            cargarAdjuntos(detalleId);
+            $('#modalAdjuntos').modal('show');
+        }
+
+        function cargarAdjuntos(detalleId) {
+            $('#listaArchivosBody').html('<tr><td colspan="3" class="text-center"><div class="spinner-border spinner-border-sm"></div> Cargando...</td></tr>');
+            $.get('/DiarioFinanciero/ObtenerAdjuntos?detalleId=' + detalleId, function(data) {
+                if (data.length === 0) {
+                    $('#listaArchivosBody').html('<tr><td colspan="3" class="text-center text-muted">No hay archivos adjuntos.</td></tr>');
+                    return;
+                }
+                let html = '';
+                data.forEach(a => {
+                    html += `<tr>
+                        <td>
+                            <a href="${a.url}" target="_blank" class="text-decoration-none">
+                                <i class="fas fa-file me-2 text-primary"></i>${a.nombre}
+                            </a>
+                        </td>
+                        <td>${a.fecha}</td>
+                        <td class="text-center">
+                            <a href="${a.url}" target="_blank" class="btn btn-outline-info btn-sm" title="Ver/Descargar">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            ${!ES_CERRADO ? `
+                            <button class="btn btn-outline-danger btn-sm" onclick="eliminarAdjunto(${a.id}, ${detalleId})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            ` : ''}
+                        </td>
+                    </tr>`;
+                });
+                $('#listaArchivosBody').html(html);
+            });
+        }
+
+        $('#btnSubirAdjunto').click(function() {
+            var input = document.getElementById('fileAdjuntos');
+            if (input.files.length === 0) {
+                toastr.warning('Seleccione al menos un archivo.');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('detalleId', $('#adjuntoMovId').val());
+            for (var i = 0; i < input.files.length; i++) {
+                formData.append('archivos', input.files[i]);
+            }
+
+            const btn = $(this);
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Subiendo...');
+
+            $.ajax({
+                url: '/DiarioFinanciero/SubirAdjunto',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    if (res.success) {
+                        toastr.success(res.message);
+                        $('#fileAdjuntos').val('');
+                        cargarAdjuntos($('#adjuntoMovId').val());
+                        // Recargar pagina despues de cerrar modal para visualizar badge
+                        $('#modalAdjuntos').on('hidden.bs.modal', function () {
+                            location.reload();
+                        });
+                    } else {
+                        toastr.error(res.message);
+                    }
+                },
+                complete: function() {
+                    btn.prop('disabled', false).html('<i class="fas fa-upload me-1"></i> Subir');
+                }
+            });
+        });
+
+        function eliminarAdjunto(id, detalleId) {
+            if (!confirm('¿Está seguro de eliminar este archivo?')) return;
+            $.post('/DiarioFinanciero/EliminarAdjunto', { id: id }, function(res) {
+                if (res.success) {
+                    toastr.success('Archivo eliminado.');
+                    cargarAdjuntos(detalleId);
+                } else {
+                    toastr.error('Error al eliminar el archivo.');
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,237 @@
+@model List<Rs_system.Models.ViewModels.DiarioFinancieroIndexViewModel>
+
+@{
+    ViewData["Title"] = "Diario Financiero";
+    var fechaInicio = ViewBag.FechaInicio as string;
+    var fechaFin = ViewBag.FechaFin as string;
+    var estado = ViewBag.Estado as string;
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-gray-800 mb-1">
+                <i class="fas fa-book text-primary me-2"></i>Diario Financiero
+            </h1>
+            <p class="text-muted small mb-0">Registro diario de ingresos y egresos de la congregación</p>
+        </div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#crearDiarioModal">
+            <i class="fas fa-plus me-1"></i> Nuevo Diario
+        </button>
+    </div>
+
+    <!-- Alerts -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body py-3">
+            <form asp-action="Index" method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Fecha Inicio</label>
+                    <input type="date" name="fechaInicio" class="form-control form-control-sm" value="@fechaInicio" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Fecha Fin</label>
+                    <input type="date" name="fechaFin" class="form-control form-control-sm" value="@fechaFin" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Estado</label>
+                    <select name="estado" class="form-select form-select-sm">
+                        <option value="">Todos</option>
+                        <option value="Abierto" selected="@(estado == "Abierto")">Abierto</option>
+                        <option value="Cerrado" selected="@(estado == "Cerrado")">Cerrado</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-primary btn-sm flex-grow-1">
+                        <i class="fas fa-search me-1"></i>Filtrar
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-eraser"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    @{
+        var totalIngresos = Model.Sum(x => x.TotalIngresos);
+        var totalEgresos = Model.Sum(x => x.TotalEgresos);
+        var saldoTotal = totalIngresos - totalEgresos;
+    }
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-start border-success border-4 shadow-sm h-100">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small fw-semibold text-uppercase">Total Ingresos</div>
+                            <div class="h4 mb-0 text-success fw-bold">@totalIngresos.ToString("C")</div>
+                        </div>
+                        <div class="text-success opacity-50"><i class="fas fa-arrow-up fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-start border-danger border-4 shadow-sm h-100">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small fw-semibold text-uppercase">Total Egresos</div>
+                            <div class="h4 mb-0 text-danger fw-bold">@totalEgresos.ToString("C")</div>
+                        </div>
+                        <div class="text-danger opacity-50"><i class="fas fa-arrow-down fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-start border-primary border-4 shadow-sm h-100">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small fw-semibold text-uppercase">Saldo Neto</div>
+                            <div class="h4 mb-0 fw-bold @(saldoTotal >= 0 ? "text-primary" : "text-danger")">@saldoTotal.ToString("C")</div>
+                        </div>
+                        <div class="text-primary opacity-50"><i class="fas fa-balance-scale fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-list me-2"></i>Registros Diarios</h6>
+            <span class="badge bg-secondary">@Model.Count registro(s)</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th class="text-end">Ingresos</th>
+                            <th class="text-end">Egresos</th>
+                            <th class="text-end">Saldo</th>
+                            <th class="text-center">Movimientos</th>
+                            <th class="text-center">Estado</th>
+                            <th>Creado por</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-5">
+                                    <i class="fas fa-inbox fa-3x mb-3 d-block opacity-25"></i>
+                                    No hay registros diarios. Haga clic en "Nuevo Diario" para comenzar.
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <i class="fas fa-calendar-day text-muted me-1"></i>
+                                    <strong>@item.Fecha.ToString("dd/MM/yyyy")</strong>
+                                    <br/><small class="text-muted">@item.Fecha.ToString("dddd", new System.Globalization.CultureInfo("es-ES"))</small>
+                                </td>
+                                <td class="text-end text-success fw-semibold">@item.TotalIngresos.ToString("C")</td>
+                                <td class="text-end text-danger fw-semibold">@item.TotalEgresos.ToString("C")</td>
+                                <td class="text-end fw-bold @(item.SaldoDia >= 0 ? "text-primary" : "text-danger")">@item.SaldoDia.ToString("C")</td>
+                                <td class="text-center"><span class="badge bg-info">@item.CantidadMovimientos</span></td>
+                                <td class="text-center">
+                                    @if (item.Estado == "Cerrado")
+                                    {
+                                        <span class="badge bg-secondary"><i class="fas fa-lock me-1"></i>Cerrado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success"><i class="fas fa-lock-open me-1"></i>Abierto</span>
+                                    }
+                                </td>
+                                <td><small>@item.CreadoPor</small></td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Detalle" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Ver Detalle">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if (item.Estado == "Abierto")
+                                        {
+                                            <form asp-action="EliminarCabecera" method="post" class="d-inline"
+                                                  onsubmit="return confirm('¿Está seguro de eliminar este diario y todos sus movimientos?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" class="btn btn-outline-danger" title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3 text-end">
+        <a asp-action="Reporte" class="btn btn-outline-info">
+            <i class="fas fa-chart-bar me-1"></i> Ver Reporte General
+        </a>
+    </div>
+</div>
+
+<!-- Modal Crear Diario -->
+<div class="modal fade" id="crearDiarioModal" tabindex="-1" aria-labelledby="crearDiarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="crearDiarioModalLabel">
+                    <i class="fas fa-plus-circle text-primary me-2"></i>Crear Nuevo Diario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form asp-action="Crear" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
+                        <input type="date" name="fecha" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                        <div class="form-text">Cada fecha puede tener un único registro diario.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Observaciones</label>
+                        <textarea name="observaciones" class="form-control" rows="3" placeholder="Observaciones generales del día (opcional)"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Crear Diario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

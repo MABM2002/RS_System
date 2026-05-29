@@ -1,0 +1,266 @@
+@model Rs_system.Models.ViewModels.CategoriasMovimientoViewModel
+@{
+    ViewData["Title"] = "Categorías de Movimiento";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Categorías de Movimiento</h4>
+        <p class="text-muted mb-0">Gestión de categorías para ingresos y egresos</p>
+    </div>
+</div>
+
+<!-- Tabs Navigation -->
+<ul class="nav nav-tabs mb-4" id="categoriasTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="ingresos-tab" data-bs-toggle="tab" data-bs-target="#ingresos" 
+                type="button" role="tab" aria-controls="ingresos" aria-selected="true">
+            <i class="bi bi-arrow-down-circle text-success me-1"></i> Categorías de Ingreso
+            <span class="badge bg-success ms-1">@Model.CategoriasIngreso.Count</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="egresos-tab" data-bs-toggle="tab" data-bs-target="#egresos" 
+                type="button" role="tab" aria-controls="egresos" aria-selected="false">
+            <i class="bi bi-arrow-up-circle text-danger me-1"></i> Categorías de Egreso
+            <span class="badge bg-danger ms-1">@Model.CategoriasEgreso.Count</span>
+        </button>
+    </li>
+</ul>
+
+<!-- Tabs Content -->
+<div class="tab-content" id="categoriasTabContent">
+    <!-- Tab Ingresos -->
+    <div class="tab-pane fade show active" id="ingresos" role="tabpanel" aria-labelledby="ingresos-tab">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Listado de Categorías de Ingreso</h5>
+            <a asp-action="CreateIngreso" class="btn btn-primary-custom">
+                <i class="bi bi-plus-lg me-1"></i> Nueva Categoría de Ingreso
+            </a>
+        </div>
+        
+        <div class="card-custom">
+            <div class="table-responsive">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Cuenta Contable</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.CategoriasIngreso.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    No hay categorías de ingreso registradas
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var item in Model.CategoriasIngreso)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@item.Nombre</strong>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.Descripcion))
+                                    {
+                                        <span>@item.Descripcion</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.CuentaContable != null)
+                                    {
+                                        <span class="badge bg-info text-dark">
+                                            @item.CuentaContable.Codigo - @item.CuentaContable.Nombre
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No asignada</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Activa)
+                                    {
+                                        <span class="badge bg-success">Activa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactiva</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="EditIngreso" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDeleteIngreso(@item.Id, '@item.Nombre')" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Egresos -->
+    <div class="tab-pane fade" id="egresos" role="tabpanel" aria-labelledby="egresos-tab">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Listado de Categorías de Egreso</h5>
+            <a asp-action="CreateEgreso" class="btn btn-primary-custom">
+                <i class="bi bi-plus-lg me-1"></i> Nueva Categoría de Egreso
+            </a>
+        </div>
+        
+        <div class="card-custom">
+            <div class="table-responsive">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Cuenta Contable</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.CategoriasEgreso.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    No hay categorías de egreso registradas
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var item in Model.CategoriasEgreso)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@item.Nombre</strong>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.Descripcion))
+                                    {
+                                        <span>@item.Descripcion</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.CuentaContable != null)
+                                    {
+                                        <span class="badge bg-info text-dark">
+                                            @item.CuentaContable.Codigo - @item.CuentaContable.Nombre
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No asignada</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Activa)
+                                    {
+                                        <span class="badge bg-success">Activa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactiva</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="EditEgreso" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDeleteEgreso(@item.Id, '@item.Nombre')" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Forms -->
+<form id="deleteIngresoForm" asp-action="DeleteIngreso" method="post" style="display: none;">
+    <input type="hidden" name="id" id="deleteIngresoId" />
+</form>
+
+<form id="deleteEgresoForm" asp-action="DeleteEgreso" method="post" style="display: none;">
+    <input type="hidden" name="id" id="deleteEgresoId" />
+</form>
+
+@section Scripts {
+    <script>
+        function confirmDeleteIngreso(id, nombre) {
+            Swal.fire({
+                title: '¿Eliminar categoría de ingreso?',
+                text: `¿Está seguro de eliminar "${nombre}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteIngresoId').value = id;
+                    document.getElementById('deleteIngresoForm').submit();
+                }
+            });
+        }
+
+        function confirmDeleteEgreso(id, nombre) {
+            Swal.fire({
+                title: '¿Eliminar categoría de egreso?',
+                text: `¿Está seguro de eliminar "${nombre}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteEgresoId').value = id;
+                    document.getElementById('deleteEgresoForm').submit();
+                }
+            });
+        }
+
+        // Mantener la pestaña activa después de recargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            var activeTab = localStorage.getItem('activeCategoriasTab');
+            if (activeTab) {
+                var tab = new bootstrap.Tab(document.querySelector(activeTab));
+                tab.show();
+            }
+
+            document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(function(tab) {
+                tab.addEventListener('shown.bs.tab', function(e) {
+                    localStorage.setItem('activeCategoriasTab', '#' + e.target.id);
+                });
+            });
+        });
+    </script>
+}

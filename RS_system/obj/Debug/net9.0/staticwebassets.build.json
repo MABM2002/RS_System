@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "H29G8QgF/QmnOoUfcPORSollMCC0UB/qIGg0vkxNgOw=",
+  "Hash": "ZtKckTGBcVLc98rdvW2qGQad7jjblJ5bgqcSu5JCGpw=",
   "Source": "RS_system",
   "BasePath": "_content/RS_system",
   "Mode": "Default",
@@ -6735,6 +6735,48 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/service-worker.js"
+    },
+    {
+      "Identity": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/uploads/diario_financiero/35aac2f9-a4c4-4d16-9480-aeee62043b72.png",
+      "SourceId": "RS_system",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/",
+      "BasePath": "_content/RS_system",
+      "RelativePath": "uploads/diario_financiero/35aac2f9-a4c4-4d16-9480-aeee62043b72#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "6axl572n12",
+      "Integrity": "vhypf03pHqZIP25buWxLJX/kpHHeWAdqdW2CZsGfaZc=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/diario_financiero/35aac2f9-a4c4-4d16-9480-aeee62043b72.png"
+    },
+    {
+      "Identity": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/uploads/diario_financiero/7aa2c063-36b0-47f8-a7b0-6f45d7f887bf.png",
+      "SourceId": "RS_system",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/",
+      "BasePath": "_content/RS_system",
+      "RelativePath": "uploads/diario_financiero/7aa2c063-36b0-47f8-a7b0-6f45d7f887bf#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "p0qauircun",
+      "Integrity": "ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/diario_financiero/7aa2c063-36b0-47f8-a7b0-6f45d7f887bf.png"
     },
     {
       "Identity": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/uploads/miembros/02958366-eb79-4433-859c-9eff0bfd8ccf.png",
@@ -42764,6 +42806,170 @@
         {
           "Name": "integrity",
           "Value": "sha256-5Td7buFAifXm6qR3EIqrFbA0cc0h6zouJlVey1qoxKQ="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/diario_financiero/35aac2f9-a4c4-4d16-9480-aeee62043b72.6axl572n12.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/uploads/diario_financiero/35aac2f9-a4c4-4d16-9480-aeee62043b72.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "8314762"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"vhypf03pHqZIP25buWxLJX/kpHHeWAdqdW2CZsGfaZc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 26 May 2026 04:07:29 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6axl572n12"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/diario_financiero/35aac2f9-a4c4-4d16-9480-aeee62043b72.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-vhypf03pHqZIP25buWxLJX/kpHHeWAdqdW2CZsGfaZc="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/diario_financiero/35aac2f9-a4c4-4d16-9480-aeee62043b72.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/uploads/diario_financiero/35aac2f9-a4c4-4d16-9480-aeee62043b72.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "8314762"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"vhypf03pHqZIP25buWxLJX/kpHHeWAdqdW2CZsGfaZc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 26 May 2026 04:07:29 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-vhypf03pHqZIP25buWxLJX/kpHHeWAdqdW2CZsGfaZc="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/diario_financiero/7aa2c063-36b0-47f8-a7b0-6f45d7f887bf.p0qauircun.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/uploads/diario_financiero/7aa2c063-36b0-47f8-a7b0-6f45d7f887bf.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "17019696"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 26 May 2026 04:07:50 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "p0qauircun"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/diario_financiero/7aa2c063-36b0-47f8-a7b0-6f45d7f887bf.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/diario_financiero/7aa2c063-36b0-47f8-a7b0-6f45d7f887bf.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/uploads/diario_financiero/7aa2c063-36b0-47f8-a7b0-6f45d7f887bf.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "17019696"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 26 May 2026 04:07:50 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw="
         }
       ]
     },

@@ -1,0 +1,185 @@
+@model Rs_system.Models.ViewModels.DiarioFinancieroReporteViewModel
+
+@{
+    ViewData["Title"] = "Reporte - D. Financiero";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-gray-800 mb-1">
+                <i class="fas fa-chart-line text-info me-2"></i> Reporte del Diario Financiero
+            </h1>
+            <p class="text-muted small mb-0">Consulta y análisis de movimientos agrupados</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Volver al Inicio
+        </a>
+    </div>
+
+    <!-- Panel de Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header py-3 bg-light text-dark fw-bold">
+            <i class="fas fa-filter text-secondary me-2"></i>Filtros de Búsqueda
+        </div>
+        <div class="card-body">
+            <form asp-action="Reporte" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Fecha Inicio</label>
+                    <input type="date" asp-for="Filtro.FechaInicio" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Fecha Fin</label>
+                    <input type="date" asp-for="Filtro.FechaFin" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Tipo Movimiento</label>
+                    <select asp-for="Filtro.Tipo" class="form-select form-select-sm">
+                        <option value="">Todos</option>
+                        <option value="1">Ingresos</option>
+                        <option value="2">Egresos</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Método de Pago</label>
+                    <select asp-for="Filtro.MetodoPagoId" class="form-select form-select-sm">
+                        <option value="">Todos</option>
+                        @foreach (var m in Model.MetodosPago)
+                        {
+                            <option value="@m.Id">@m.Nombre</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small text-success">Categoría Ingreso</label>
+                    <select asp-for="Filtro.CategoriaIngresoId" class="form-select form-select-sm">
+                        <option value="">Todas</option>
+                        @foreach (var c in Model.CategoriasIngreso)
+                        {
+                            <option value="@c.Id">@c.Nombre</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small text-danger">Categoría Egreso</label>
+                    <select asp-for="Filtro.CategoriaEgresoId" class="form-select form-select-sm">
+                        <option value="">Todas</option>
+                        @foreach (var c in Model.CategoriasEgreso)
+                        {
+                            <option value="@c.Id">@c.Nombre</option>
+                        }
+                    </select>
+                </div>
+                
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i> Aplicar Filtros
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resultados Resumen -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-start border-success border-4 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-uppercase text-success fw-bold text-xs mb-1">Total Ingresos Reporte</div>
+                    <div class="h3 mb-0 fw-bold">@Model.TotalIngresos.ToString("C")</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-start border-danger border-4 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-uppercase text-danger fw-bold text-xs mb-1">Total Egresos Reporte</div>
+                    <div class="h3 mb-0 fw-bold">@Model.TotalEgresos.ToString("C")</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-start border-primary border-4 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-uppercase text-primary fw-bold text-xs mb-1">Saldo del Periodo</div>
+                    <div class="h3 mb-0 fw-bold @(Model.Saldo >= 0 ? "text-primary" : "text-danger")">
+                        @Model.Saldo.ToString("C")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla Detallada -->
+    <div class="card shadow-sm">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center bg-white">
+            <h6 class="m-0 fw-bold text-primary">
+                <i class="fas fa-list-alt me-2"></i>Resultados de Movimientos (@Model.Movimientos.Count)
+            </h6>
+            <button class="btn btn-outline-success btn-sm" onclick="window.print()">
+                <i class="fas fa-print me-1"></i> Imprimir Reporte
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Cabecera</th>
+                            <th>Tipo / Categoría</th>
+                            <th>Descripción</th>
+                            <th>Referencia</th>
+                            <th class="text-end">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Movimientos.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="fas fa-search-minus fa-3x mb-3 d-block opacity-25"></i>
+                                    No se encontraron movimientos con los filtros seleccionados.
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var mov in Model.Movimientos)
+                        {
+                            <tr>
+                                <td>@mov.FechaMovimiento.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <a asp-action="Detalle" asp-route-id="@mov.CabeceraId" target="_blank" class="text-decoration-none">
+                                        <i class="fas fa-book me-1"></i> @mov.Cabecera.Fecha.ToString("dd/MM/yyyy")
+                                    </a>
+                                </td>
+                                <td>
+                                    @if (mov.EsIngreso)
+                                    {
+                                        <span class="badge bg-success mb-1">Ingreso</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger mb-1">Egreso</span>
+                                    }
+                                    <br/><small class="text-muted fw-bold">@mov.NombreCategoria</small>
+                                </td>
+                                <td>
+                                    @mov.Descripcion
+                                    <div class="small text-muted">@(mov.Tercero)</div>
+                                </td>
+                                <td>
+                                    <div>@mov.NumeroComprobante</div>
+                                    <div class="small text-muted">@mov.MetodoPago?.Nombre</div>
+                                </td>
+                                <td class="text-end fw-bold @(mov.EsIngreso ? "text-success" : "text-danger")">
+                                    @mov.Monto.ToString("C")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

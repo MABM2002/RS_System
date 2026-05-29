@@ -1,4 +1,5 @@
 using Rs_system.Models;
+using Rs_system.Models.ViewModels;
 
 namespace Rs_system.Services;
 
@@ -66,10 +67,15 @@ public interface IContabilidadPartidaDobleService
     // ==================== Reportes Financieros ====================
 
     /// <summary>
-    /// Calcula el Balance General a una fecha de corte.
-    /// Agrupa los saldos acumulados (Débito - Crédito) por cuenta y por tipo de cuenta.
+    /// Calcula el Balance General a una fecha de corte (vista plana para reporte tradicional).
     /// </summary>
     Task<BalanceGeneralResult> GetBalanceGeneralAsync(DateTime fechaCorte);
+
+    /// <summary>
+    /// Calcula el Balance General a una fecha de corte con lógica recursiva de saldos.
+    /// </summary>
+    Task<FinancialReportViewModel> GetBalanceGeneralRecursivoAsync(DateTime fechaCorte);
+
 
     /// <summary>
     /// Calcula el Estado de Resultados para un mes y año específicos.
