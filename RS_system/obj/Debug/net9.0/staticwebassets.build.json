@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "ZtKckTGBcVLc98rdvW2qGQad7jjblJ5bgqcSu5JCGpw=",
+  "Hash": "86sj8w5D+1Yc2/ZlBIKXFf1lImPwVQvk0cmSIlG5HCA=",
   "Source": "RS_system",
   "BasePath": "_content/RS_system",
   "Mode": "Default",
@@ -6756,6 +6756,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/uploads/diario_financiero/35aac2f9-a4c4-4d16-9480-aeee62043b72.png"
+    },
+    {
+      "Identity": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.png",
+      "SourceId": "RS_system",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/",
+      "BasePath": "_content/RS_system",
+      "RelativePath": "uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "p0qauircun",
+      "Integrity": "ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.png"
     },
     {
       "Identity": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/uploads/diario_financiero/7aa2c063-36b0-47f8-a7b0-6f45d7f887bf.png",
@@ -42888,6 +42909,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-vhypf03pHqZIP25buWxLJX/kpHHeWAdqdW2CZsGfaZc="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.p0qauircun.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "17019696"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 04 Jun 2026 03:52:03 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "p0qauircun"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.png",
+      "AssetFile": "/home/adalberto/RiderProjects/RS_System/RS_system/wwwroot/uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "17019696"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 04 Jun 2026 03:52:03 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw="
         }
       ]
     },

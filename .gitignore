@@ -5,3 +5,7 @@
 .idea/
 /RS_system/.idea/
 /RS_system/bin/
+/Reports.PdfEngine/bin/
+/Reports.PdfEngine/obj/
+/Reports.PdfEngine.Tests/bin/
+/Reports.PdfEngine.Tests/obj/

@@ -9,11 +9,16 @@ public class DiarioFinancieroService : IDiarioFinancieroService
 {
     private readonly ApplicationDbContext _context;
     private readonly IAccountingIntegrationService _accountingIntegration;
+    private readonly IConfiguracionService _configService;
 
-    public DiarioFinancieroService(ApplicationDbContext context, IAccountingIntegrationService accountingIntegration)
+    public DiarioFinancieroService(
+        ApplicationDbContext context,
+        IAccountingIntegrationService accountingIntegration,
+        IConfiguracionService configService)
     {
         _context = context;
         _accountingIntegration = accountingIntegration;
+        _configService = configService;
     }
 
     // ══════════════════════════════════════════════════
@@ -412,7 +417,11 @@ public class DiarioFinancieroService : IDiarioFinancieroService
             Saldo = totalIngresos - totalEgresos,
             CategoriasIngreso = await ObtenerCategoriasIngresoAsync(),
             CategoriasEgreso = await ObtenerCategoriasEgresoAsync(),
-            MetodosPago = await ObtenerMetodosPagoAsync()
+            MetodosPago = await ObtenerMetodosPagoAsync(),
+            NombreIglesia = await _configService.GetValorOrDefaultAsync("NAME_CHURCH", "Iglesia"),
+            DireccionIglesia = await _configService.GetValorAsync("church_address"),
+            TelefonoIglesia = await _configService.GetValorAsync("church_phone"),
+            EmailIglesia = await _configService.GetValorAsync("church_email")
         };
     }
 }

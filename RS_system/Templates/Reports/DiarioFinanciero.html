@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Diario Financiero</title>
+<style>
+  /* ── Reset & Page Setup ── */
+  @page {
+    size: letter;
+    margin: 12mm 14mm 14mm 14mm;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 10pt;
+    color: #212529;
+    line-height: 1.5;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── Header ── */
+  .report-header {
+    border-bottom: 3px double #1a3a5c;
+    padding-bottom: 10mm;
+    margin-bottom: 6mm;
+    text-align: center;
+  }
+
+  .church-name {
+    font-size: 12pt;
+    font-weight: 1000;
+    color: #1a3a5c;
+    letter-spacing: 0.5pt;
+    text-transform: uppercase;
+  }
+
+  .church-details {
+    font-size: 9pt;
+    color: #6c757d;
+    margin-top: 2mm;
+    line-height: 1.6;
+  }
+
+  .church-details span { margin: 0 3mm; }
+  .church-details span.sep { color: #adb5bd; }
+
+  /* ── Report Title ── */
+  .report-title-section {
+    margin-bottom: 6mm;
+  }
+
+  .report-title {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #1a3a5c;
+    text-align: center;
+    margin-bottom: 4mm;
+    letter-spacing: 1pt;
+  }
+
+  .report-title hr {
+    border: none;
+    border-top: 1px solid #1a3a5c;
+    width: 60%;
+    margin: 2mm auto;
+  }
+
+  /* ── Filters Box ── */
+  .filters-box {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 3px;
+    padding: 4mm 6mm;
+    margin-bottom: 6mm;
+    font-size: 9pt;
+  }
+
+  .filters-box .filter-label {
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .filters-box .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2mm 8mm;
+  }
+
+  .filters-box .filter-item {
+    white-space: nowrap;
+  }
+
+  /* ── Summary Cards ── */
+  .summary-row {
+    display: flex;
+    gap: 4mm;
+    margin-bottom: 8mm;
+  }
+
+  .summary-card {
+    flex: 1;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 5mm 6mm;
+    text-align: center;
+    border-top: 4px solid;
+  }
+
+  .summary-card.income  { border-top-color: #198754; }
+  .summary-card.expense { border-top-color: #dc3545; }
+  .summary-card.balance { border-top-color: #0d6efd; }
+  .summary-card.balance.negative { border-top-color: #dc3545; }
+
+  .summary-card .card-label {
+    font-size: 8pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8pt;
+    color: #6c757d;
+    margin-bottom: 2mm;
+  }
+
+  .summary-card.income  .card-label { color: #198754; }
+  .summary-card.expense .card-label { color: #dc3545; }
+  .summary-card.balance .card-label { color: #0d6efd; }
+  .summary-card.balance.negative .card-label { color: #dc3545; }
+
+  .summary-card .card-value {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #212529;
+  }
+
+  .summary-card.income  .card-value { color: #198754; }
+  .summary-card.expense .card-value { color: #dc3545; }
+  .summary-card.balance .card-value { color: #0d6efd; }
+  .summary-card.balance.negative .card-value { color: #dc3545; }
+
+  /* ── Movements Table ── */
+  .table-section {
+    margin-bottom: 6mm;
+  }
+
+  .table-section .table-title {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #1a3a5c;
+    margin-bottom: 3mm;
+  }
+
+  table.movements {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+  }
+
+  table.movements thead th {
+    background: #1a3a5c;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.4pt;
+    padding: 3mm 2.5mm;
+    text-align: left;
+    border: none;
+  }
+
+  table.movements thead th.col-date    { width: 16%; }
+  table.movements thead th.col-header  { width: 13%; }
+  table.movements thead th.col-cat     { width: 18%; }
+  table.movements thead th.col-desc    { width: 24%; }
+  table.movements thead th.col-ref     { width: 16%; }
+  table.movements thead th.col-amount  { width: 13%; text-align: right; }
+
+  table.movements tbody td {
+    padding: 2.5mm 2.5mm;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: top;
+  }
+
+  table.movements tbody tr {
+    page-break-inside: avoid;
+  }
+
+  table.movements tbody tr:nth-child(even) {
+    background: #f8f9fa;
+  }
+
+  table.movements tbody td.col-amount {
+    text-align: right;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  table.movements .amount-income  { color: #198754; }
+  table.movements .amount-expense { color: #dc3545; }
+
+  table.movements .badge {
+    display: inline-block;
+    font-size: 7.5pt;
+    font-weight: 600;
+    padding: 0.5mm 2.5mm;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.3pt;
+    margin-bottom: 1mm;
+  }
+
+  table.movements .badge-income  { background: #d1e7dd; color: #0f5132; }
+  table.movements .badge-expense { background: #f8d7da; color: #842029; }
+
+  table.movements .cat-name {
+    font-size: 8pt;
+    color: #6c757d;
+    font-weight: 600;
+  }
+
+  table.movements .tercero {
+    font-size: 8pt;
+    color: #adb5bd;
+  }
+
+  table.movements .ref-detail {
+    font-size: 8pt;
+    color: #adb5bd;
+  }
+
+  /* ── Totals Row ── */
+  table.movements tfoot td {
+    padding: 3mm 2.5mm;
+    font-weight: 700;
+    font-size: 9.5pt;
+    border-top: 2px solid #1a3a5c;
+    background: #f1f3f5;
+  }
+
+  table.movements tfoot td.col-amount {
+    text-align: right;
+    font-size: 10pt;
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 20mm 0;
+    color: #adb5bd;
+  }
+
+  .empty-state .icon {
+    font-size: 36pt;
+    margin-bottom: 4mm;
+    opacity: 0.4;
+  }
+
+  .empty-state .msg {
+    font-size: 11pt;
+    font-weight: 500;
+  }
+
+  /* ── Footer ── */
+  .report-footer {
+    margin-top: 8mm;
+    padding-top: 3mm;
+    border-top: 1px solid #dee2e6;
+    font-size: 7.5pt;
+    color: #adb5bd;
+    text-align: center;
+  }
+
+  .report-footer .footer-left  { float: left; }
+  .report-footer .footer-right { float: right; }
+  .report-footer::after { content: ""; display: table; clear: both; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<div class="report-header">
+  <div class="church-name">{{ NombreIglesia }}</div>
+  <div class="church-details">
+    {{ if DireccionIglesia }}
+      <span>{{ DireccionIglesia }}</span><span class="sep">|</span>
+    {{ end }}
+    {{ if TelefonoIglesia }}
+      <span>Tel: {{ TelefonoIglesia }}</span><span class="sep">|</span>
+    {{ end }}
+    {{ if EmailIglesia }}
+      <span>{{ EmailIglesia }}</span>
+    {{ end }}
+  </div>
+</div>
+
+<!-- ═══════════════ TITLE ═══════════════ -->
+<div class="report-title-section">
+  <div class="report-title">
+    REPORTE DE DIARIO FINANCIERO
+    <hr>
+  </div>
+</div>
+
+<!-- ═══════════════ FILTERS ═══════════════ -->
+<div class="filters-box">
+  <div class="filter-row">
+    <div class="filter-item">
+      <span class="filter-label">Periodo:</span>
+      {{ if Filtro.FechaInicio }}
+        {{ Filtro.FechaInicio | date.to_string "%d/%m/%Y" }}
+      {{ else }}
+        (sin inicio)
+      {{ end }}
+      &mdash;
+      {{ if Filtro.FechaFin }}
+        {{ Filtro.FechaFin | date.to_string "%d/%m/%Y" }}
+      {{ else }}
+        (sin fin)
+      {{ end }}
+    </div>
+
+    {{ if Filtro.Tipo }}
+    <div class="filter-item">
+      <span class="filter-label">Tipo:</span>
+      {{ if Filtro.Tipo == 1 }}Ingresos{{ else }}Egresos{{ end }}
+    </div>
+    {{ end }}
+
+    {{ if Filtro.CategoriaIngresoId }}
+      {{ for cat in CategoriasIngreso }}
+        {{ if cat.Id == Filtro.CategoriaIngresoId }}
+          <div class="filter-item">
+            <span class="filter-label">Categoría Ingreso:</span> {{ cat.Nombre }}
+          </div>
+        {{ end }}
+      {{ end }}
+    {{ end }}
+
+    {{ if Filtro.CategoriaEgresoId }}
+      {{ for cat in CategoriasEgreso }}
+        {{ if cat.Id == Filtro.CategoriaEgresoId }}
+          <div class="filter-item">
+            <span class="filter-label">Categoría Egreso:</span> {{ cat.Nombre }}
+          </div>
+        {{ end }}
+      {{ end }}
+    {{ end }}
+
+    {{ if Filtro.MetodoPagoId }}
+      {{ for mp in MetodosPago }}
+        {{ if mp.Id == Filtro.MetodoPagoId }}
+          <div class="filter-item">
+            <span class="filter-label">Método de Pago:</span> {{ mp.Nombre }}
+          </div>
+        {{ end }}
+      {{ end }}
+    {{ end }}
+  </div>
+</div>
+
+<!-- ═══════════════ SUMMARY CARDS ═══════════════ -->
+<div class="summary-row">
+  <div class="summary-card income">
+    <div class="card-label">Total Ingresos</div>
+    <div class="card-value">{{ TotalIngresos | math.format "N2" }}</div>
+  </div>
+  <div class="summary-card expense">
+    <div class="card-label">Total Egresos</div>
+    <div class="card-value">{{ TotalEgresos | math.format "N2" }}</div>
+  </div>
+  <div class="summary-card balance {{ if Saldo < 0 }}negative{{ end }}">
+    <div class="card-label">Saldo del Periodo</div>
+    <div class="card-value">{{ Saldo | math.format "N2" }}</div>
+  </div>
+</div>
+
+<!-- ═══════════════ MOVEMENTS TABLE ═══════════════ -->
+<div class="table-section">
+  <div class="table-title">Movimientos ({{ Movimientos | array.size }})</div>
+
+  {{ if Movimientos | array.size == 0 }}
+  <div class="empty-state">
+    <div class="icon">🔍</div>
+    <div class="msg">No se encontraron movimientos con los filtros seleccionados.</div>
+  </div>
+  {{ else }}
+  <table class="movements">
+    <thead>
+      <tr>
+        <th class="col-date">Fecha</th>
+        <th class="col-header">Cabecera</th>
+        <th class="col-cat">Tipo / Categoría</th>
+        <th class="col-desc">Descripción</th>
+        <th class="col-ref">Referencia</th>
+        <th class="col-amount">Monto</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ for mov in Movimientos }}
+      <tr>
+        <td class="col-date">{{ mov.FechaMovimiento | date.to_string "%d/%m/%Y %H:%M" }}</td>
+        <td class="col-header">{{ mov.Cabecera.Fecha | date.to_string "%d/%m/%Y" }}</td>
+        <td class="col-cat">
+          {{ if mov.EsIngreso }}
+          <span class="badge badge-income">Ingreso</span>
+          {{ else }}
+          <span class="badge badge-expense">Egreso</span>
+          {{ end }}
+          <br><span class="cat-name">{{ mov.NombreCategoria }}</span>
+        </td>
+        <td class="col-desc">
+          {{ mov.Descripcion }}
+          {{ if mov.Tercero }}
+          <br><span class="tercero">{{ mov.Tercero }}</span>
+          {{ end }}
+        </td>
+        <td class="col-ref">
+          {{ if mov.NumeroComprobante }}
+          {{ mov.NumeroComprobante }}
+          {{ else }}
+          <span class="ref-detail">&mdash;</span>
+          {{ end }}
+          {{ if mov.MetodoPago }}
+          <br><span class="ref-detail">{{ mov.MetodoPago.Nombre }}</span>
+          {{ end }}
+        </td>
+        <td class="col-amount {{ if mov.EsIngreso }}amount-income{{ else }}amount-expense{{ end }}">
+          {{ mov.Monto | math.format "N2" }}
+        </td>
+      </tr>
+      {{ end }}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="5" style="text-align:right;">Total Ingresos</td>
+        <td class="col-amount amount-income">{{ TotalIngresos | math.format "N2" }}</td>
+      </tr>
+      <tr>
+        <td colspan="5" style="text-align:right;">Total Egresos</td>
+        <td class="col-amount amount-expense">{{ TotalEgresos | math.format "N2" }}</td>
+      </tr>
+      <tr>
+        <td colspan="5" style="text-align:right;">Saldo Neto</td>
+        <td class="col-amount {{ if Saldo >= 0 }}amount-income{{ else }}amount-expense{{ end }}">
+          {{ Saldo | math.format "N2" }}
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+  {{ end }}
+</div>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<div class="report-footer">
+  <span class="footer-left">Generado por RS_System</span>
+  <span class="footer-right">{{ date.now | date.to_string "%d/%m/%Y %H:%M" }}</span>
+</div>
+
+</body>
+</html>

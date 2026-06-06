@@ -25,4 +25,14 @@
       <Folder Include="Models\ViewModels\Reportes\" />
       <Folder Include="Views\Reportes\" />
     </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Reports.PdfEngine\Reports.PdfEngine.csproj" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Templates\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

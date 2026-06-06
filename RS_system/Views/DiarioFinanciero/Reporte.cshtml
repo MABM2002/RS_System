@@ -117,9 +117,11 @@
             <h6 class="m-0 fw-bold text-primary">
                 <i class="fas fa-list-alt me-2"></i>Resultados de Movimientos (@Model.Movimientos.Count)
             </h6>
-            <button class="btn btn-outline-success btn-sm" onclick="window.print()">
-                <i class="fas fa-print me-1"></i> Imprimir Reporte
-            </button>
+            <div>
+                <button class="btn btn-outline-danger btn-sm me-1" onclick="descargarPdf()">
+                    <i class="fas fa-file-pdf me-1"></i> Descargar PDF
+                </button>
+            </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -183,3 +185,17 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    function descargarPdf() {
+        const form = document.querySelector('form[action*="Reporte"]');
+        const fd = new FormData(form);
+        const params = new URLSearchParams();
+        for (const [key, value] of fd.entries()) {
+            if (value) params.append(key, value);
+        }
+        window.open('/DiarioFinanciero/DescargarPdf?' + params.toString(), '_blank');
+    }
+</script>
+}

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Reports.PdfEngine.Abstractions;
 using Rs_system.Models;
 using Rs_system.Models.ViewModels;
 using Rs_system.Services;
@@ -11,11 +12,16 @@ public class DiarioFinancieroController : Controller
 {
     private readonly IDiarioFinancieroService _diarioService;
     private readonly IFileStorageService _fileStorageService;
+    private readonly IReportGenerator _reportGenerator;
 
-    public DiarioFinancieroController(IDiarioFinancieroService diarioService, IFileStorageService fileStorageService)
+    public DiarioFinancieroController(
+        IDiarioFinancieroService diarioService,
+        IFileStorageService fileStorageService,
+        IReportGenerator reportGenerator)
     {
         _diarioService = diarioService;
         _fileStorageService = fileStorageService;
+        _reportGenerator = reportGenerator;
     }
 
     private string UsuarioActual => User.Identity?.Name ?? "Sistema";
@@ -231,5 +237,24 @@ public class DiarioFinancieroController : Controller
     {
         var vm = await _diarioService.GenerarReporteAsync(filtro);
         return View(vm);
+    }
+
+    // ==================== Descargar PDF ====================
+
+    [HttpGet]
+    public async Task<IActionResult> DescargarPdf(DiarioFinancieroFiltroViewModel filtro)
+    
+        try
+        {
+            var vm = await _diarioService.GenerarReporteAsync(filtro);
+            byte[] pdfBytes = await _reportGenerator.GenerateAsync("DiarioFinanciero", vm);
+            var fileName = $"DiarioFinanciero_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Error al generar el PDF: {ex.Message}";
+            return RedirectToAction(nameof(Reporte), filtro);
+        }
     }
 }

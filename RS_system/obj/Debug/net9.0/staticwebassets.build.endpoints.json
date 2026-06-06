@@ -35564,6 +35564,88 @@
       ]
     },
     {
+      "Route": "uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.p0qauircun.png",
+      "AssetFile": "uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "17019696"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 04 Jun 2026 03:52:03 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "p0qauircun"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw="
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.png"
+        }
+      ]
+    },
+    {
+      "Route": "uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.png",
+      "AssetFile": "uploads/diario_financiero/79348a78-54d0-48a5-ac4f-56e4a4319d21.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "17019696"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 04 Jun 2026 03:52:03 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-ObgTG2gZk8Rb2HAjXK9rHVLMSTxB+ur88u7vgSO/6Kw="
+        }
+      ]
+    },
+    {
       "Route": "uploads/diario_financiero/7aa2c063-36b0-47f8-a7b0-6f45d7f887bf.p0qauircun.png",
       "AssetFile": "uploads/diario_financiero/7aa2c063-36b0-47f8-a7b0-6f45d7f887bf.png",
       "Selectors": [],

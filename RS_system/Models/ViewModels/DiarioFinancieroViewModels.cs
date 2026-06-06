@@ -77,6 +77,12 @@ public class DiarioFinancieroReporteViewModel
     public List<CategoriaIngreso> CategoriasIngreso { get; set; } = new();
     public List<CategoriaEgreso> CategoriasEgreso { get; set; } = new();
     public List<MetodoPago> MetodosPago { get; set; } = new();
+
+    // Church / organization info for report header
+    public string NombreIglesia { get; set; } = "Iglesia";
+    public string? DireccionIglesia { get; set; }
+    public string? TelefonoIglesia { get; set; }
+    public string? EmailIglesia { get; set; }
 }
 
 /// <summary>Input model for creating/editing a single movement via AJAX.</summary>

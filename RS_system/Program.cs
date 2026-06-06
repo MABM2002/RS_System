@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Reports.PdfEngine.DependencyInjection;
 using Rs_system.Data;
 using Rs_system.Models;
 using Rs_system.Services;
@@ -63,6 +64,9 @@ builder.Services.AddScoped<IDiezmoReciboService,  DiezmoReciboService>();
 
 // Plantillas de Documentos dinámicos
 builder.Services.AddScoped<IGeneradorDocumentoService, GeneradorDocumentoService>();
+
+// PDF Reporting Engine (Playwright + Scriban)
+builder.Services.AddPdfReporting(builder.Configuration);
 
 builder.Services.AddMemoryCache(options =>
 {
