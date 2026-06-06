@@ -22,12 +22,12 @@ RUN dotnet restore "RS_system/RS_system.csproj"
 
 # Copy everything and build
 COPY . .
-RUN dotnet build "RS_system/RS_system.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "RS_system/RS_system.csproj" -c $BUILD_CONFIGURATION --no-restore
 
 # Publish
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "RS_system/RS_system.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "RS_system/RS_system.csproj" -c $BUILD_CONFIGURATION --no-restore -o /app/publish /p:UseAppHost=false
 
 # Final
 FROM base AS final
