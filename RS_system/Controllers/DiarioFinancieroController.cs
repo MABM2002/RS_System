@@ -243,7 +243,7 @@ public class DiarioFinancieroController : Controller
 
     [HttpGet]
     public async Task<IActionResult> DescargarPdf(DiarioFinancieroFiltroViewModel filtro)
-    
+    {
         try
         {
             var vm = await _diarioService.GenerarReporteAsync(filtro);

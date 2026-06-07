@@ -15,13 +15,17 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy project files and restore
+# Copy solution and project files first for layer caching
+COPY RS_system.sln ./
 COPY RS_system/RS_system.csproj RS_system/
 COPY Reports.PdfEngine/Reports.PdfEngine.csproj Reports.PdfEngine/
 RUN dotnet restore "RS_system/RS_system.csproj"
 
-# Copy everything and build
-COPY . .
+# Copy source code
+COPY RS_system/ RS_system/
+COPY Reports.PdfEngine/ Reports.PdfEngine/
+
+# Build
 RUN dotnet build "RS_system/RS_system.csproj" -c $BUILD_CONFIGURATION --no-restore
 
 # Publish

@@ -1,0 +1,16 @@
+**/bin/
+**/obj/
+**/out/
+
+.git/
+.gitignore
+
+.idea/
+.vscode/
+*.DotSettings.user
+
+**/Dockerfile*
+**/docker-compose*
+
+PDF_ENGINE_GUIDE.md
+TestPdfGeneration.cs
